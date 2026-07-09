@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Pet Uygulaması</title>
+<link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+<div class="phone">
+
+  <!-- ================= ANA SAYFA (PETID) ================= -->
+  <section class="screen active" id="scr-home">
+    <div class="landing">
+    <div class="topbar">
+      <div>
+        <h1>🐾 PET<span style="color:var(--green)">ID</span></h1>
+        <div class="sub">Merhaba Leo — can dostunun dijital dünyası</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="mini-pet on" id="mp0" onclick="setPet(0,this)">🐱</div>
+        <div class="mini-pet" id="mp1" onclick="setPet(1,this)">🐶</div>
+        <div class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="bigpet-wrap">
+      <img id="bigFoto" alt="" onerror="fotoYok(this)">
+      <canvas id="bigPet" width="176" height="187" style="display:none"></canvas>
+    </div>
+
+    <div class="hero-search">
+      <div class="h-bub" id="hBub"></div>
+      <canvas id="hCanvas" width="48" height="51" onclick="heroPetTap()"></canvas>
+      <form class="search big" onsubmit="homeSearch(event)">🔍<input id="homeQ" placeholder="Bugün nasıl yardımcı olabilirim?"><button type="submit" class="go-btn">→</button></form>
+    </div>
+
+    <div class="home-ans" id="homeAns" style="display:none"></div>
+
+    <div class="chip-row" style="margin-bottom:16px">
+      <div class="chip" onclick="go('egitim')">🎓 Eğitim</div>
+      <div class="chip" onclick="go('saglik')">🩺 Sağlık</div>
+      <div class="chip" onclick="go('ai')">🐾 Davranış</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('vet')">🧑‍⚕️ Veteriner</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('otel')">🏨 Pet Oteli</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('hepsi')">❤️ Hizmetler</div>
+      <div class="chip" onclick="go('saglik')">💉 Aşı Takvimi</div>
+      <div class="chip" onclick="go('profil')">🪪 Profil</div>
+      <div class="chip" onclick="go('match');openMatch()">💘 PatiMatch</div>
+      <div class="chip" onclick="go('oyun')">🎮 Pixel Oyun</div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="scroll-hint" onclick="scrollHome()">Keşfetmek için kaydır ⌄</div>
+    </div><!-- /landing -->
+
+    <div class="below" id="homeBelow">
+    <div class="grid2 big-cards">
+      <div class="mod-card" onclick="go('egitim')">
+        <div class="mi" style="background:var(--green-soft)">🎓</div>
+        <b>Eğitim</b><span>Kişiselleştirilmiş dersler, animasyonlar ve günlük görevler</span>
+      </div>
+      <div class="mod-card" onclick="go('saglik')">
+        <div class="mi" style="background:var(--red-soft)">🩺</div>
+        <b>Sağlık</b><span>Aşı takibi, ilaçlar ve AI sağlık rehberi</span>
+      </div>
+      <div class="mod-card" onclick="go('ai')">
+        <div class="mi" style="background:var(--purple-soft)">🤖</div>
+        <b>AI Yardım</b><span>"Can dostum bana ne anlatmak istiyor?"</span>
+      </div>
+      <div class="mod-card" onclick="go('hizmet')">
+        <div class="mi" style="background:var(--blue-soft)">❤️</div>
+        <b>Hizmetler &amp; Topluluk</b><span>Veteriner, otel, eğitmen ve sahiplendirme</span>
+      </div>
+    </div>
+
+    <div class="auth">
+      <button class="btn" onclick="openAuth('kayit')">Ücretsiz Başla</button>
+      <button class="btn ghost" onclick="openAuth('giris')">Giriş Yap</button>
+    </div>
+    <div style="text-align:center;font-size:10.5px;color:var(--gray);margin-top:10px">Kaydolmadan da tüm özellikleri keşfedebilirsin 🐾</div>
+    </div><!-- /below -->
+  </section>
+
+  <!-- ================= KAYIT OL / GİRİŞ ================= -->
+  <section class="screen" id="scr-kayit">
+    <div class="auth-wrap">
+      <button class="auth-back" onclick="go('home')">‹ Geri</button>
+
+      <div class="auth-logo">
+        <div class="mark">🐾</div>
+        <h1>PatiDost'a Katıl</h1>
+        <p id="authSub">Can dostunun dijital dünyasına ilk adım</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabKayit" class="on" onclick="authMode('kayit')">Kayıt Ol</button>
+        <button id="tabGiris" onclick="authMode('giris')">Giriş Yap</button>
+      </div>
+
+      <div class="auth-form">
+        <div class="fld" id="fName">
+          <label>Ad Soyad</label>
+          <div class="box"><span class="ic">👤</span><input id="kAd" placeholder="Örn. Leo Yılmaz" autocomplete="name"></div>
+          <div class="err">Lütfen adını gir</div>
+        </div>
+
+        <div class="fld" id="fMail">
+          <label>E-posta</label>
+          <div class="box"><span class="ic">✉️</span><input id="kMail" type="email" placeholder="ornek@eposta.com" autocomplete="email"></div>
+          <div class="err">Geçerli bir e-posta gir</div>
+        </div>
+
+        <div class="fld" id="fPass">
+          <label>Şifre</label>
+          <div class="box"><span class="ic">🔒</span><input id="kPass" type="password" placeholder="En az 6 karakter" autocomplete="new-password"><span class="eye" onclick="togglePass(this,'kPass')">👁️</span></div>
+          <div class="hint">En az 6 karakter kullan</div>
+          <div class="err">Şifre en az 6 karakter olmalı</div>
+        </div>
+
+        <div class="fld reg-only">
+          <label>Hangi can dostun var?</label>
+          <div class="pettype">
+            <div class="pt on" data-t="kedi" onclick="pickPetType(this)"><div class="e">🐱</div><b>Kedi</b></div>
+            <div class="pt" data-t="kopek" onclick="pickPetType(this)"><div class="e">🐶</div><b>Köpek</b></div>
+            <div class="pt" data-t="diger" onclick="pickPetType(this)"><div class="e">🐾</div><b>Diğer</b></div>
+          </div>
+        </div>
+
+        <div class="agree reg-only" id="fAgree">
+          <div class="cbx" id="agreeBox" onclick="toggleAgree()"></div>
+          <p><a onclick="toast('📄 Kullanım Koşulları (prototip)')">Kullanım Koşulları</a> ve <a onclick="toast('🔒 Gizlilik Politikası (prototip)')">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.</p>
+        </div>
+
+        <button class="btn" id="authBtn" onclick="submitAuth()">Hesap Oluştur</button>
+
+        <div class="auth-div">veya</div>
+        <div class="soc-row">
+          <div class="soc" onclick="toast('🔵 Google ile devam (prototip)')"><span class="g">🅶</span> Google</div>
+          <div class="soc" onclick="toast('🍎 Apple ile devam (prototip)')"><span class="g"></span> Apple</div>
+        </div>
+
+        <div class="auth-foot" id="authFoot">
+          Zaten hesabın var mı? <a onclick="authMode('giris')">Giriş yap</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EĞİTİM ================= -->
+  <section class="screen" id="scr-egitim">
+    <div class="topbar">
+      <div><h1>Eğitim 🎓</h1><div class="sub">Kişiselleştirilmiş program</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="egChips">
+      <div class="chip on" onclick="egTab('kedi',this)">🐱 Kedi Programı</div>
+      <div class="chip" onclick="egTab('kopek',this)">🐶 Köpek Programı</div>
+      <div class="chip" onclick="egTab('zeka',this)">🧩 Zeka Oyunları</div>
+      <div class="chip" onclick="egTab('aktivite',this)">🏃 Antreman</div>
+    </div>
+
+    <div class="eg-tab" id="tab-kedi">
+    <div class="prog-head"><div><b>Temel İtaat — Kedi</b><span>2. hafta · 8/12 ders tamamlandı</span></div><span class="pct">%68</span></div>
+    <div class="thinbar"><i style="width:68%"></i></div>
+
+    <div class="mini-label">BUGÜNÜN GÖREVLERİ <span id="taskCount">3/5</span></div>
+    <div class="mini-tasks" id="taskList">
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Sabah oyun seansı</b><span>10 dk · Enerji atma</span></div><div class="pts">+10 🏆</div></div>
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>"Otur" komutu tekrarı</b><span>5 dk · Ödüllü pekiştirme</span></div><div class="pts">+15 🏆</div></div>
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Tımar &amp; tüy bakımı</b><span>5 dk · Alışkanlık</span></div><div class="pts">+5 🏆</div></div>
+      <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>"Bekle" komutu — yeni ders</b><span>10 dk · Animasyonlu anlatım</span></div><div class="pts">+20 🏆</div></div>
+      <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Akşam zeka oyunu</b><span>8 dk · Ödül avı</span></div><div class="pts">+10 🏆</div></div>
+    </div>
+
+    <div class="mini-label">DERSLER</div>
+    <div class="syllabus">
+      <div class="syl-row" onclick="openLesson('otur')"><span class="syl-no done">✓</span><div><b>"Otur" Komutu</b><span class="sub2">3 dk · Başlangıç · Tamamlandı</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('bekle')"><span class="syl-no next">2</span><div><b>"Bekle" Komutu</b><span class="sub2">4 dk · Sıradaki ders</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('gel')"><span class="syl-no">3</span><div><b>"Gel" Çağrısı</b><span class="sub2">5 dk · Orta seviye</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('pati')"><span class="syl-no">4</span><div><b>"Pati Ver" Numarası</b><span class="sub2">4 dk · Eğlence</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('tuvalet')"><span class="syl-no">5</span><div><b>Tuvalet Eğitimi</b><span class="sub2">6 dk · Başlangıç</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('yatak')"><span class="syl-no">6</span><div><b>"Yatağına Git" Komutu</b><span class="sub2">4 dk · Sakinleşme</span></div><span class="chev">›</span></div>
+    </div>
+
+    <div class="mini-label">HAFTALIK SERİ <span>🔥 6 gün</span></div>
+    <div class="mini-streak">
+      <div class="mstreak on"><i></i>Pzt</div>
+      <div class="mstreak on"><i></i>Sal</div>
+      <div class="mstreak on"><i></i>Çar</div>
+      <div class="mstreak on"><i></i>Per</div>
+      <div class="mstreak on"><i></i>Cum</div>
+      <div class="mstreak on"><i></i>Cmt</div>
+      <div class="mstreak"><i></i>Paz</div>
+    </div>
+    </div><!-- /tab-kedi -->
+
+    <!-- KÖPEK PROGRAMI -->
+    <div class="eg-tab" id="tab-kopek" style="display:none">
+      <div class="prog-head"><div><b>PETID Temel Eğitim — Köpek</b><span>1. hafta · 2/12 kademe tamamlandı</span></div><span class="pct">%17</span></div>
+      <div class="thinbar"><i style="width:17%"></i></div>
+
+      <div class="mini-label">BUGÜNÜN GÖREVLERİ <span>2/4</span></div>
+      <div class="mini-tasks">
+        <div class="task done" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>Sabah yürüyüşü</b><span>25 dk · Tasma adabıyla</span></div><div class="pts">+15 🏆</div></div>
+        <div class="task done" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>"Otur-Bekle" zinciri</b><span>5 dk · Mama öncesi rutin</span></div><div class="pts">+10 🏆</div></div>
+        <div class="task" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>"Gel" çağrısı pratiği</b><span>10 dk · Bahçede uzun tasmayla</span></div><div class="pts">+20 🏆</div></div>
+        <div class="task" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>Akşam koku oyunu</b><span>10 dk · Zihinsel yorgunluk</span></div><div class="pts">+10 🏆</div></div>
+      </div>
+
+      <div class="mini-label">12 KADEME MÜFREDATI</div>
+      <div class="syllabus">
+        <div class="syl-row" onclick="openLesson('k1')"><span class="syl-no done">✓</span><div><b>İsmini Öğrenme</b><span class="sub2">🎥 Videolu ders · İsmini duyunca sana bakması</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k2')"><span class="syl-no done">✓</span><div><b>Gel Komutu</b><span class="sub2">Çağrı sinyalinde sahibine gelmesi</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k3')"><span class="syl-no next">3</span><div><b>Dikkat Kurma</b><span class="sub2">Göz teması · Sıradaki kademe</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k4')"><span class="syl-no">4</span><div><b>Otur Komutu</b><span class="sub2">Güvenli ve sakin otur pozisyonu</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k5')"><span class="syl-no">5</span><div><b>Bekle Komutu</b><span class="sub2">Yerinde kalma + serbest bırakma</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k6')"><span class="syl-no">6</span><div><b>Yat Komutu</b><span class="sub2">Sakinleşme ve kontrol pozisyonu</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k7')"><span class="syl-no">7</span><div><b>Pati Ver</b><span class="sub2">Eğlenceli numara + güven bağı</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k8')"><span class="syl-no">8</span><div><b>Bırak Komutu</b><span class="sub2">Nesneyi gönüllü bırakma</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k9')"><span class="syl-no">9</span><div><b>Hayır / Durdurma Sinyali</b><span class="sub2">Alternatife yönlendirme</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k10')"><span class="syl-no">10</span><div><b>Tuvalet Eğitimi</b><span class="sub2">Uygun yerde tuvalet alışkanlığı</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k11')"><span class="syl-no">11</span><div><b>Tasmalı Yürüyüş</b><span class="sub2">Tasmada çekmeden yürüme</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k12')"><span class="syl-no">12</span><div><b>Dikkat Dağıtıcıda Gel</b><span class="sub2">Dış ortamda geri çağırma · İleri</span></div><span class="chev">›</span></div>
+      </div>
+
+      <div class="mini-note">🐾 Amaç köpeği zorlamak değil, doğru davranışı kolaylaştırıp ödülle güçlendirmek. Bir kademede %80 başarı olmadan sonrakine geçme — eğitim, geri bildirimine göre kişiselleşir.</div>
+    </div><!-- /tab-kopek -->
+
+    <!-- ZEKA OYUNLARI -->
+    <div class="eg-tab" id="tab-zeka" style="display:none">
+      <div class="card" style="background:var(--purple-soft);border:none">
+        <b style="font-size:13.5px;color:var(--ink)">🧩 Zihinsel egzersiz neden önemli?</b>
+        <span style="font-size:12px;color:var(--gray);display:block;margin-top:4px;line-height:1.55">10 dakikalık zihin oyunu, 30 dakikalık fiziksel aktiviteye eşdeğer yorgunluk sağlar. Sıkılan hayvan yıkıcı davranışa yönelir — zihni çalışan hayvan mutludur.</span>
+      </div>
+
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--amber-soft);flex-shrink:0">🥤</div><div><b style="font-size:13.5px;color:var(--ink)">Bardak Oyunu</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">5 dk · Kolay · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Ödülü 3 bardaktan birinin altına sakla, gözünün önünde karıştır ve bulmasına izin ver. Doğru bardağı gösterince büyük ödül! Her seferinde karıştırmayı hızlandır.</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--green-soft);flex-shrink:0">🧦</div><div><b style="font-size:13.5px;color:var(--ink)">Koku Avı</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">10 dk · Orta · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Ödül mamalarını odanın farklı köşelerine sakla (önce görünür, sonra gizli yerlere). "Ara!" komutuyla başlat. Burun çalıştırmak, hayvanlar için en doğal ve en yorucu zihin egzersizidir.</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--blue-soft);flex-shrink:0">🍽️</div><div><b style="font-size:13.5px;color:var(--ink)">Puzzle Mama Kabı</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">Her öğün · Kolay · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Normal mama kabı yerine yalama matı veya puzzle kap kullan. Hızlı yemeyi engeller, sindirime iyi gelir ve her öğünü zihin egzersizine çevirir. Evde yapım: muffin kalıbı + tenis topları!</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--red-soft);flex-shrink:0">🗣️</div><div><b style="font-size:13.5px;color:var(--ink)">İsim Tanıma</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">15 dk · Zor · İleri seviye</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Bir oyuncağa isim ver ("Top nerede?") ve doğru oyuncağı getirince ödüllendir. Kelime dağarcığı köpeklerde 100+ kelimeye çıkabilir. Border Collie Chaser 1000+ kelime biliyordu!</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--purple-soft);flex-shrink:0">📦</div><div><b style="font-size:13.5px;color:var(--ink)">Kutu Keşfi (Kediler)</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">Serbest · Kolay · Kedi</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Farklı boylarda karton kutuları odaya diz, bazılarına ödül ve oyuncak sakla. Kediler için kutu = güven + av alanı. Haftada bir düzeni değiştir, keşif hissi hep taze kalsın.</p></div></div></div>
+    </div><!-- /tab-zeka -->
+
+    <!-- ANTRENMAN -->
+    <div class="eg-tab" id="tab-aktivite" style="display:none">
+      <div class="sec-title" style="margin-top:0"><h2>Haftalık Aktivite (dk)</h2><a>Hedef: 45 dk/gün</a></div>
+      <div class="card">
+        <div class="bars">
+          <div class="bar"><i style="height:62%"></i><span>Pzt</span></div>
+          <div class="bar"><i style="height:80%"></i><span>Sal</span></div>
+          <div class="bar"><i style="height:55%"></i><span>Çar</span></div>
+          <div class="bar"><i style="height:90%"></i><span>Per</span></div>
+          <div class="bar"><i style="height:70%"></i><span>Cum</span></div>
+          <div class="bar"><i style="height:96%"></i><span>Cmt</span></div>
+          <div class="bar cur"><i style="height:40%"></i><span>Paz</span></div>
+        </div>
+      </div>
+
+      <div class="sec-title"><h2>Günlük Hedefler</h2><a>Düzenle</a></div>
+      <div class="card">
+        <div class="med"><div class="mi2" style="background:var(--green-soft)">🏃</div><div><b>Aktif oyun / yürüyüş</b><span>Kedi: 3×10 dk av oyunu · Köpek: 2×25 dk yürüyüş</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">%67</span></div>
+        <div class="med"><div class="mi2" style="background:var(--blue-soft)">🧩</div><div><b>Zihinsel egzersiz</b><span>Günde en az 1 zeka oyunu · Bugün: Koku avı ✓</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">✓</span></div>
+        <div class="med"><div class="mi2" style="background:var(--purple-soft)">🤸</div><div><b>Esneme &amp; tırmanma</b><span>Kedi rafı / engel atlama · Eklem sağlığı</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">✓</span></div>
+      </div>
+
+      <div class="tipbox" style="background:var(--amber-soft);color:#8A5B10">⚡ Enerji ipucu: Kediler kısa-yoğun (sprint), köpekler uzun-tempolu egzersizi sever. Kedinle 10 dakikalık tüy oltası seansı, köpeğinle tempolu yürüyüş + koku molası kombinasyonu idealdir. Yaz sıcağında egzersizi sabah/akşam saatlerine kaydır.</div>
+    </div><!-- /tab-aktivite -->
+  </section>
+
+  <!-- ================= SAĞLIK ================= -->
+  <section class="screen" id="scr-saglik">
+    <div class="topbar">
+      <div><h1>Sağlık 🩺</h1><div class="sub" id="subSag">Boncuk'un sağlık takibi</div></div>
+      <div style="display:flex;gap:9px;align-items:center">
+        <div class="score-pill" title="Sağlık Skoru — Çok İyi (▲ +3)">92<span>SKOR</span></div>
+        <div class="avatar" onclick="go('profil')">🐱</div>
+      </div>
+    </div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="sagChips">
+      <div class="chip on" onclick="sagJump('sagAsi',this)">💉 Aşılar</div>
+      <div class="chip" onclick="sagJump('sagGecmis',this)">📋 Geçmiş</div>
+      <div class="chip" onclick="sagJump('sagIlac',this)">💊 İlaçlar</div>
+      <div class="chip" onclick="sagJump('sagKilo',this)">⚖️ Kilo</div>
+      <div class="chip" onclick="sagJump('sagBesin',this)">🍽️ Beslenme</div>
+      <div class="chip" onclick="go('ai')">🤖 AI Rehber</div>
+    </div>
+
+    <div class="sec-title" id="sagAsi" style="margin-top:4px"><h2>Aşı Takvimi</h2><a>Takvime ekle</a></div>
+    <div class="card">
+      <div class="vac-item" id="vacItem-karma">
+        <div class="vac" onclick="toggleVac('karma')"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>Karma Aşı (5'li)</b><span>14 Mart 2026 · Pati Veteriner</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span><span class="chev">›</span></div>
+        <div class="vac-detail" id="vacDetail-karma"></div>
+      </div>
+      <div class="vac-item" id="vacItem-kuduz">
+        <div class="vac" onclick="toggleVac('kuduz')"><div class="vdot" style="background:var(--amber-soft)">💉</div><div><b>Kuduz Aşısı</b><span>12 Temmuz 2026 · Randevu alındı</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber)">6 GÜN</span><span class="chev">›</span></div>
+        <div class="vac-detail" id="vacDetail-kuduz"></div>
+      </div>
+      <div class="vac-item" id="vacItem-losemi">
+        <div class="vac" onclick="toggleVac('losemi')"><div class="vdot" style="background:var(--blue-soft)">🗓️</div><div><b>Lösemi (FeLV)</b><span>Eylül 2026 · Planlandı</span></div><span class="badge" style="background:var(--blue-soft);color:var(--blue)">PLANLI</span><span class="chev">›</span></div>
+        <div class="vac-detail" id="vacDetail-losemi"></div>
+      </div>
+      <div class="vac-item" id="vacItem-parazit">
+        <div class="vac" onclick="toggleVac('parazit')"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>İç-Dış Parazit</b><span>1 Haziran 2026 · Uygulandı</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span><span class="chev">›</span></div>
+        <div class="vac-detail" id="vacDetail-parazit"></div>
+      </div>
+    </div>
+
+    <div class="sec-title" id="sagGecmis"><h2>Sağlık Geçmişi</h2><a>+ Kayıt ekle</a></div>
+    <div class="card">
+      <div class="hist"><div class="hi">🏥</div><div><b>Genel kontrol muayenesi</b><span>1 Haziran 2026 · Dr. Elif Kaya — sonuç: normal</span></div></div>
+      <div class="hist"><div class="hi">🔬</div><div><b>Kan tahlili</b><span>14 Mart 2026 · Tüm değerler referans aralığında</span></div></div>
+      <div class="hist"><div class="hi">✂️</div><div><b>Kısırlaştırma operasyonu</b><span>10 Ekim 2025 · Sorunsuz iyileşme</span></div></div>
+      <div class="hist"><div class="hi">📄</div><div><b>Tüm kayıtları görüntüle / dışa aktar</b><span>PDF olarak paylaşılabilir</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">→</span></div>
+    </div>
+
+    <div class="sec-title" id="sagIlac"><h2>İlaç &amp; Takviyeler</h2><a>+ Ekle</a></div>
+    <div class="card">
+      <div class="med"><div class="mi2" style="background:var(--red-soft)">💧</div><div><b>Parazit damlası</b><span>Ayda 1 · Sıradaki: 1 Ağustos</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🦴</div><div><b>Eklem takviyesi</b><span>Her gün · Akşam maması ile</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💊</div><div><b>Tüy yumağı macunu</b><span>Haftada 3 · Hatırlatıcı kapalı</span></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+
+    <div class="sec-title" id="sagKilo"><h2>Kilo Takibi</h2><a>4.2 kg · İdeal</a></div>
+    <div class="card">
+      <div class="bars">
+        <div class="bar"><i style="height:58%"></i><span>Şub</span></div>
+        <div class="bar"><i style="height:64%"></i><span>Mar</span></div>
+        <div class="bar"><i style="height:70%"></i><span>Nis</span></div>
+        <div class="bar"><i style="height:74%"></i><span>May</span></div>
+        <div class="bar"><i style="height:72%"></i><span>Haz</span></div>
+        <div class="bar cur"><i style="height:75%"></i><span>Tem</span></div>
+      </div>
+    </div>
+
+    <div class="sec-title" id="sagBesin"><h2>Beslenme Planı 🍽️</h2><a>Düzenle</a></div>
+    <div class="card">
+      <div class="med"><div class="mi2" style="background:var(--green-soft)">🥣</div><div><b>Günlük mama: 65 g kuru + 1 poş yaş</b><span>2 öğün · Sabah 08:00 / Akşam 19:00</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">İDEAL</span></div>
+      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💧</div><div><b>Su hedefi: ~220 ml/gün</b><span>Bugün: 160 ml · Çeşme tipi suluk öneriliyor</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">%73</span></div>
+      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🎁</div><div><b>Ödül maması limiti</b><span>Günlük kalorinin en fazla %10'u · Bugün 2/5</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">2/5</span></div>
+    </div>
+
+  </section>
+
+  <!-- ================= DAVRANIŞ & AI ================= -->
+  <section class="screen" id="scr-ai">
+    <div class="topbar">
+      <div><h1>Davranış &amp; AI 🤖</h1><div class="sub">"Can dostum bana ne anlatmak istiyor?"</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="sec-title" style="margin-top:0"><h2>Bu Haftanın Davranış Analizi</h2><a>Detay</a></div>
+    <div class="mood" style="margin-bottom:16px">
+      <div class="m"><div class="me2">⚡</div><b>Enerji</b><span style="color:var(--green)">Yüksek ▲</span></div>
+      <div class="m"><div class="me2">🍽️</div><b>İştah</b><span style="color:var(--blue)">Normal</span></div>
+      <div class="m"><div class="me2">😌</div><b>Stres</b><span style="color:var(--green)">Düşük ▼</span></div>
+    </div>
+
+    <div class="chat-box" id="chat">
+      <div class="bub ai">Merhaba Leo! 🐾 Ben PatiDost AI. Boncuk'un bir davranışını anlat, ne anlatmak istediğini birlikte çözelim.</div>
+    </div>
+
+    <div class="qrow">
+      <div class="chip" onclick="ask(this.textContent)">Sürekli miyavlıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Patisini yalıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Kuyruğu kabarık</div>
+      <div class="chip" onclick="ask(this.textContent)">Gece uyumuyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Mama yemiyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Kum kabı dışına yapıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Çok su içiyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Eşyaları deviriyor</div>
+    </div>
+
+    <div class="inp">
+      <input id="aiInput" type="text" placeholder="Bir davranış yaz... örn: kulaklarını geriye yatırıyor" onkeydown="if(event.key==='Enter')ask()">
+      <button onclick="ask()">➤</button>
+    </div>
+
+    <div style="font-size:10.5px;color:var(--gray);margin-top:10px;line-height:1.5;text-align:center">⚠️ AI yanıtları bilgilendirme amaçlıdır, veteriner muayenesinin yerini tutmaz.</div>
+  </section>
+
+  <!-- ================= PROFİL ================= -->
+  <section class="screen" id="scr-profil">
+    <div class="topbar">
+      <div><h1>Hayvan Profili 🐾</h1><div class="sub">Dijital kimlik &amp; yaşam geçmişi</div></div>
+      <div class="avatar">🐱</div>
+    </div>
+
+    <div class="idcard">
+      <div class="id-top"><span class="brand">PATİDOST · DİJİTAL KİMLİK</span><span style="font-size:16px">🐾</span></div>
+      <div class="who">
+        <div class="pa" id="pAvatar">🐱</div>
+        <div><b id="pName">Boncuk</b><span id="pMeta">Tekir Kedi · Dişi · 2 yaş</span></div>
+      </div>
+      <div class="idrow">
+        <div><span>Doğum Tarihi</span><b id="pBirth">15.05.2024</b></div>
+        <div><span>Çip No</span><b id="pChip">TR-90-2647-8812</b></div>
+        <div><span>Kan Grubu</span><b id="pBlood">A</b></div>
+        <div><span>Kısırlaştırma</span><b id="pNeuter">Evet</b></div>
+        <div><span>Kilo</span><b id="pKilo">4.2 kg</b></div>
+        <div><span>Alerji / Not</span><b id="pAlerji">Yok</b></div>
+      </div>
+      <div class="qr">
+        <svg width="52" height="52" viewBox="0 0 21 21">
+          <rect width="21" height="21" fill="#fff"/>
+          <path fill="#122B24" d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM9 0h1v2H9zM11 1h2v1h-2zM9 4h2v1H9zM12 3h1v3h-1zM9 7h1v2H9zM0 9h2v1H0zM3 9h2v2H3zM6 10h2v1H6zM9 10h2v2H9zM12 9h2v1h-2zM15 9h1v2h-1zM17 10h2v1h-2zM20 9h1v2h-1zM12 12h1v2h-1zM14 13h2v1h-2zM17 12h1v2h-1zM19 13h2v1h-2zM9 14h2v2H9zM14 16h3v3h-3zM9 17h1v2H9zM11 18h2v1h-2zM18 16h1v1h-1zM20 15h1v2h-1zM12 20h3v1h-3zM18 19h3v2h-3z"/>
+        </svg>
+      </div>
+      <div style="font-size:10px;opacity:.75;margin-top:12px">Kayıp durumunda QR okutulduğunda iletişim bilgilerin görünür</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:6px">
+      <button class="btn" style="background:var(--card);color:var(--green);border:1.5px solid var(--green)" onclick="openEdit()">✏️ Bilgileri Düzenle</button>
+      <button class="btn" onclick="go('oyun')">🎮 Pixel <span id="gameBtnName">Boncuk</span></button>
+    </div>
+
+    <div class="sec-title"><h2>Fotoğraflar</h2><a>+ Ekle</a></div>
+    <div class="photos" id="petPhotos" style="margin-bottom:6px"></div>
+
+    <div class="sec-title"><h2>Yaşam Geçmişi</h2><a>+ Anı ekle</a></div>
+    <div class="card">
+      <div class="tl">
+        <div class="tl-item"><b>Kuduz aşısı randevusu 💉</b><span>12 Temmuz 2026 · Yaklaşan</span></div>
+        <div class="tl-item"><b>Temel itaat eğitimine başladı 🎓</b><span>22 Haziran 2026</span></div>
+        <div class="tl-item"><b>Kısırlaştırma operasyonu ✂️</b><span>10 Ekim 2025</span></div>
+        <div class="tl-item"><b>İlk aşıları tamamlandı 💪</b><span>20 Ağustos 2024</span></div>
+        <div class="tl-item"><b>Ailemize katıldı ❤️</b><span>2 Temmuz 2024 · Sahiplenildi</span></div>
+      </div>
+    </div>
+
+    <div class="sec-title"><h2>Belgeler &amp; Kayıtlar</h2><a>Tümü</a></div>
+    <div class="card">
+      <div class="hist"><div class="hi">📄</div><div><b>Aşı karnesi (PDF)</b><span>Son güncelleme: 1 Haziran 2026</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+      <div class="hist"><div class="hi">🔬</div><div><b>Kan tahlili sonuçları</b><span>14 Mart 2026</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+      <div class="hist"><div class="hi">🪪</div><div><b>Çip kayıt belgesi</b><span>Tarım Bakanlığı sistemi</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+    </div>
+
+    <button class="btn" style="margin-top:4px">Kimlik Kartını Paylaş</button>
+    <div style="text-align:center;margin-top:14px"><a onclick="signOut()" style="font-size:12px;color:var(--gray);cursor:pointer;text-decoration:underline">Çıkış Yap</a></div>
+  </section>
+
+  <!-- ================= HİZMETLER & TOPLULUK ================= -->
+  <section class="screen" id="scr-hizmet">
+    <div class="topbar">
+      <div><h1>Hizmetler ❤️</h1><div class="sub">Çevrende &amp; toplulukta</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="card" id="hizMatchCard" style="background:linear-gradient(135deg,#F472B6,#E11D48);border:none;cursor:pointer;padding:18px;margin-bottom:16px" onclick="go('match');openMatch()">
+      <div style="display:flex;gap:14px;align-items:center;color:#fff">
+        <div style="font-size:34px">💘</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <b style="font-size:15.5px">PatiMatch — Can dostuna eş bul</b>
+            <span id="hizMatchBadge" class="badge" style="background:rgba(255,255,255,.25);color:#fff">💘 Adaylara göz at</span>
+          </div>
+          <span style="font-size:12px;opacity:.92;display:block;margin-top:4px">Çiftleşme için güvenli eşleşme · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
+        </div><span style="font-weight:800;font-size:18px">→</span>
+      </div>
+    </div>
+
+    <div class="sec-title" style="margin-top:0"><h2>Pati Market 🛒</h2><a>Tümü</a></div>
+    <div class="chip-row" style="margin-bottom:12px" id="marketChips">
+      <div class="chip on" onclick="filtMarket('hepsi',this)">Hepsi</div>
+      <div class="chip" onclick="filtMarket('mama',this)">🍖 Mama</div>
+      <div class="chip" onclick="filtMarket('oyuncak',this)">🧸 Oyuncak</div>
+    </div>
+    <div class="mkt-grid" id="marketGrid" style="margin-bottom:18px"></div>
+
+    <div class="search">🔍<input type="text" placeholder="Veteriner, otel, eğitmen ara..."></div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="srvChips">
+      <div class="chip on" onclick="filtSrv('hepsi',this)">Hepsi</div>
+      <div class="chip" onclick="filtSrv('vet',this)">🩺 Veteriner</div>
+      <div class="chip" onclick="filtSrv('otel',this)">🏨 Pet Oteli</div>
+      <div class="chip" onclick="filtSrv('egt',this)">🎓 Eğitmen</div>
+      <div class="chip" onclick="filtSrv('gez',this)">🦮 Gezdirici</div>
+      <div class="chip" onclick="filtSrv('kuafor',this)">✂️ Kuaför</div>
+    </div>
+
+    <div id="srvList">
+      <div class="srv-item" data-t="vet" id="srvItem-vet1">
+        <div class="srv" onclick="toggleSrv('vet1')"><div class="si" style="background:var(--red-soft)">🩺</div><div><b>Pati Veteriner Kliniği</b><span class="meta">7/24 acil · 850 m · Açık</span><span class="star">★ 4.9 (312 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-vet1"></div>
+      </div>
+      <div class="srv-item" data-t="otel" id="srvItem-otel1">
+        <div class="srv" onclick="toggleSrv('otel1')"><div class="si" style="background:var(--blue-soft)">🏨</div><div><b>Mutlu Patiler Pet Oteli</b><span class="meta">Kameralı odalar · 2.1 km</span><span class="star">★ 4.8 (198 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-otel1"></div>
+      </div>
+      <div class="srv-item" data-t="egt" id="srvItem-egt1">
+        <div class="srv" onclick="toggleSrv('egt1')"><div class="si" style="background:var(--green-soft)">🎓</div><div><b>Deniz Yılmaz — Köpek Eğitmeni</b><span class="meta">Pozitif pekiştirme · Evde ders</span><span class="star">★ 5.0 (87 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-egt1"></div>
+      </div>
+      <div class="srv-item" data-t="gez" id="srvItem-gez1">
+        <div class="srv" onclick="toggleSrv('gez1')"><div class="si" style="background:var(--amber-soft)">🦮</div><div><b>Mert K. — Köpek Gezdirici</b><span class="meta">Hafta içi her gün · 45 dk tur</span><span class="star">★ 4.7 (64 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-gez1"></div>
+      </div>
+      <div class="srv-item" data-t="vet" id="srvItem-vet2">
+        <div class="srv" onclick="toggleSrv('vet2')"><div class="si" style="background:var(--red-soft)">🐾</div><div><b>VetPlus Hayvan Hastanesi</b><span class="meta">Görüntüleme + cerrahi · 3.4 km</span><span class="star">★ 4.6 (521 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-vet2"></div>
+      </div>
+      <div class="srv-item" data-t="egt" id="srvItem-egt2">
+        <div class="srv" onclick="toggleSrv('egt2')"><div class="si" style="background:var(--green-soft)">🐱</div><div><b>Elif Aydın — Kedi Davranış Uzmanı</b><span class="meta">Online seans · Saldırganlık &amp; stres</span><span class="star">★ 4.9 (142 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-egt2"></div>
+      </div>
+      <div class="srv-item" data-t="gez" id="srvItem-gez2">
+        <div class="srv" onclick="toggleSrv('gez2')"><div class="si" style="background:var(--amber-soft)">🐕</div><div><b>PatiRun — Grup Yürüyüşü</b><span class="meta">Hafta sonu park buluşması · Sosyalleşme</span><span class="star">★ 4.8 (53 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-gez2"></div>
+      </div>
+      <div class="srv-item" data-t="kuafor" id="srvItem-kuafor1">
+        <div class="srv" onclick="toggleSrv('kuafor1')"><div class="si" style="background:var(--purple-soft)">✂️</div><div><b>Tüylü Dostlar Pet Kuaförü</b><span class="meta">Yıkama + tıraş + tırnak · Evden alma servisi</span><span class="star">★ 4.9 (231 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-kuafor1"></div>
+      </div>
+      <div class="srv-item" data-t="kuafor" id="srvItem-kuafor2">
+        <div class="srv" onclick="toggleSrv('kuafor2')"><div class="si" style="background:var(--purple-soft)">🛁</div><div><b>Pati SPA &amp; Bakım</b><span class="meta">Kedi dostu sessiz salon · Tüy açma uzmanı</span><span class="star">★ 4.7 (96 değerlendirme)</span></div><div class="go chev">›</div></div>
+        <div class="srv-detail" id="srvDetail-kuafor2"></div>
+      </div>
+    </div>
+
+    <div class="sec-title"><h2>Sahiplendirme 🏡</h2><a>Tümü</a></div>
+    <div class="adopt" id="adoptList"></div>
+
+    <div class="sec-title"><h2>Yardımlaşma Topluluğu 🤝</h2><a>+ Gönderi</a></div>
+    <div class="card">
+      <div class="feed">
+        <div class="fh"><div class="fa">👩</div><b>Ayşe D.</b><span>2 sa önce</span></div>
+        <p>Moda sahilinde sokak kedileri için mama bağışı topluyoruz. Bu hafta sonu dağıtım yapacağız, katılmak isteyen var mı? 🐾</p>
+        <div class="facts">❤️ 48 &nbsp; 💬 12 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--blue-soft)">👨</div><b>Emre T.</b><span>5 sa önce</span></div>
+        <p>Acil! Kadıköy'de yaralı bir güvercin bulduk, kuşlara bakan veteriner önerisi olan var mı?</p>
+        <div class="facts">❤️ 23 &nbsp; 💬 31 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--green-soft)">🧕</div><b>Zeynep A.</b><span>1 gün önce</span></div>
+        <p>Tatile çıkarken kedime bakacak birini arıyordum, buradan bulduğum gönüllü sayesinde çok rahat ettim. Teşekkürler PatiDost topluluğu! 💚</p>
+        <div class="facts">❤️ 96 &nbsp; 💬 8 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--amber-soft)">🧑</div><b>Mert B.</b><span>2 gün önce</span></div>
+        <p>Kış geliyor — mahalledeki sokak hayvanları için tahta kulübe yapımına başlıyoruz. Marangozluğu olan ya da malzeme desteği verebilecek herkesi bekleriz! 🔨🏠</p>
+        <div class="facts">❤️ 154 &nbsp; 💬 27 &nbsp; ↗ Paylaş</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PATİMATCH ================= -->
+  <section class="screen" id="scr-match">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="go('hizmet')">←</button>
+        <div><h1>PatiMatch 💘</h1><div class="sub" id="matchSub">Adaylar yükleniyor...</div></div>
+      </div>
+      <div style="display:flex;gap:9px;align-items:center">
+        <div class="msg-icon-btn" onclick="go('mesajlar')">💬<span class="msg-badge" id="msgBadge" style="display:none">0</span></div>
+        <div class="avatar" onclick="go('profil')">🐱</div>
+      </div>
+    </div>
+
+    <div class="chip-row" id="matchStrip" style="margin-bottom:12px"></div>
+    <div class="m-stack" id="mStack"></div>
+    <div class="m-actions">
+      <button class="m-btn no" onclick="matchPass()">✖️</button>
+      <button class="m-btn yes" onclick="matchLike()">💘</button>
+    </div>
+    <div style="text-align:center;font-size:10.5px;color:var(--gray);line-height:1.6">🧬 Sorumlu üretim: eşleşme öncesi veteriner kontrolü, genetik ve sağlık testleri önerilir.<br>Kediler kedilerle 🐱 · Köpekler köpeklerle 🐶 eşleşir.</div>
+  </section>
+
+  <!-- ================= EŞLEŞME POP-UP ================= -->
+  <div class="overlay center" id="matchPop">
+    <div class="match-pop">
+      <div style="font-size:30px">💘</div>
+      <b style="font-size:18px;color:var(--ink)">Eşleşme!</b>
+      <div class="mp-heads"><span id="mpMine">🐱</span><span style="font-size:26px">💞</span><span id="mpEmoji">🐱</span></div>
+      <p style="font-size:12.5px;color:var(--gray);line-height:1.55;margin-bottom:14px"><b id="mpName" style="color:var(--ink)">Duman</b>'ın sahibi de seni beğendi! Sorumlu eşleştirme için önce veteriner kontrolü ve sağlık testlerini konuşmayı unutma 🩺</p>
+      <button class="btn" onclick="openMatchThread()">Mesaj Gönder</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="closeM('matchPop')">Keşfetmeye Devam</button>
+    </div>
+  </div>
+
+  <!-- ================= MESAJLAR ================= -->
+  <section class="screen" id="scr-mesajlar">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="go('match')">←</button>
+        <div><h1>Mesajlar 💬</h1><div class="sub">Eşleşmelerinle sohbet et</div></div>
+      </div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+    <div id="msgList"></div>
+  </section>
+
+  <!-- ================= MESAJ SOHBET MODALI ================= -->
+  <div class="overlay" id="msgThreadModal">
+    <div class="sheet" style="padding-bottom:18px">
+      <div class="sheet-head">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="msg-thread-avatar"><img id="threadAvatar" src="" alt=""></div>
+          <h3 id="threadName">Sohbet</h3>
+        </div>
+        <button class="x" onclick="closeThread()">✕</button>
+      </div>
+      <div class="chat-box" id="threadChat" style="min-height:280px"></div>
+      <div class="inp">
+        <input id="threadInput" type="text" placeholder="Bir mesaj yaz..." onkeydown="if(event.key==='Enter')sendThreadMsg()">
+        <button onclick="sendThreadMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PİXEL OYUN ================= -->
+  <section class="screen" id="scr-oyun">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="go('profil')">←</button>
+        <div><h1 id="gTitle">Pixel Boncuk 🎮</h1><div class="sub" id="gStageSub">Yavru · Seviye 1</div></div>
+      </div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="g-room" id="gRoom">
+      <div class="g-sun">☀️</div>
+      <div class="g-moon">🌙</div>
+      <div class="g-stars">✦ ✦ ✦ ✦</div>
+      <div class="g-hud">
+        <span class="g-chip">🪙 <span id="gCoin">15</span></span>
+        <span class="g-chip" id="gTimer" style="display:none"></span>
+      </div>
+      <div class="g-bub" id="gBub"></div>
+      <div class="g-dot" id="gDot"></div>
+      <div class="g-item" id="gFood">🍖</div>
+      <div class="g-ball" id="gBall">🎾</div>
+      <div class="g-wrap" id="gWrap">
+        <canvas id="gCanvas"></canvas>
+        <span class="g-acc" id="gAcc"></span>
+        <span class="g-emote" id="gEmote"></span>
+      </div>
+      <div class="g-name" id="gName">Boncuk</div>
+    </div>
+
+    <div class="g-stats">
+      <div class="g-stat"><b>🍖 Tokluk <span id="gTokV">80%</span></b><div class="g-track"><div class="g-fill" id="gTok"></div></div></div>
+      <div class="g-stat"><b>😊 Mutluluk <span id="gMutV">70%</span></b><div class="g-track"><div class="g-fill" id="gMut"></div></div></div>
+      <div class="g-stat"><b>⚡ Enerji <span id="gEnjV">90%</span></b><div class="g-track"><div class="g-fill" id="gEnj"></div></div></div>
+    </div>
+
+    <div class="g-actions">
+      <div class="g-act" onclick="gFeed()"><span>🍖</span>Besle</div>
+      <div class="g-act" onclick="gPlay()" id="gPlayBtn"><span>🎾</span>Oyna</div>
+      <div class="g-act" onclick="gPet2()"><span>🤗</span>Sev</div>
+      <div class="g-act" onclick="gSleep()"><span>💤</span>Uyut</div>
+      <div class="g-act" onclick="openFlap()"><span>🪶</span>Pati Uçuşu</div>
+      <div class="g-act" onclick="openShop()"><span>🛍️</span>Mağaza</div>
+    </div>
+
+    <div class="card g-lvl">
+      <div style="font-size:26px">🏆</div>
+      <div style="flex:1">
+        <b style="font-size:13px;color:var(--ink)">Seviye <span id="gLvlNo">1</span> — <span id="gStageName">Yavru</span></b>
+        <div class="g-track" style="margin:8px 0 6px"><div class="g-fill" id="gXp" style="background:var(--purple)"></div></div>
+        <span style="font-size:10.5px;color:var(--gray)">XP kazan → dostun büyüsün · 🪙 kazan → mağazadan aksesuar al · Odaya dokun → yanına koşsun!</span>
+      </div>
+    </div>
+
+    <div class="qrow">
+      <div class="chip" onclick="gTalk(this.textContent)">Seni seviyorum ❤️</div>
+      <div class="chip" onclick="gTalk('Nasılsın?')">Nasılsın?</div>
+      <div class="chip" onclick="gTalk('Aç mısın?')">Aç mısın?</div>
+      <div class="chip" onclick="gTalk('Oyun ister misin?')">Oyun?</div>
+    </div>
+    <div class="inp">
+      <input id="gInput" type="text" placeholder="Onunla konuş..." onkeydown="if(event.key==='Enter')gTalk()">
+      <button onclick="gTalk()">➤</button>
+    </div>
+  </section>
+
+  <!-- ================= DERS MODALI ================= -->
+  <div class="overlay" id="lessonModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3 id="lTitle">Ders</h3><button class="x" onclick="closeM('lessonModal')">✕</button></div>
+      <div class="stage" id="lStage"></div>
+      <div class="meta-row" id="lMeta"></div>
+      <p id="lDesc" style="font-size:12.5px;color:#3E524B;line-height:1.6;margin-bottom:6px"></p>
+      <div id="lAges" class="grid2" style="display:none;margin-bottom:10px"></div>
+      <div class="sec-title" style="margin-top:10px"><h2>Adım Adım Eğitim</h2><a onclick="replayStage()">↻ Animasyonu başlat</a></div>
+      <div class="card" id="lSteps"></div>
+      <div id="lVarsWrap" style="display:none">
+        <div class="sec-title"><h2>Duruma Göre Sorun Giderme</h2><a>🔧</a></div>
+        <div class="card" id="lVars"></div>
+      </div>
+      <div class="tipbox" id="lTip" style="background:var(--green-soft);color:#1E5C46"></div>
+      <div class="tipbox" id="lErr" style="background:var(--amber-soft);color:#8A5B10"></div>
+      <button class="btn" onclick="closeM('lessonModal')">Dersi Tamamla ✓ &nbsp;+20 🏆</button>
+    </div>
+  </div>
+
+  <!-- ================= PROFİL DÜZENLEME MODALI ================= -->
+  <div class="overlay" id="editModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Profili Düzenle ✏️</h3><button class="x" onclick="closeM('editModal')">✕</button></div>
+      <div class="f-grid">
+        <div class="f-item"><label>İsim</label><input id="f_ad"></div>
+        <div class="f-item"><label>Tür</label><select id="f_tur"><option value="kedi">Kedi 🐱</option><option value="kopek">Köpek 🐶</option></select></div>
+        <div class="f-item"><label>Cins</label><input id="f_cins"></div>
+        <div class="f-item"><label>Cinsiyet</label><select id="f_cinsiyet"><option>Dişi</option><option>Erkek</option></select></div>
+        <div class="f-item"><label>Doğum Tarihi</label><input id="f_dogum" type="date"></div>
+        <div class="f-item"><label>Kilo (kg)</label><input id="f_kilo" type="number" step="0.1" min="0"></div>
+        <div class="f-item"><label>Çip No</label><input id="f_cip"></div>
+        <div class="f-item"><label>Kan Grubu</label><input id="f_kan"></div>
+        <div class="f-item"><label>Kısırlaştırma</label><select id="f_kisir"><option>Evet</option><option>Hayır</option></select></div>
+        <div class="f-item"><label>Pixel Rengi 🎨</label><select id="f_renk"><option value="gri">Gri</option><option value="turuncu">Turuncu</option><option value="siyah">Siyah</option><option value="beyaz">Beyaz</option><option value="altin">Altın</option><option value="kahve">Kahve</option></select></div>
+        <div class="f-item full"><label>Alerjiler / Notlar</label><input id="f_alerji" placeholder="örn: tavuk proteini alerjisi"></div>
+        <div class="f-item full"><label>Fotoğraf 📷 (ana ekranda silik görünür)</label>
+          <input type="file" id="f_foto" accept="image/*" onchange="fotoSec(this)">
+          <div id="fotoPrev" style="margin-top:6px;display:flex;align-items:center;gap:10px"></div>
+        </div>
+      </div>
+      <div style="font-size:10.5px;color:var(--gray);margin-top:10px">🎮 Tür ve pixel rengi seçimin, oyundaki pixel dostunun görünümünü belirler.</div>
+      <button class="btn" style="margin-top:12px" onclick="saveEdit()">Kaydet</button>
+    </div>
+  </div>
+
+  <!-- ================= MAĞAZA MODALI ================= -->
+  <div class="overlay" id="shopModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Pati Mağazası 🛍️</h3><button class="x" onclick="closeM('shopModal')">✕</button></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:12px">Paran: <b id="shopCoin" style="color:var(--amber)">🪙 15</b> · Besleyerek, oynayarak ve Pati Uçuşu'nda uçarak kazanırsın.</div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </div>
+
+  <!-- ================= PATİ UÇUŞU MODALI ================= -->
+  <div class="overlay" id="flapModal">
+    <div class="sheet" style="padding-bottom:18px">
+      <div class="sheet-head"><h3>Pati Uçuşu 🪶</h3><button class="x" onclick="closeFlap()">✕</button></div>
+      <canvas id="fCanvas" width="340" height="430" onclick="fTap()"></canvas>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--gray);font-weight:700">
+        <span>🏆 Rekor: <b id="fBest" style="color:var(--ink)">0</b></span>
+        <span>Geçilen her engel = <b style="color:var(--amber)">+1 🪙</b></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast"></div>
+
+  <!-- ================= ALT NAVİGASYON ================= -->
+  <nav class="nav">
+    <button class="on" data-s="home" onclick="go('home')"><span class="ic">🏠</span>Ana Sayfa</button>
+    <button data-s="egitim" onclick="go('egitim')"><span class="ic">🎓</span>Eğitim</button>
+    <button class="ai-btn" onclick="go('ai')">🐾</button>
+    <button data-s="saglik" onclick="go('saglik')"><span class="ic">🩺</span>Sağlık</button>
+    <button data-s="hizmet" onclick="go('hizmet')"><span class="ic">❤️</span>Hizmetler</button>
+  </nav>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

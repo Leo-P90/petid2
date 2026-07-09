@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Ana Sayfa (Fütürizm)</title>
+<style>
+  :root{
+    --void:#050807;
+    --panel:rgba(14,24,22,.58);
+    --panel-solid:#0C1614;
+    --panel-border:rgba(120,255,214,.16);
+    --ink:#EAFBF4;
+    --ink-soft:#9FC2B6;
+    --ink-faint:#5C7972;
+    --mint:#33FFC2;
+    --mint-mid:#0EA574;
+    --cyan:#43E7FF;
+    --amber:#FFC65C;
+    --rose:#FF6E86;
+    --violet:#B48CFF;
+    --mono:ui-monospace,'Cascadia Code','Consolas','SFMono-Regular',monospace;
+    --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;
+    background:
+      radial-gradient(ellipse 900px 520px at 12% -8%, rgba(51,255,194,.16), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 92% 108%, rgba(180,140,255,.14), transparent 60%),
+      #030504;
+    position:relative;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+    background-size:42px 42px;
+    -webkit-mask-image:radial-gradient(circle at 50% 25%, black, transparent 72%);
+    mask-image:radial-gradient(circle at 50% 25%, black, transparent 72%);
+  }
+  *:focus-visible{outline:2px solid var(--mint);outline-offset:3px;border-radius:8px}
+
+  .rig{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1}
+  .rig-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#5b7a70;font-weight:600;text-align:center}
+  .rig-label b{color:#8fffd9}
+  .rig-note{font-family:var(--mono);font-size:9px;color:#41564f;letter-spacing:.04em}
+
+  .phone{
+    width:396px;max-width:100%;height:830px;
+    background:var(--void);
+    border-radius:40px;overflow:hidden;position:relative;
+    border:8px solid #04100c;
+    box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 0 1px rgba(51,255,194,.08),inset 0 0 40px rgba(0,0,0,.4);
+  }
+  .phone::after{
+    content:'';position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+
+  .glow-blob{position:absolute;border-radius:50%;filter:blur(54px);pointer-events:none;z-index:0}
+  .b1{width:220px;height:220px;background:rgba(51,255,194,.22);top:-70px;left:-80px}
+  .b2{width:260px;height:260px;background:rgba(180,140,255,.18);bottom:80px;right:-100px}
+
+  .stack{position:relative;z-index:1;padding:20px 18px 116px}
+  .stack>*{animation:riseIn .5s cubic-bezier(.16,1,.3,1) backwards}
+  .stack>*:nth-child(1){animation-delay:.02s}
+  .stack>*:nth-child(2){animation-delay:.06s}
+  .stack>*:nth-child(3){animation-delay:.10s}
+  .stack>*:nth-child(4){animation-delay:.14s}
+  .stack>*:nth-child(5){animation-delay:.18s}
+  .stack>*:nth-child(6){animation-delay:.22s}
+  .stack>*:nth-child(7){animation-delay:.26s}
+  .stack>*:nth-child(8){animation-delay:.30s}
+  @keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- top ---------- */
+  .top{display:flex;align-items:flex-start;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px}
+  .mark-hex{width:38px;height:38px;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .mark-hex .hexbg{position:absolute;inset:0;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(160deg,rgba(51,255,194,.26),rgba(67,231,255,.10));border:1px solid rgba(51,255,194,.5);box-shadow:0 0 16px -2px rgba(51,255,194,.6)}
+  .mark-hex .mring{position:absolute;inset:-5px;border-radius:50%;border:1px dashed rgba(51,255,194,.32);animation:spin 11s linear infinite}
+  .mark-hex .paw{position:relative;font-size:16px;filter:drop-shadow(0 0 5px rgba(51,255,194,.75))}
+  .wordmark{font-size:18.5px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,var(--ink),var(--mint) 75%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wordmark small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--ink-faint);font-weight:600}
+  .top-actions{display:flex;gap:8px}
+  .bell-btn{position:relative;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.18s;color:var(--ink)}
+  .bell-btn:hover{border-color:var(--mint);background:rgba(51,255,194,.08)}
+  .bell-btn .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px 1px var(--rose);animation:pulseDot 1.8s ease-in-out infinite}
+  @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.55}}
+
+  /* ---------- ticker ---------- */
+  .ticker{overflow:hidden;white-space:nowrap;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:7px 0;margin:14px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+  .ticker-track{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ink-soft);animation:tick 20s linear infinite}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- pet switch ---------- */
+  .pet-switch{display:flex;gap:8px;margin-bottom:16px}
+  .pet-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--ink-soft);font-size:12px;font-weight:700;cursor:pointer;transition:.18s}
+  .pet-tab .mark{font-size:16px}
+  .pet-tab .cnt{font-family:var(--mono);font-size:8px;color:var(--ink-faint);letter-spacing:.03em;display:block;margin-top:1px}
+  .pet-tab.on{border-color:rgba(51,255,194,.5);background:linear-gradient(180deg,rgba(51,255,194,.14),rgba(51,255,194,.02));color:var(--ink);box-shadow:inset 0 0 0 1px rgba(51,255,194,.15),0 8px 20px -8px rgba(51,255,194,.55)}
+  .pet-tab.on .cnt{color:var(--mint)}
+  .pet-tab:hover{border-color:rgba(255,255,255,.22)}
+  .pet-tab-add{border:1px dashed rgba(255,255,255,.2);background:none;color:var(--ink-faint);border-radius:14px;padding:0 12px;font-size:16px;cursor:pointer;transition:.18s}
+  .pet-tab-add:hover{border-color:var(--mint);color:var(--mint)}
+
+  /* ---------- hologram ---------- */
+  .holo-stage{position:relative;height:206px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .holo-ring{position:absolute;border-radius:50%;top:50%;left:50%}
+  .holo-ring.r1{width:168px;height:168px;margin:-84px 0 0 -84px;border:1.5px dashed rgba(51,255,194,.35);animation:spin 14s linear infinite}
+  .holo-ring.r2{width:198px;height:198px;margin:-99px 0 0 -99px;border:1px dotted rgba(67,231,255,.24);animation:spin 22s linear infinite reverse}
+  .holo-stage[data-type="dog"] .r1{border-color:rgba(67,231,255,.4)}
+  .holo-stage[data-type="dog"] .r2{border-color:rgba(180,140,255,.28)}
+  .holo-base{position:absolute;bottom:16px;width:132px;height:22px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(51,255,194,.5),transparent 70%);filter:blur(5px)}
+  .holo-stage[data-type="dog"] .holo-base{background:radial-gradient(ellipse at center,rgba(67,231,255,.5),transparent 70%)}
+  .holo-capsule{position:relative;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.10),rgba(8,20,18,.45) 62%);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 42px -6px rgba(51,255,194,.5),inset 0 0 30px rgba(51,255,194,.08)}
+  .holo-stage[data-type="dog"] .holo-capsule{box-shadow:0 0 42px -6px rgba(67,231,255,.5),inset 0 0 30px rgba(67,231,255,.08)}
+  .holo-pet{font-size:56px;display:block;filter:drop-shadow(0 8px 14px rgba(0,0,0,.55));animation:float 4.6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .holo-sweep{position:absolute;left:0;right:0;height:42%;top:-42%;background:linear-gradient(180deg,transparent,rgba(51,255,194,.3),transparent);animation:sweep 3.8s ease-in-out infinite}
+  @keyframes sweep{0%{top:-42%}100%{top:100%}}
+  .spark{position:absolute;font-size:11px;opacity:0;animation:rise 3.4s ease-in infinite;pointer-events:none}
+  .spark.s1{left:22%;bottom:34%;animation-delay:.2s}
+  .spark.s2{left:72%;bottom:28%;animation-delay:1.3s}
+  .spark.s3{left:50%;bottom:38%;animation-delay:2.3s}
+  @keyframes rise{0%{opacity:0;transform:translateY(0) scale(.8)}18%{opacity:.85}82%{opacity:.4}100%{opacity:0;transform:translateY(-60px) scale(1.1)}}
+  .hud-chip{position:absolute;top:10px;width:86px;font-family:var(--mono);background:rgba(7,15,14,.6);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:7px 9px;backdrop-filter:blur(6px)}
+  .hud-chip.left{left:0}
+  .hud-chip.right{right:0}
+  .hud-chip b{display:block;font-size:7px;letter-spacing:.09em;color:var(--ink-soft);margin-bottom:5px;font-weight:600}
+  .hud-bar{height:4px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px}
+  .hud-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--mint),var(--cyan));border-radius:99px;transition:width .5s ease}
+  .hud-chip span{font-size:10px;color:var(--ink);font-weight:700}
+
+  /* ---------- search ---------- */
+  .search-field{position:relative;display:flex;align-items:center;gap:9px;background:var(--panel-solid);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:12px 14px;transition:border-color .2s ease,box-shadow .2s ease}
+  .search-field:focus-within{border-color:rgba(51,255,194,.55);box-shadow:0 0 0 3px rgba(51,255,194,.12),0 0 24px -4px rgba(51,255,194,.5)}
+  .search-field .ic{font-size:14px;color:var(--mint);flex-shrink:0}
+  .search-field:focus-within .ic{animation:pulseIcon 1.2s ease-in-out infinite}
+  @keyframes pulseIcon{0%,100%{opacity:1}50%{opacity:.4}}
+  .search-field input{flex:1;border:none;outline:none;background:none;color:var(--ink);font-size:13px;font-family:var(--mono)}
+  .search-field input::placeholder{color:var(--ink-faint)}
+  .search-field button{border:none;background:linear-gradient(135deg,var(--mint),var(--cyan));color:#04120c;font-weight:800;font-size:11.5px;padding:8px 13px;border-radius:11px;cursor:pointer;flex-shrink:0;transition:.15s}
+  .search-field button:hover{transform:translateY(-1px);box-shadow:0 8px 18px -6px rgba(51,255,194,.6)}
+
+  .ai-answer{display:none;margin-top:10px;background:var(--panel);border:1px solid rgba(255,255,255,.1);border-left:3px solid var(--violet);border-radius:14px;padding:12px 14px;backdrop-filter:blur(12px)}
+  .ai-answer.show{display:block;animation:riseIn .3s ease}
+  .ai-answer .q{font-size:10.5px;color:var(--ink-faint);font-style:italic;margin-bottom:6px;font-family:var(--mono)}
+  .ai-answer .a{font-size:12.5px;color:var(--ink);line-height:1.55}
+  .ai-answer .a .dots i{font-style:normal;animation:blinkDot 1s infinite}
+  .ai-answer .a .dots i:nth-child(2){animation-delay:.2s}
+  .ai-answer .a .dots i:nth-child(3){animation-delay:.4s}
+  @keyframes blinkDot{0%,100%{opacity:.15}50%{opacity:1}}
+  .ai-answer .acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+  .ai-answer .chip{font-family:var(--mono);font-size:10px;border:1px solid rgba(180,140,255,.4);color:var(--violet);background:rgba(180,140,255,.08);padding:6px 11px;border-radius:99px;cursor:pointer;transition:.15s}
+  .ai-answer .chip:hover{background:rgba(180,140,255,.18)}
+  .ai-answer .close{display:inline-block;margin-top:9px;font-size:10px;color:var(--ink-faint);cursor:pointer;font-family:var(--mono);letter-spacing:.04em}
+  .ai-answer .close:hover{color:var(--mint)}
+
+  /* ---------- progress card ---------- */
+  .progress-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:20px;padding:16px;backdrop-filter:blur(14px);margin:16px 0;box-shadow:0 18px 40px -22px rgba(0,0,0,.7)}
+  .pc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .pc-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ink-faint);font-weight:700}
+  .pc-pet{font-size:11.5px;font-weight:700;color:var(--mint)}
+  .pc-body{display:flex;align-items:center;gap:16px}
+  .ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0}
+  .prog-ring{width:96px;height:96px;transform:rotate(0deg)}
+  .pr-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:9}
+  .pr-fg{fill:none;stroke:var(--mint);stroke-width:9;stroke-linecap:round;transform:rotate(-90deg);transform-origin:60px 60px;filter:drop-shadow(0 0 6px rgba(51,255,194,.65));transition:stroke-dashoffset .6s ease}
+  .ring-num{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;gap:1px;font-family:var(--mono)}
+  .ring-num b{font-size:21px;color:var(--ink);font-weight:800}
+  .ring-num span{font-size:10px;color:var(--ink-soft)}
+  .pc-stats{flex:1;display:flex;flex-direction:column;gap:8px}
+  .pc-stat{display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+  .pc-stat .pi{font-size:14px;width:18px;text-align:center}
+  .pc-stat b{font-size:13px;color:var(--ink);font-weight:800;min-width:30px}
+  .pc-stat span{font-size:9.5px;color:var(--ink-faint);letter-spacing:.02em}
+  .pc-cap{font-size:11px;color:var(--ink-soft);line-height:1.55;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+
+  /* ---------- section label ---------- */
+  .section-label{display:flex;align-items:center;gap:10px;margin:22px 0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-faint);font-weight:700}
+  .section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.16),transparent)}
+
+  /* ---------- module tiles (bento) ---------- */
+  .mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{position:relative;overflow:hidden;border-radius:18px;padding:15px;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);transition:transform .18s ease,border-color .18s ease,background .18s ease}
+  .tile:hover,.tile:focus-visible{transform:translateY(-3px);border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06)}
+  .tile .tico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+  .tile b{font-size:13px;color:var(--ink);display:block;margin-bottom:3px}
+  .tile .desc{font-size:10.5px;color:var(--ink-soft);line-height:1.45;display:block}
+  .tile.flagship{grid-column:1/-1;padding:20px;background:linear-gradient(155deg,rgba(51,255,194,.11),rgba(180,140,255,.06) 60%,rgba(255,255,255,.02));border-color:rgba(51,255,194,.3)}
+  .tile.flagship:hover{border-color:rgba(51,255,194,.5)}
+  .tile.flagship .tico{width:50px;height:50px;font-size:23px;background:rgba(51,255,194,.14);border-color:rgba(51,255,194,.42);box-shadow:0 0 22px -4px rgba(51,255,194,.55)}
+  .tile.flagship b{font-size:15px}
+  .tile.wide{grid-column:1/-1;display:flex;align-items:center;gap:13px;padding:14px 15px}
+  .tile.wide .tico{margin-bottom:0}
+  .tile.wide .txt{flex:1}
+  .tile .kicker{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--mint);border:1px solid rgba(51,255,194,.4);padding:3px 8px;border-radius:99px;background:rgba(51,255,194,.08)}
+  .tile .trust{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;color:var(--cyan)}
+  .tile .go{margin-top:11px;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--mint)}
+  .tile .chev{margin-left:auto;font-size:17px;color:var(--ink-faint);flex-shrink:0}
+
+  /* ---------- ayrıca ---------- */
+  .more-row{display:flex;gap:8px;flex-wrap:wrap}
+  .more-link{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:var(--ink-soft);font-size:11px;font-weight:700;padding:9px 13px;border-radius:99px;cursor:pointer;transition:.18s}
+  .more-link:hover,.more-link:focus-visible{border-color:var(--violet);color:var(--ink);background:rgba(180,140,255,.1)}
+
+  /* ---------- cta ---------- */
+  .cta-zone{margin-top:24px}
+  .cta-row{display:flex;gap:10px}
+  .btn{flex:1;border-radius:14px;padding:13px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:var(--sans);transition:.15s}
+  .btn.primary{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--mint),var(--cyan));color:#04120c;border:none;box-shadow:0 14px 30px -10px rgba(51,255,194,.55)}
+  .btn.primary::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-20deg);transition:left .5s ease}
+  .btn.primary:hover::after{left:130%}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 18px 36px -8px rgba(51,255,194,.65)}
+  .btn.primary:active{transform:translateY(0) scale(.98)}
+  .btn.ghost{background:rgba(255,255,255,.04);color:var(--ink);border:1.5px solid rgba(255,255,255,.16)}
+  .btn.ghost:hover{border-color:var(--mint);color:var(--mint);background:rgba(51,255,194,.06)}
+  .cta-note{text-align:center;font-size:10px;color:var(--ink-faint);margin-top:10px;font-family:var(--mono);letter-spacing:.03em}
+
+  /* ---------- nav ---------- */
+  .nav{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(9,15,14,.72);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.09);border-radius:22px;display:flex;justify-content:space-around;align-items:flex-end;padding:8px 6px 10px;box-shadow:0 20px 40px -12px rgba(0,0,0,.65);z-index:5}
+  .nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:var(--ink-faint);font-family:var(--mono);letter-spacing:.02em;cursor:pointer;width:58px}
+  .nav button .ic{font-size:18px;filter:grayscale(1) opacity(.5);transition:.2s}
+  .nav button.on{color:var(--mint)}
+  .nav button.on .ic{filter:none;opacity:1;filter:drop-shadow(0 0 6px rgba(51,255,194,.8))}
+  .nav .ai-btn{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--mint),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-24px;box-shadow:0 10px 26px -4px rgba(51,255,194,.6);border:4px solid var(--void);cursor:pointer}
+
+  .toast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);background:rgba(9,17,15,.92);border:1px solid rgba(51,255,194,.32);color:var(--ink);font-family:var(--mono);font-size:11px;font-weight:600;padding:10px 16px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:40;backdrop-filter:blur(8px);box-shadow:0 10px 30px -8px rgba(0,0,0,.65);max-width:84%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="rig">
+  <div class="rig-label">PatiDost · Ana Sayfa · <b>Fütürizm</b></div>
+  <div class="rig-note">yalnızca koyu tema için tasarlandı — bkz. analiz notu</div>
+  <div class="phone" id="phone">
+    <section class="screen" id="screen">
+      <div class="glow-blob b1"></div>
+      <div class="glow-blob b2"></div>
+
+      <div class="stack">
+
+        <div class="top">
+          <div class="brand">
+            <div class="mark-hex"><span class="mring"></span><span class="hexbg"></span><span class="paw">🐾</span></div>
+            <div>
+              <div class="wordmark">PatiDost</div>
+              <small>DİJİTAL DOST SİSTEMİ · v2.0</small>
+            </div>
+          </div>
+          <div class="top-actions">
+            <button class="bell-btn" onclick="notify('2 bildirim: aşı hatırlatması ve günlük görev seni bekliyor 🔔')" aria-label="Bildirimler">🔔<span class="dot"></span></button>
+          </div>
+        </div>
+
+        <div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+        <div class="pet-switch" role="tablist" aria-label="Evcil hayvan seç">
+          <button class="pet-tab on" id="tab0" onclick="setPet(0)" role="tab" aria-selected="true">
+            <span class="mark">🐱</span><span><span id="tabName0">Boncuk</span><span class="cnt" id="cnt0">2 bildirim</span></span>
+          </button>
+          <button class="pet-tab" id="tab1" onclick="setPet(1)" role="tab" aria-selected="false">
+            <span class="mark">🐶</span><span><span id="tabName1">Zeytin</span><span class="cnt" id="cnt1">1 bildirim</span></span>
+          </button>
+          <button class="pet-tab-add" onclick="notify('Yeni dost ekleme akışı burada açılır')" aria-label="Yeni dost ekle">+</button>
+        </div>
+
+        <div class="holo-stage" id="holoStage" data-type="cat">
+          <div class="holo-ring r1"></div>
+          <div class="holo-ring r2"></div>
+          <div class="holo-base"></div>
+          <div class="holo-capsule">
+            <span class="holo-pet" id="holoPet">🐱</span>
+            <span class="holo-sweep"></span>
+          </div>
+          <span class="spark s1">🐾</span>
+          <span class="spark s2">✦</span>
+          <span class="spark s3">🐾</span>
+          <div class="hud-chip left">
+            <b>MUTLULUK</b>
+            <div class="hud-bar"><i id="moodFill" style="width:74%"></i></div>
+            <span id="moodNum">74%</span>
+          </div>
+          <div class="hud-chip right">
+            <b>ENERJİ</b>
+            <div class="hud-bar"><i id="enFill" style="width:90%"></i></div>
+            <span id="enNum">90%</span>
+          </div>
+        </div>
+
+        <form class="search-field" onsubmit="return doSearch(event)">
+          <span class="ic">◎</span>
+          <input id="q" placeholder="Bugün nasıl yardımcı olabilirim?" autocomplete="off">
+          <button type="submit">SOR →</button>
+        </form>
+        <div class="ai-answer" id="aiAnswer">
+          <div class="q" id="aiQ"></div>
+          <div class="a" id="aiA"></div>
+          <div class="acts" id="aiActs">
+            <span class="chip" onclick="notify('Eğitim ekranına yönlendiriliyor')">Eğitime git</span>
+            <span class="chip" onclick="notify('Sağlık ekranına yönlendiriliyor')">Sağlığı incele</span>
+          </div>
+          <span class="close" onclick="closeAnswer()">kapat ✕</span>
+        </div>
+
+        <div class="progress-card">
+          <div class="pc-head">
+            <span class="pc-label">İLERLEME ÖZETİ</span>
+            <span class="pc-pet" id="pcPetName">Boncuk</span>
+          </div>
+          <div class="pc-body">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 120 120" class="prog-ring">
+                <circle cx="60" cy="60" r="52" class="pr-bg"/>
+                <circle cx="60" cy="60" r="52" class="pr-fg" id="prFg"/>
+              </svg>
+              <div class="ring-num"><b id="prNum">68</b><span>%</span></div>
+            </div>
+            <div class="pc-stats">
+              <div class="pc-stat"><span class="pi">🔥</span><b id="streakNum">5</b><span>gün seri</span></div>
+              <div class="pc-stat"><span class="pi">💉</span><b id="vacNum">12g</b><span>sonraki aşı</span></div>
+              <div class="pc-stat"><span class="pi">🪙</span><b id="coinNum">82</b><span>coin</span></div>
+            </div>
+          </div>
+          <p class="pc-cap" id="pcCap">Eğitim modülündeki "Temel İtaat" serisi ve sağlık görevlerinin ortalaması.</p>
+        </div>
+
+        <div class="section-label">MODÜLLER</div>
+        <div class="mod-grid">
+          <div class="tile" tabindex="0" onclick="notify('Eğitim ekranına gidiliyor')">
+            <div class="tico">🎓</div>
+            <b>Eğitim</b>
+            <span class="desc">Ders serileri, animasyonlar ve günlük görevler</span>
+          </div>
+          <div class="tile" tabindex="0" onclick="notify('Sağlık ekranına gidiliyor')">
+            <div class="tico">🩺</div>
+            <b>Sağlık</b>
+            <span class="desc" id="healthDesc">Karma aşı 12 gün içinde</span>
+            <span class="trust">✓ Veteriner onaylı veri</span>
+          </div>
+          <div class="tile flagship" tabindex="0" onclick="notify('Davranış &amp; AI sohbetine gidiliyor')">
+            <span class="kicker">ÖNERİLEN</span>
+            <div class="tico">🤖</div>
+            <b>Davranış &amp; AI</b>
+            <span class="desc">"Can dostum bana ne anlatmak istiyor?" — anında yanıt al</span>
+            <span class="go">Sohbete başla →</span>
+          </div>
+          <div class="tile wide" tabindex="0" onclick="notify('Hizmetler ekranına gidiliyor')">
+            <div class="tico">❤️</div>
+            <div class="txt"><b>Hizmetler &amp; Topluluk</b><span class="desc">Veteriner, otel, eğitmen ve sahiplendirme</span></div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+
+        <div class="section-label">AYRICA</div>
+        <div class="more-row">
+          <button class="more-link" onclick="notify('Profil ekranına gidiliyor')">🪪 Profil</button>
+          <button class="more-link" onclick="notify('PatiMatch ekranına gidiliyor')">💘 PatiMatch</button>
+          <button class="more-link" onclick="notify('Pixel Oyun ekranına gidiliyor')">🎮 Pixel Oyun</button>
+          <button class="more-link" onclick="notify('Aşı takvimine gidiliyor')">💉 Aşı Takvimi</button>
+        </div>
+
+        <div class="cta-zone">
+          <div class="cta-row">
+            <button class="btn primary" onclick="notify('Kayıt akışı açılıyor')">Ücretsiz Başla</button>
+            <button class="btn ghost" onclick="notify('Giriş akışı açılıyor')">Giriş Yap</button>
+          </div>
+          <div class="cta-note">Kaydolmadan da tüm özellikleri keşfedebilirsin 🐾</div>
+        </div>
+
+      </div>
+    </section>
+
+    <nav class="nav">
+      <button class="on" onclick="notify('Ana sayfadasın')"><span class="ic">⌂</span>Ana Sayfa</button>
+      <button onclick="notify('Eğitim ekranına gidiliyor')"><span class="ic">🎓</span>Eğitim</button>
+      <button class="ai-btn" onclick="notify('AI sohbeti açılıyor')">🐾</button>
+      <button onclick="notify('Sağlık ekranına gidiliyor')"><span class="ic">🩺</span>Sağlık</button>
+      <button onclick="notify('Hizmetler ekranına gidiliyor')"><span class="ic">❤</span>Hizmetler</button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  const petData = [
+    {name:'Boncuk', type:'cat', emoji:'🐱', notif:'2 bildirim', pct:68, cap:'Eğitim modülündeki "Temel İtaat" serisi ve sağlık görevlerinin ortalaması.', health:'Karma aşı 12 gün içinde', mood:74, energy:90, streak:5, vaccine:'12g', coins:82},
+    {name:'Zeytin', type:'dog', emoji:'🐶', notif:'1 bildirim', pct:42, cap:'Zeytin yeni katıldı — "Tuvalet Eğitimi" serisine başlandı.', health:'Yıllık kontrol 30 gün içinde', mood:80, energy:65, streak:9, vaccine:'27g', coins:70}
+  ];
+  let cur = 0;
+  const CIRC = 2 * Math.PI * 52;
+
+  function setPet(i){
+    cur = i;
+    document.getElementById('tab0').classList.toggle('on', i===0);
+    document.getElementById('tab1').classList.toggle('on', i===1);
+    document.getElementById('tab0').setAttribute('aria-selected', i===0);
+    document.getElementById('tab1').setAttribute('aria-selected', i===1);
+    document.getElementById('holoStage').setAttribute('data-type', petData[i].type);
+    render();
+  }
+
+  function tickerHtml(p){
+    const t = '🟢 SİSTEM ÇEVRİMİÇİ&nbsp;&nbsp;·&nbsp;&nbsp;🔥 '+p.streak+' GÜNLÜK SERİ AKTİF&nbsp;&nbsp;·&nbsp;&nbsp;💉 '+p.health.toUpperCase()+'&nbsp;&nbsp;·&nbsp;&nbsp;🤖 AI MODELİ HAZIR&nbsp;&nbsp;·&nbsp;&nbsp;';
+    return t + t;
+  }
+
+  function render(){
+    const p = petData[cur];
+    document.getElementById('holoPet').textContent = p.emoji;
+    document.getElementById('moodFill').style.width = p.mood + '%';
+    document.getElementById('moodNum').textContent = p.mood + '%';
+    document.getElementById('enFill').style.width = p.energy + '%';
+    document.getElementById('enNum').textContent = p.energy + '%';
+    document.getElementById('pcPetName').textContent = p.name;
+    document.getElementById('pcCap').textContent = p.cap;
+    document.getElementById('healthDesc').textContent = p.health;
+    document.getElementById('streakNum').textContent = p.streak;
+    document.getElementById('vacNum').textContent = p.vaccine;
+    document.getElementById('coinNum').textContent = p.coins;
+
+    const fg = document.getElementById('prFg');
+    fg.style.strokeDasharray = CIRC;
+    fg.style.strokeDashoffset = CIRC - (CIRC * p.pct / 100);
+    document.getElementById('prNum').textContent = p.pct;
+
+    document.getElementById('tickerTrack').innerHTML = tickerHtml(p);
+  }
+
+  function doSearch(ev){
+    ev.preventDefault();
+    const q = document.getElementById('q').value.trim();
+    if(!q) return false;
+    document.getElementById('q').value = '';
+    const box = document.getElementById('aiAnswer');
+    document.getElementById('aiQ').textContent = '"' + q + '"';
+    document.getElementById('aiA').innerHTML = '<span class="dots">Analiz ediliyor<i>.</i><i>.</i><i>.</i></span>';
+    box.classList.add('show');
+    setTimeout(function(){
+      document.getElementById('aiA').textContent = petData[cur].name + ' için bunu inceledim: bu konuda Eğitim ya da Sağlık modülünde daha ayrıntılı rehber var. İstersen doğrudan oraya geçebilirim.';
+    }, 650);
+    return false;
+  }
+  function closeAnswer(){ document.getElementById('aiAnswer').classList.remove('show'); }
+
+  let toastT;
+  function notify(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ t.classList.remove('show'); }, 1700);
+  }
+
+  render();
+</script>
+</body>
+</html>

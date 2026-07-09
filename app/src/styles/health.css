@@ -1,0 +1,44 @@
+/* ---------- sağlık ---------- */
+.score{display:flex;align-items:center;gap:14px}
+.score .big{font-size:34px;font-weight:800;color:var(--green)}
+.vac-item{border-bottom:1px solid var(--line)}
+.vac-item:last-child{border-bottom:none}
+.vac{display:flex;gap:12px;padding:12px 0;cursor:pointer;align-items:center}
+.vac .vdot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.vac b{font-size:13.5px;color:var(--ink);display:block}
+.vac span{font-size:11.5px;color:var(--gray)}
+.vac .badge{margin-left:auto;align-self:center;flex-shrink:0}
+.vac .chev{color:#B9C7C0;font-size:15px;flex-shrink:0;transition:transform .2s}
+.vac-item.open .vac .chev{transform:rotate(90deg);color:var(--green)}
+.vac-detail{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.vac-item.open .vac-detail{max-height:420px}
+.vac-detail-inner{padding:0 0 14px 46px}
+.se-group{margin-bottom:10px}
+.se-group b{font-size:10.5px;font-weight:800;display:block;margin-bottom:5px;letter-spacing:.3px}
+.se-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.se-list li{font-size:11.5px;color:var(--gray);line-height:1.45;padding-left:13px;position:relative}
+.se-list li::before{content:"•";position:absolute;left:0}
+.vac-note{font-size:10.5px;color:var(--gray);line-height:1.5;margin-top:2px}
+.med{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.med:last-child{border-bottom:none}
+.med .mi2{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.med b{font-size:13px;color:var(--ink);display:block}
+.med span{font-size:11px;color:var(--gray)}
+.switch{margin-left:auto;width:42px;height:24px;border-radius:99px;background:#D6E2DD;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.switch::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.switch.on{background:var(--green)}
+.switch.on::after{left:21px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:92px;margin-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bar i{width:100%;max-width:30px;border-radius:8px 8px 4px 4px;background:var(--green-mid);display:block}
+.bar.cur i{background:var(--green)}
+.bar span{font-size:10px;color:var(--gray);font-weight:600}
+.hist{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.hist:last-child{border-bottom:none}
+.hist .hi{width:38px;height:38px;border-radius:12px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hist b{font-size:13px;color:var(--ink);display:block}
+.hist span{font-size:11px;color:var(--gray)}
+
+/* sağlık skor rozeti */
+.score-pill{width:46px;height:46px;border-radius:50%;border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:var(--green);font-size:15px;background:var(--card);line-height:1}
+.score-pill span{font-size:6.5px;letter-spacing:.8px;color:var(--gray);margin-top:1px}

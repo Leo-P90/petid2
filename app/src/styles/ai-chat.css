@@ -1,0 +1,16 @@
+/* ---------- AI ---------- */
+.chat-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-height:250px;margin-bottom:12px}
+.bub{max-width:82%;padding:11px 13px;border-radius:16px;font-size:13px;line-height:1.5}
+.bub.ai{background:var(--green-soft);color:var(--ink);border-bottom-left-radius:5px;align-self:flex-start}
+.bub.me{background:var(--green);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.qrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.qrow .chip{flex:0 1 auto}
+.inp{display:flex;gap:8px}
+.inp input{flex:1;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px;outline:none;background:var(--card);color:var(--ink)}
+.inp input:focus{border-color:var(--green)}
+.inp button{width:46px;height:46px;border-radius:14px;background:var(--green);color:#fff;border:none;font-size:18px;cursor:pointer;flex-shrink:0}
+.mood{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mood .m{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center;box-shadow:var(--shadow)}
+.mood .m .me2{font-size:22px}
+.mood .m b{font-size:11.5px;color:var(--ink);display:block;margin:5px 0 2px}
+.mood .m span{font-size:10.5px;font-weight:700}

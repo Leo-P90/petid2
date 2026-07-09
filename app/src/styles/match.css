@@ -1,0 +1,24 @@
+/* ---------- PatiMatch ---------- */
+.m-stack{position:relative;height:428px;margin-bottom:14px}
+.m-card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.m-img{height:55%;position:relative;overflow:hidden;background:var(--green-soft)}
+.m-img img{width:100%;height:100%;object-fit:cover;display:block}
+.m-uyum{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.92);color:#C2295B;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px}
+.m-info{padding:13px 16px;flex:1}
+.m-info b{font-size:17px;color:var(--ink)}
+.m-meta{font-size:12px;color:var(--gray);display:block;margin:3px 0 7px}
+.m-info p{font-size:12.5px;color:#3E524B;line-height:1.5;margin-bottom:9px}
+.phone.dark .m-info p{color:#B9C9C2}
+.m-tags{display:flex;gap:6px;flex-wrap:wrap}
+.m-actions{display:flex;justify-content:center;gap:28px;margin-bottom:12px}
+.m-btn{width:60px;height:60px;border-radius:50%;border:none;font-size:24px;cursor:pointer;box-shadow:var(--shadow)}
+.m-btn.no{background:var(--card);border:1.5px solid var(--line)}
+.m-btn.yes{background:linear-gradient(135deg,#F472B6,#E11D48);color:#fff}
+.m-btn:active{transform:scale(.9)}
+@keyframes swipeR{to{transform:translateX(130%) rotate(14deg);opacity:0}}
+@keyframes swipeL{to{transform:translateX(-130%) rotate(-14deg);opacity:0}}
+.m-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gray);font-size:14px;font-weight:700;text-align:center;background:var(--card);border:1.5px dashed var(--line);border-radius:24px}
+.m-empty a{color:var(--green);cursor:pointer}
+.overlay.center{align-items:center;justify-content:center;padding:24px}
+.match-pop{background:var(--card);border-radius:26px;padding:24px 22px;text-align:center;max-width:300px;box-shadow:var(--shadow);animation:fade .3s}
+.match-pop .mp-heads{display:flex;justify-content:center;align-items:center;gap:6px;font-size:48px;margin:8px 0}

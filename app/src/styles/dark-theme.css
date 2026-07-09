@@ -1,0 +1,17 @@
+/* ---------- karanlık tema ---------- */
+.phone.dark{
+  --bg:#0F1714; --card:#1A2420; --ink:#E9F1ED; --gray:#96A69F; --line:#27382F;
+  --green-soft:#173629; --green-mid:#20503C;
+  --amber-soft:#3A2E12; --blue-soft:#152A42; --red-soft:#3B181C; --purple-soft:#262047;
+  --shadow:0 4px 18px rgba(0,0,0,.4);
+  background:var(--bg);
+}
+.phone.dark .step p,.phone.dark .feed p{color:#B9C9C2}
+.phone.dark #lDesc{color:#B9C9C2!important}
+.phone.dark .g-chip{background:rgba(0,0,0,.45);color:#DCE7E2}
+.phone.dark .g-name{background:rgba(0,0,0,.45);color:#DCE7E2}
+.phone.dark .switch{background:#33463E}
+.phone.dark .g-track{background:#22312B}
+.phone.dark .task .cb{border-color:#3B4F46}
+.phone.dark .toast{background:#E9F1ED;color:#12211C}
+.phone.dark .ai-btn{border-color:var(--bg)!important}

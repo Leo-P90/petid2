@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Ana Sayfa (Fonksiyonalizm)</title>
+<style>
+  :root{
+    --paper:#F4F5F3; --surface:#FFFFFF; --ink:#121815; --ink-soft:#4B5750; --gray:#8A948E;
+    --line:#D8DDD9; --line-strong:#B7C0BA;
+    --accent:#0EA574; --accent-ink:#053B2B; --on-accent:#F4FFFB;
+    --edu:#2F5FE0; --health:#C7402E; --behavior:#6D3FD1; --service:#A8710A;
+    --u:4px;
+    --sans:'Segoe UI',Inter,Helvetica,Arial,sans-serif;
+    --mono:Consolas,'SF Mono','Cascadia Mono',ui-monospace,'Courier New',monospace;
+  }
+  .dark{
+    --paper:#0D1310; --surface:#151E19; --ink:#EBF1ED; --ink-soft:#A9B5AE; --gray:#77857D;
+    --line:#293028; --line-strong:#39433B;
+    --accent:#22CB93; --accent-ink:#BEF6DC; --on-accent:#05261B;
+    --edu:#7FA0FF; --health:#F08D7C; --behavior:#B79BFF; --service:#E0AC4E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+  html,body{background:#DEE3DF;min-height:100vh}
+  body{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 12px 48px}
+  .specimen{width:396px;max-width:100%}
+  .specimen-tag{display:flex;justify-content:space-between;align-items:baseline;padding:0 2px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.5px;color:#4B5750}
+  .specimen-tag b{color:#121815;font-weight:700}
+
+  .phone{width:396px;max-width:100%;height:844px;background:var(--paper);border-radius:6px;overflow:hidden;position:relative;border:1px solid #121815;box-shadow:0 1px 0 #fff inset,0 18px 40px rgba(10,20,16,.18);color:var(--ink)}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding-bottom:74px;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+
+  /* ---- grid overlay (demonstrates the underlying system) ---- */
+  .gridlines{position:absolute;inset:0;top:0;bottom:74px;display:none;pointer-events:none;z-index:80}
+  .gridlines.on{display:grid;grid-template-columns:repeat(4,1fr);column-gap:12px;padding:0 20px}
+  .gridlines i{display:block;height:100%;background:rgba(199,64,46,.08);border-left:1px solid rgba(199,64,46,.55);border-right:1px solid rgba(199,64,46,.55)}
+
+  .pad{padding:18px 20px 8px}
+  .kicker{font-size:10px;font-weight:700;letter-spacing:1.6px;color:var(--gray);text-transform:uppercase;display:flex;align-items:baseline;gap:8px}
+  .kicker .n{font-family:var(--mono);color:var(--ink-soft);font-weight:700}
+  .rule{height:1px;background:var(--line);margin:14px 20px}
+  .section{padding:0 20px 22px}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+  .section-head a{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--accent-ink);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;text-underline-offset:3px}
+
+  /* ---- header ---- */
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start}
+  .brand{display:flex;gap:10px;align-items:center}
+  .mark{width:30px;height:30px;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:15px;border-radius:3px;flex-shrink:0}
+  .dark .mark{background:var(--accent);color:var(--on-accent)}
+  .wordmark b{font-size:16px;font-weight:800;letter-spacing:-.3px;display:block;line-height:1}
+  .wordmark span{font-size:9px;font-weight:700;letter-spacing:1.4px;color:var(--gray);text-transform:uppercase}
+  .utils{display:flex;gap:6px}
+  .util-btn{width:28px;height:28px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft);font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:border-color .12s,color .12s}
+  .util-btn:hover{border-color:var(--ink);color:var(--ink)}
+  .util-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .util-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .dark .util-btn.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+
+  .status-line{font-size:11px;color:var(--ink-soft);padding:10px 20px 0;line-height:1.5}
+  .status-line b{color:var(--ink);font-weight:700}
+
+  /* ---- pet selector: segmented, not pills ---- */
+  .petsel{display:flex;border:1px solid var(--line-strong);border-radius:3px;overflow:hidden;margin:14px 20px 0}
+  .pet-tab{flex:1;display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--surface);border:none;border-right:1px solid var(--line-strong);cursor:pointer;text-align:left;font-family:var(--sans);border-bottom:2px solid transparent}
+  .pet-tab:last-child{border-right:none}
+  .pet-tab .code{width:22px;height:22px;border:1.5px solid var(--line-strong);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink-soft);flex-shrink:0}
+  .pet-tab b{font-size:12.5px;font-weight:700;color:var(--ink-soft);display:block;line-height:1.3}
+  .pet-tab span{font-size:9.5px;color:var(--gray)}
+  .pet-tab.on{border-bottom:2px solid var(--accent);background:var(--paper)}
+  .pet-tab.on .code{border-color:var(--accent);color:var(--accent-ink);background:var(--surface)}
+  .pet-tab.on b{color:var(--ink)}
+  .pet-tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+  /* ---- search: labeled field, not a pill ---- */
+  .searchblock{padding:18px 20px 0}
+  form.sf{border-bottom:1.5px solid var(--line-strong);display:flex;align-items:flex-end;gap:10px;padding-bottom:8px;transition:border-color .12s}
+  form.sf:focus-within{border-color:var(--accent)}
+  form.sf input{flex:1;border:none;outline:none;background:none;color:var(--ink);font-size:14px;font-family:var(--sans);padding:2px 0}
+  form.sf input::placeholder{color:var(--gray)}
+  form.sf button{border:none;background:none;color:var(--accent-ink);font-weight:800;font-size:11px;letter-spacing:.6px;cursor:pointer;padding:6px 0;font-family:var(--sans)}
+  form.sf button:hover{text-decoration:underline}
+  form.sf button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .result{margin:10px 20px 0;border:1px solid var(--line-strong);border-left:3px solid var(--accent);padding:11px 13px;display:none;background:var(--surface)}
+  .result.show{display:block;animation:reveal .18s ease}
+  @keyframes reveal{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+  .result .kicker{margin-bottom:5px}
+  .result p{font-size:12.5px;line-height:1.55;color:var(--ink)}
+
+  /* ---- stat panel: data as system ---- */
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--line-strong)}
+  .stat{padding:12px 10px;border-right:1px solid var(--line-strong)}
+  .stat:last-child{border-right:none}
+  .stat .lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gray);text-transform:uppercase;margin-bottom:6px;display:block}
+  .stat .val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .stat .val small{font-size:11px;font-weight:600;color:var(--gray)}
+  .stat .delta{font-size:9.5px;color:var(--accent-ink);font-weight:700;margin-top:3px;font-family:var(--mono)}
+
+  .progress-row{border:1px solid var(--line-strong);border-top:none;padding:12px 12px 10px}
+  .progress-row .pr-top{display:flex;justify-content:space-between;font-size:10px;color:var(--gray);font-weight:700;letter-spacing:.4px;margin-bottom:7px;text-transform:uppercase}
+  .progress-row .pr-top b{font-family:var(--mono);color:var(--ink);font-size:11px;letter-spacing:0}
+  .ptrack{position:relative;height:5px;background:var(--line);margin-bottom:4px}
+  .pfill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);width:60%}
+  .pticks{display:flex;justify-content:space-between}
+  .pticks i{width:1px;height:4px;background:var(--line-strong);display:block}
+  .pticks span{font-size:8.5px;color:var(--gray);font-family:var(--mono)}
+
+  /* ---- module grid ---- */
+  .modgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-strong);border:1px solid var(--line-strong)}
+  .mod{background:var(--surface);padding:14px 12px;cursor:pointer;text-align:left;border:none;font-family:var(--sans);color:var(--ink);position:relative;transition:background .12s}
+  .mod:hover, .mod:focus-visible{background:var(--paper)}
+  .mod:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .mod-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .mod-idx{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--gray);border:1px solid var(--line-strong);width:19px;height:19px;display:flex;align-items:center;justify-content:center;transition:.12s}
+  .mod:hover .mod-idx,.mod:focus-visible .mod-idx{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .mod-sw{width:8px;height:8px;flex-shrink:0}
+  .mod b{font-size:13.5px;font-weight:700;display:block;margin-bottom:4px;letter-spacing:-.1px}
+  .mod p{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-bottom:10px;min-height:31px}
+  .mod .meta{font-size:10px;font-family:var(--mono);color:var(--gray);border-top:1px solid var(--line);padding-top:7px;display:flex;justify-content:space-between}
+  .mod .meta b{font-size:10px;color:var(--ink);font-weight:700}
+
+  /* ---- secondary access list ---- */
+  .list{border:1px solid var(--line-strong)}
+  .lrow{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid var(--line);cursor:pointer;background:var(--surface);transition:background .12s}
+  .lrow:last-child{border-bottom:none}
+  .lrow:hover,.lrow:focus-visible{background:var(--paper)}
+  .lrow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .lrow .lt{display:flex;flex-direction:column;gap:2px}
+  .lrow b{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .lrow span{font-size:10px;color:var(--gray)}
+  .lrow .go{font-family:var(--mono);font-size:13px;color:var(--gray);transition:transform .12s;flex-shrink:0}
+  .lrow:hover .go,.lrow:focus-visible .go{transform:translateX(3px);color:var(--accent-ink)}
+
+  /* ---- tasks ---- */
+  .tasks{border:1px solid var(--line-strong)}
+  .trow{display:flex;align-items:center;gap:11px;padding:10.5px 13px;border-bottom:1px solid var(--line);background:var(--surface);cursor:pointer}
+  .trow:last-child{border-bottom:none}
+  .trow .cbx{width:16px;height:16px;border:1.5px solid var(--line-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--paper);font-weight:800}
+  .trow.done .cbx{background:var(--ink);border-color:var(--ink)}
+  .dark .trow.done .cbx{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+  .trow b{font-size:12px;font-weight:600;color:var(--ink);flex:1}
+  .trow.done b{color:var(--gray);text-decoration:line-through}
+  .trow .due{font-family:var(--mono);font-size:10px;color:var(--health);font-weight:700}
+  .dark .trow .due{color:var(--health)}
+
+  /* ---- auth CTA ---- */
+  .cta-row{display:flex;gap:1px;background:var(--line-strong);border:1px solid var(--line-strong)}
+  .cta{flex:1;border:none;padding:13px;font-size:12.5px;font-weight:800;letter-spacing:.3px;cursor:pointer;font-family:var(--sans);transition:opacity .12s}
+  .cta.primary{background:var(--ink);color:var(--paper)}
+  .dark .cta.primary{background:var(--accent);color:var(--on-accent)}
+  .cta.primary:hover{opacity:.88}
+  .cta.secondary{background:var(--surface);color:var(--ink)}
+  .cta.secondary:hover{background:var(--paper)}
+  .cta:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+  .fine{font-size:10px;color:var(--gray);text-align:center;margin-top:9px;line-height:1.5}
+
+  /* ---- bottom nav ---- */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line-strong);display:flex;z-index:60}
+  .navtab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 12px;background:none;border:none;border-top:2px solid transparent;cursor:pointer;color:var(--gray);font-family:var(--sans)}
+  .navtab .g{font-family:var(--mono);font-size:12px;font-weight:800;width:18px;height:18px;border:1.3px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .navtab span{font-size:8.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .navtab.on{color:var(--ink);border-top-color:var(--accent)}
+  .navtab.on .g{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .dark .navtab.on .g{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+  .navtab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+</style>
+</head>
+<body>
+
+  <div class="specimen">
+    <div class="specimen-tag"><span>PATİDOST / <b>01 — ANA SAYFA</b> / fonksiyonalizm.html</span><span>396×844</span></div>
+  </div>
+
+  <div class="phone" id="phone">
+    <div class="gridlines" id="gridOverlay"><i></i><i></i><i></i><i></i></div>
+
+    <section class="screen">
+
+      <div class="pad hdr">
+        <div class="brand">
+          <div class="mark">🐾</div>
+          <div class="wordmark"><b>PATİDOST</b><span>Bakım Sistemi</span></div>
+        </div>
+        <div class="utils">
+          <button class="util-btn" id="gridBtn" onclick="toggleGrid()" title="Izgarayı göster/gizle" aria-pressed="false">#</button>
+          <button class="util-btn" id="themeBtn" onclick="toggleTheme()" title="Tema" aria-pressed="false">◐</button>
+        </div>
+      </div>
+
+      <div class="status-line">Merhaba <b>Leo</b> — 3 hatırlatma, 1 bekleyen görev, 60% haftalık program.</div>
+
+      <div class="petsel" role="tablist" aria-label="Evcil hayvan seç">
+        <button class="pet-tab on" id="pt0" role="tab" aria-selected="true" onclick="setPet(0,this)">
+          <span class="code">K</span>
+          <span><b>Leo</b><span>Kedi · 2 yaş</span></span>
+        </button>
+        <button class="pet-tab" id="pt1" role="tab" aria-selected="false" onclick="setPet(1,this)">
+          <span class="code">D</span>
+          <span><b>Zeus</b><span>Köpek · 5 ay</span></span>
+        </button>
+      </div>
+
+      <div class="searchblock">
+        <div class="kicker" style="margin-bottom:8px">Ara — sağlık, eğitim, hizmet</div>
+        <form class="sf" onsubmit="return doSearch(event)">
+          <input id="q" type="text" placeholder="Bugün ne için yardım lazım?" autocomplete="off">
+          <button type="submit">ARA →</button>
+        </form>
+      </div>
+      <div class="result" id="result">
+        <div class="kicker"><span class="n">AI</span> Sonuç</div>
+        <p id="resultText"></p>
+      </div>
+
+      <div class="rule"></div>
+
+      <div class="section">
+        <div class="section-head">
+          <div class="kicker"><span class="n">01</span> Günlük özet</div>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="lbl">Eğitim</span>
+            <div class="val">68<small>%</small></div>
+            <div class="delta">+4 bu hafta</div>
+          </div>
+          <div class="stat">
+            <span class="lbl">Sağlık skoru</span>
+            <div class="val">92<small>/100</small></div>
+            <div class="delta">Stabil</div>
+          </div>
+          <div class="stat">
+            <span class="lbl">Sıradaki</span>
+            <div class="val" style="font-size:14px;font-weight:700">Aşı</div>
+            <div class="delta">12 gün</div>
+          </div>
+        </div>
+        <div class="progress-row">
+          <div class="pr-top"><span>Haftalık program</span><b>6 / 10 görev</b></div>
+          <div class="ptrack"><div class="pfill" id="prfill"></div></div>
+          <div class="pticks"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <div class="section" style="padding-top:0">
+        <div class="section-head">
+          <div class="kicker"><span class="n">02</span> Modüller</div>
+        </div>
+        <div class="modgrid">
+          <button class="mod" onclick="nav('Eğitim')">
+            <div class="mod-top"><span class="mod-idx">01</span><span class="mod-sw" style="background:var(--edu)"></span></div>
+            <b>Eğitim</b>
+            <p>Kişiselleştirilmiş dersler ve günlük görevler.</p>
+            <div class="meta"><span>Tamamlanan</span><b>6/10</b></div>
+          </button>
+          <button class="mod" onclick="nav('Sağlık')">
+            <div class="mod-top"><span class="mod-idx">02</span><span class="mod-sw" style="background:var(--health)"></span></div>
+            <b>Sağlık</b>
+            <p>Aşı takibi, ilaçlar, AI sağlık rehberi.</p>
+            <div class="meta"><span>Skor</span><b>92/100</b></div>
+          </button>
+          <button class="mod" onclick="nav('Davranış')">
+            <div class="mod-top"><span class="mod-idx">03</span><span class="mod-sw" style="background:var(--behavior)"></span></div>
+            <b>Davranış &amp; AI</b>
+            <p>Can dostunun davranışlarını yorumla.</p>
+            <div class="meta"><span>Sohbet</span><b>2 yeni</b></div>
+          </button>
+          <button class="mod" onclick="nav('Hizmetler')">
+            <div class="mod-top"><span class="mod-idx">04</span><span class="mod-sw" style="background:var(--service)"></span></div>
+            <b>Hizmetler</b>
+            <p>Veteriner, otel, eğitmen, sahiplendirme.</p>
+            <div class="meta"><span>Yakında</span><b>48 sonuç</b></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="section" style="padding-top:0">
+        <div class="section-head">
+          <div class="kicker"><span class="n">03</span> Diğer erişimler</div>
+        </div>
+        <div class="list">
+          <div class="lrow" tabindex="0" onclick="nav('Aşı Takvimi')">
+            <div class="lt"><b>Aşı takvimi</b><span>Karma aşı yaklaşıyor</span></div>
+            <span class="go">→</span>
+          </div>
+          <div class="lrow" tabindex="0" onclick="nav('Profil')">
+            <div class="lt"><b>Profil</b><span>Dijital kimlik kartı</span></div>
+            <span class="go">→</span>
+          </div>
+          <div class="lrow" tabindex="0" onclick="nav('PatiMatch')">
+            <div class="lt"><b>PatiMatch</b><span>3 yeni eşleşme adayı</span></div>
+            <span class="go">→</span>
+          </div>
+          <div class="lrow" tabindex="0" onclick="nav('Pixel Oyun')">
+            <div class="lt"><b>Pixel oyun</b><span>Enerji %74</span></div>
+            <span class="go">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="padding-top:0">
+        <div class="section-head">
+          <div class="kicker"><span class="n">04</span> Bekleyen görevler</div>
+        </div>
+        <div class="tasks">
+          <div class="trow" onclick="toggleTask(this)"><span class="cbx"></span><b>Karma aşı randevusu al</b><span class="due">2 gün</span></div>
+          <div class="trow" onclick="toggleTask(this)"><span class="cbx"></span><b>Otur dersi — tekrar</b><span class="due">Bugün</span></div>
+          <div class="trow done" onclick="toggleTask(this)"><span class="cbx">✓</span><b>Sabah maması</b><span class="due">Tamam</span></div>
+        </div>
+      </div>
+
+      <div class="section" style="padding-top:0">
+        <div class="section-head">
+          <div class="kicker"><span class="n">05</span> Hesap</div>
+        </div>
+        <div class="cta-row">
+          <button class="cta primary" onclick="nav('Kayıt Ol')">ÜCRETSİZ BAŞLA</button>
+          <button class="cta secondary" onclick="nav('Giriş Yap')">GİRİŞ YAP</button>
+        </div>
+        <div class="fine">Kaydolmadan da tüm modülleri keşfedebilirsin.</div>
+      </div>
+
+    </section>
+
+    <div class="nav">
+      <button class="navtab on"><span class="g">A</span><span>Ana Sayfa</span></button>
+      <button class="navtab" onclick="nav('Eğitim')"><span class="g">E</span><span>Eğitim</span></button>
+      <button class="navtab" onclick="nav('Sağlık')"><span class="g">S</span><span>Sağlık</span></button>
+      <button class="navtab" onclick="nav('AI')"><span class="g">AI</span><span>AI</span></button>
+      <button class="navtab" onclick="nav('Profil')"><span class="g">P</span><span>Profil</span></button>
+    </div>
+  </div>
+
+<script>
+  function toggleTheme(){
+    const ph=document.getElementById('phone');
+    const dark=!ph.classList.contains('dark');
+    ph.classList.toggle('dark',dark);
+    document.getElementById('themeBtn').setAttribute('aria-pressed',String(dark));
+    document.getElementById('themeBtn').classList.toggle('active',dark);
+  }
+  function toggleGrid(){
+    const g=document.getElementById('gridOverlay');
+    const on=!g.classList.contains('on');
+    g.classList.toggle('on',on);
+    document.getElementById('gridBtn').setAttribute('aria-pressed',String(on));
+    document.getElementById('gridBtn').classList.toggle('active',on);
+  }
+  function setPet(i,el){
+    document.querySelectorAll('.pet-tab').forEach(t=>{t.classList.remove('on');t.setAttribute('aria-selected','false')});
+    el.classList.add('on');el.setAttribute('aria-selected','true');
+  }
+  function toggleTask(el){
+    el.classList.toggle('done');
+    const cb=el.querySelector('.cbx');
+    cb.textContent=el.classList.contains('done')?'✓':'';
+  }
+  const ANSWERS={
+    'aşı':'Bir sonraki karma aşı 12 gün içinde. Randevuyu Sağlık modülünden planlayabilirsin.',
+    'eğitim':'Bu hafta 6/10 görev tamamlandı. Sıradaki ders: "Otur — pekiştirme".',
+    'default':'İlgili modüle yönlendiriliyor: sonuç Sağlık, Eğitim ve Hizmetler modüllerinde taranır.'
+  };
+  function doSearch(ev){
+    ev.preventDefault();
+    const q=document.getElementById('q').value.trim();
+    if(!q)return false;
+    let ans=ANSWERS.default;
+    if(/aşı/i.test(q))ans=ANSWERS['aşı'];
+    if(/eğitim|ders/i.test(q))ans=ANSWERS['eğitim'];
+    document.getElementById('resultText').textContent=ans;
+    document.getElementById('result').classList.add('show');
+    return false;
+  }
+  function nav(name){
+    document.getElementById('q').placeholder='→ '+name+' modülüne yönlendirilecek';
+  }
+</script>
+</body>
+</html>

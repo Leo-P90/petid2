@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Ana Sayfa (Minimalizm)</title>
+<style>
+  :root{
+    /* --- kısıtlı palet: tek vurgu rengi, geniş nötr aralık --- */
+    --ink:#15201C;
+    --ink-soft:#54615B;
+    --ink-faint:#9AA6A0;
+    --paper:#FBFAF7;
+    --surface:#FFFFFF;
+    --line:#E4E1D9;
+    --line-soft:#EDEBE4;
+    --accent:#0EA574;
+    --accent-ink:#0B7A57;
+    --accent-wash:#EEF5F1;
+    --radius-s:10px;
+    --radius-m:16px;
+    --unit:8px;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+    --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDEFEA;
+    --ink-soft:#A9B3AC;
+    --ink-faint:#68746D;
+    --paper:#111512;
+    --surface:#171B18;
+    --line:#262B26;
+    --line-soft:#1F2420;
+    --accent:#3CCB98;
+    --accent-ink:#5FE0AE;
+    --accent-wash:#182620;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#EDEFEA; --ink-soft:#A9B3AC; --ink-faint:#68746D;
+      --paper:#111512; --surface:#171B18; --line:#262B26; --line-soft:#1F2420;
+      --accent:#3CCB98; --accent-ink:#5FE0AE; --accent-wash:#182620;
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#DEDAD0;
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;padding:40px 16px;
+  }
+  @media (prefers-color-scheme: dark){ body{ background:#05070A; } }
+
+  .rig{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .rig-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8A8574;font-weight:600}
+  @media (prefers-color-scheme: dark){ .rig-label{color:#5b6058} }
+
+  .phone{
+    width:396px;max-width:100%;height:830px;
+    background:var(--paper);
+    border-radius:38px;overflow:hidden;position:relative;
+    border:8px solid #12211C;
+    box-shadow:0 30px 70px rgba(15,20,17,.28);
+    transition:background .3s ease;
+  }
+  .screen{
+    position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;
+    display:flex;flex-direction:column;
+  }
+  .screen::-webkit-scrollbar{display:none}
+
+  /* ============ ÜST BAR ============ */
+  .top{
+    padding:26px 26px 0;
+    display:flex;align-items:flex-start;justify-content:space-between;
+  }
+  .wordmark{font-family:var(--serif);font-size:19px;letter-spacing:.01em;color:var(--ink);font-weight:600}
+  .wordmark em{font-style:normal;color:var(--accent)}
+  .greet{margin-top:6px;font-size:12.5px;color:var(--ink-soft);letter-spacing:.01em}
+  .top-actions{display:flex;align-items:center;gap:14px;padding-top:1px}
+  .theme-toggle{
+    width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+    background:transparent;color:var(--ink-soft);font-size:13px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .18s ease, color .18s ease, transform .25s ease;
+  }
+  .theme-toggle:hover{border-color:var(--ink-faint);color:var(--ink)}
+  .theme-toggle:active{transform:rotate(24deg)}
+  .theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  /* ============ PET SEÇİCİ — sekme, dolgu yok ============ */
+  .pet-switch{
+    display:flex;gap:22px;
+    padding:22px 26px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .pet-tab{
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    padding:0 0 12px;display:flex;align-items:baseline;gap:7px;
+    color:var(--ink-faint);font-size:14px;font-weight:600;
+    position:relative;transition:color .18s ease;
+  }
+  .pet-tab .mark{font-size:15px;filter:grayscale(1);opacity:.55;transition:filter .18s ease,opacity .18s ease}
+  .pet-tab .cnt{font-size:10.5px;color:var(--ink-faint);font-weight:600}
+  .pet-tab::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+    background:var(--accent);transform:scaleX(0);transform-origin:left;
+    transition:transform .22s ease;
+  }
+  .pet-tab.on{color:var(--ink)}
+  .pet-tab.on .mark{filter:none;opacity:1}
+  .pet-tab.on::after{transform:scaleX(1)}
+  .pet-tab:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:4px}
+  .pet-tab-add{
+    margin-left:auto;background:none;border:none;cursor:pointer;
+    color:var(--ink-faint);font-size:12px;font-weight:600;padding:0 0 12px;
+    font-family:inherit;transition:color .18s ease;
+  }
+  .pet-tab-add:hover{color:var(--accent-ink)}
+
+  /* ============ ARAMA — çizgi tabanlı, kutu değil ============ */
+  .search-zone{padding:22px 26px 0}
+  .search-field{
+    display:flex;align-items:center;gap:10px;
+    border-bottom:1.5px solid var(--line);
+    padding-bottom:12px;transition:border-color .2s ease;
+  }
+  .search-field:focus-within{border-color:var(--ink)}
+  .search-field .ic{font-size:14px;color:var(--ink-faint);flex-shrink:0}
+  .search-field input{
+    flex:1;border:none;outline:none;background:none;
+    font-size:14.5px;color:var(--ink);font-family:var(--sans);
+  }
+  .search-field input::placeholder{color:var(--ink-faint)}
+  .search-field button{
+    border:none;background:none;color:var(--ink-faint);font-size:13px;
+    cursor:pointer;font-weight:600;padding:4px 2px;transition:color .18s ease,transform .18s ease;
+    font-family:inherit;flex-shrink:0;
+  }
+  .search-field button:hover{color:var(--accent-ink);transform:translateX(2px)}
+
+  .ai-answer{
+    margin-top:14px;padding-top:2px;font-size:12.5px;line-height:1.6;color:var(--ink-soft);
+    display:none;animation:riseIn .32s ease;
+  }
+  .ai-answer.show{display:block}
+  .ai-answer .q{color:var(--ink-faint);font-style:italic;margin-bottom:5px;font-size:12px}
+  .ai-answer .a{color:var(--ink)}
+  .ai-answer .close{
+    display:inline-block;margin-top:8px;font-size:11px;color:var(--ink-faint);
+    cursor:pointer;font-weight:600;border-bottom:1px solid var(--line);
+  }
+  .ai-answer .close:hover{color:var(--ink)}
+  @keyframes riseIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  /* ============ İLERLEME — tipografi öncelikli, kart değil ============ */
+  .progress-zone{padding:36px 26px 8px}
+  .progress-kicker{
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:700;margin-bottom:10px;
+  }
+  .progress-num-row{display:flex;align-items:flex-end;gap:14px;margin-bottom:14px}
+  .progress-num{
+    font-family:var(--serif);font-size:64px;line-height:.85;color:var(--ink);
+    font-weight:600;letter-spacing:-.01em;transition:opacity .2s ease;
+  }
+  .progress-num sup{font-size:24px;font-weight:500;top:-32px;color:var(--ink-faint)}
+  .progress-cap{font-size:13px;color:var(--ink-soft);padding-bottom:10px;line-height:1.5;max-width:190px}
+  .progress-track{height:1.5px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:10px}
+  .progress-fill{height:100%;background:var(--ink);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  :root[data-theme="dark"] .progress-fill{background:var(--accent-ink)}
+  @media (prefers-color-scheme: dark){ .progress-fill{background:var(--accent-ink)} }
+  .progress-foot{
+    display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ink-faint);
+  }
+  .progress-foot a{color:var(--accent-ink);font-weight:700;text-decoration:none;cursor:pointer}
+  .progress-foot a:hover{text-decoration:underline}
+
+  /* ============ MODÜLLER — satır listesi, ikon rozeti yok ============ */
+  .section-label{
+    padding:30px 26px 4px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:700;
+  }
+  .mod-list{padding:2px 10px 4px}
+  .mod-row{
+    display:flex;align-items:center;gap:14px;
+    padding:15px 16px;border-radius:var(--radius-s);
+    cursor:pointer;border-left:2px solid transparent;
+    transition:background .16s ease, border-color .16s ease, padding-left .16s ease;
+  }
+  .mod-row:hover, .mod-row:focus-visible{
+    background:var(--accent-wash);border-left-color:var(--accent);padding-left:20px;outline:none;
+  }
+  .mod-row:focus-visible{box-shadow:0 0 0 2px var(--accent) inset}
+  .mod-row .glyph{
+    width:20px;text-align:center;font-size:15px;flex-shrink:0;filter:grayscale(1);opacity:.6;
+    transition:filter .16s ease,opacity .16s ease;
+  }
+  .mod-row:hover .glyph, .mod-row:focus-visible .glyph{filter:none;opacity:1}
+  .mod-row .txt{flex:1;min-width:0}
+  .mod-row b{font-size:14px;color:var(--ink);font-weight:600;display:block}
+  .mod-row span{font-size:11.5px;color:var(--ink-faint);display:block;margin-top:2px}
+  .mod-row .chev{color:var(--ink-faint);font-size:15px;flex-shrink:0;transition:transform .16s ease}
+  .mod-row:hover .chev, .mod-row:focus-visible .chev{transform:translateX(2px);color:var(--accent-ink)}
+  .mod-row + .mod-row{border-top:1px solid var(--line-soft)}
+
+  /* ============ İKİNCİL / OYUN — küçültülmüş, metin bağlantısı ============ */
+  .more-row{
+    display:flex;gap:8px;flex-wrap:wrap;padding:14px 26px 0;
+  }
+  .more-link{
+    font-size:11.5px;color:var(--ink-soft);border:1px solid var(--line);
+    border-radius:99px;padding:7px 13px;cursor:pointer;font-weight:600;
+    transition:border-color .16s ease,color .16s ease,background .16s ease;
+    background:transparent;
+  }
+  .more-link:hover{border-color:var(--ink-faint);color:var(--ink);background:var(--surface)}
+  .more-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ============ CTA ============ */
+  .cta-zone{padding:34px 26px 22px;margin-top:auto}
+  .cta-row{display:flex;gap:10px}
+  .btn{
+    flex:1;border:none;border-radius:var(--radius-s);padding:14px;
+    font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    transition:transform .12s ease, background .16s ease, opacity .16s ease;
+  }
+  .btn.primary{background:var(--ink);color:var(--paper)}
+  .btn.primary:hover{opacity:.88}
+  .btn.primary:active{transform:scale(.98)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--ink-faint)}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .cta-note{text-align:center;font-size:10.5px;color:var(--ink-faint);margin-top:12px}
+
+  /* ============ ALT NAVİGASYON — düz, dolgusuz ============ */
+  .nav{
+    display:flex;justify-content:space-around;align-items:center;
+    padding:13px 6px;border-top:1px solid var(--line);background:var(--paper);
+    flex-shrink:0;
+  }
+  .nav button{
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:9.5px;font-weight:600;color:var(--ink-faint);
+    padding:2px 8px;transition:color .16s ease;
+  }
+  .nav button .ic{font-size:16px;filter:grayscale(1);opacity:.55;transition:filter .16s ease,opacity .16s ease}
+  .nav button.on{color:var(--ink)}
+  .nav button.on .ic{filter:none;opacity:1}
+  .nav button:hover{color:var(--ink)}
+  .nav button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  .toast{
+    position:absolute;left:50%;bottom:78px;transform:translateX(-50%);
+    background:var(--ink);color:var(--paper);font-size:11.5px;font-weight:600;
+    padding:10px 16px;border-radius:99px;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;z-index:20;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+</style>
+</head>
+<body>
+<div class="rig">
+  <div class="rig-label">PatiDost · Ana Sayfa · Minimalizm</div>
+  <div class="phone" id="phone">
+    <section class="screen" id="screen">
+
+      <div class="top">
+        <div>
+          <div class="wordmark">Pati<em>Dost</em></div>
+          <div class="greet">İyi günler, Leo</div>
+        </div>
+        <div class="top-actions">
+          <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" aria-label="Temayı değiştir">◐</button>
+        </div>
+      </div>
+
+      <div class="pet-switch" role="tablist" aria-label="Evcil hayvan seç">
+        <button class="pet-tab on" id="tab0" onclick="setPet(0)" role="tab" aria-selected="true">
+          <span class="mark">🐱</span> Boncuk <span class="cnt" id="cnt0">2 bildirim</span>
+        </button>
+        <button class="pet-tab" id="tab1" onclick="setPet(1)" role="tab" aria-selected="false">
+          <span class="mark">🐶</span> Zeytin <span class="cnt" id="cnt1">1 bildirim</span>
+        </button>
+        <button class="pet-tab-add" onclick="notify('Yeni dost ekleme akışı burada açılır')">+ Ekle</button>
+      </div>
+
+      <div class="search-zone">
+        <form class="search-field" onsubmit="return doSearch(event)">
+          <span class="ic">⌕</span>
+          <input id="q" placeholder="Bugün nasıl yardımcı olabilirim?" autocomplete="off">
+          <button type="submit">Sor →</button>
+        </form>
+        <div class="ai-answer" id="aiAnswer">
+          <div class="q" id="aiQ"></div>
+          <div class="a" id="aiA"></div>
+          <span class="close" onclick="closeAnswer()">kapat</span>
+        </div>
+      </div>
+
+      <div class="progress-zone">
+        <div class="progress-kicker">Bu haftaki ilerleme — <span id="petNameLabel">Boncuk</span></div>
+        <div class="progress-num-row">
+          <div class="progress-num" id="progNum">68<sup>%</sup></div>
+        </div>
+        <div class="progress-cap" id="progCap">Eğitim modülündeki "Temel İtaat" serisi ve sağlık görevlerinin ortalaması.</div>
+        <div class="progress-track"><div class="progress-fill" id="progFill" style="width:68%"></div></div>
+        <div class="progress-foot">
+          <span id="progFoot">3 görev bu hafta tamamlandı</span>
+          <a onclick="notify('Eğitim ekranına yönlendiriliyor')">Detaylar</a>
+        </div>
+      </div>
+
+      <div class="section-label">Modüller</div>
+      <div class="mod-list">
+        <div class="mod-row" tabindex="0" onclick="notify('Eğitim ekranına gidiliyor')">
+          <span class="glyph">🎓</span>
+          <span class="txt"><b>Eğitim</b><span>Ders serileri ve günlük görevler</span></span>
+          <span class="chev">›</span>
+        </div>
+        <div class="mod-row" tabindex="0" onclick="notify('Sağlık ekranına gidiliyor')">
+          <span class="glyph">🩺</span>
+          <span class="txt"><b>Sağlık</b><span id="healthDesc">Karma aşısı 12 gün içinde</span></span>
+          <span class="chev">›</span>
+        </div>
+        <div class="mod-row" tabindex="0" onclick="notify('Davranış &amp; AI ekranına gidiliyor')">
+          <span class="glyph">🤖</span>
+          <span class="txt"><b>Davranış &amp; AI</b><span>Sorularına anında yanıt</span></span>
+          <span class="chev">›</span>
+        </div>
+        <div class="mod-row" tabindex="0" onclick="notify('Hizmetler ekranına gidiliyor')">
+          <span class="glyph">❤️</span>
+          <span class="txt"><b>Hizmetler</b><span>Veteriner, otel, eğitmen, topluluk</span></span>
+          <span class="chev">›</span>
+        </div>
+      </div>
+
+      <div class="section-label">Ayrıca</div>
+      <div class="more-row">
+        <button class="more-link" onclick="notify('Profil ekranına gidiliyor')">🪪 Profil</button>
+        <button class="more-link" onclick="notify('PatiMatch ekranına gidiliyor')">💘 PatiMatch</button>
+        <button class="more-link" onclick="notify('Pixel Oyun ekranına gidiliyor')">🎮 Pixel Oyun</button>
+        <button class="more-link" onclick="notify('Aşı takvimine gidiliyor')">💉 Aşı Takvimi</button>
+      </div>
+
+      <div class="cta-zone">
+        <div class="cta-row">
+          <button class="btn primary" onclick="notify('Kayıt akışı açılıyor')">Ücretsiz Başla</button>
+          <button class="btn ghost" onclick="notify('Giriş akışı açılıyor')">Giriş Yap</button>
+        </div>
+        <div class="cta-note">Kaydolmadan da tüm özellikleri keşfedebilirsin</div>
+      </div>
+
+      <nav class="nav">
+        <button class="on"><span class="ic">⌂</span>Ana Sayfa</button>
+        <button><span class="ic">🎓</span>Eğitim</button>
+        <button><span class="ic">🐾</span>AI</button>
+        <button><span class="ic">🩺</span>Sağlık</button>
+        <button><span class="ic">❤</span>Hizmetler</button>
+      </nav>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  const petData = [
+    {name:'Boncuk', notif:'2 bildirim', pct:68, cap:'Eğitim modülündeki "Temel İtaat" serisi ve sağlık görevlerinin ortalaması.', foot:'3 görev bu hafta tamamlandı', health:'Karma aşısı 12 gün içinde'},
+    {name:'Zeytin', notif:'1 bildirim', pct:42, cap:'Zeytin yeni katıldı — "Tuvalet Eğitimi" serisine başlandı.', foot:'1 görev bu hafta tamamlandı', health:'Yıllık kontrol 30 gün içinde'}
+  ];
+  let cur = 0;
+
+  function setPet(i){
+    cur = i;
+    document.getElementById('tab0').classList.toggle('on', i===0);
+    document.getElementById('tab1').classList.toggle('on', i===1);
+    document.getElementById('tab0').setAttribute('aria-selected', i===0);
+    document.getElementById('tab1').setAttribute('aria-selected', i===1);
+    render();
+  }
+
+  function render(){
+    const p = petData[cur];
+    document.getElementById('petNameLabel').textContent = p.name;
+    document.getElementById('progCap').textContent = p.cap;
+    document.getElementById('progFoot').textContent = p.foot;
+    document.getElementById('healthDesc').textContent = p.health;
+    const num = document.getElementById('progNum');
+    num.style.opacity = 0;
+    setTimeout(()=>{
+      num.innerHTML = p.pct + '<sup>%</sup>';
+      document.getElementById('progFill').style.width = p.pct + '%';
+      num.style.opacity = 1;
+    }, 140);
+  }
+
+  function doSearch(ev){
+    ev.preventDefault();
+    const q = document.getElementById('q').value.trim();
+    if(!q) return false;
+    document.getElementById('q').value = '';
+    const box = document.getElementById('aiAnswer');
+    document.getElementById('aiQ').textContent = '"' + q + '"';
+    document.getElementById('aiA').textContent = 'Düşünüyorum…';
+    box.classList.add('show');
+    setTimeout(()=>{
+      document.getElementById('aiA').textContent = petData[cur].name + ' için bunu inceledim: bu konuda Eğitim ya da Sağlık modülünde daha ayrıntılı rehber var. İstersen doğrudan oraya geçebiliriz.';
+    }, 550);
+    return false;
+  }
+  function closeAnswer(){ document.getElementById('aiAnswer').classList.remove('show'); }
+
+  function toggleTheme(){
+    const root = document.documentElement;
+    const cur = root.getAttribute('data-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let next;
+    if(!cur) next = prefersDark ? 'light' : 'dark';
+    else next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '◑' : '◐';
+  }
+
+  let toastT;
+  function notify(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(()=>t.classList.remove('show'), 1600);
+  }
+</script>
+</body>
+</html>

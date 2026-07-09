@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Maksimalizm / Ana Sayfa</title>
+<style>
+:root{
+  --green:#0EA574; --green-dark:#087C56; --green-deep:#0B3B2C; --green-soft:#DFF6EC;
+  --coral:#FF5D73; --coral-dark:#E23F57; --coral-soft:#FFE3E7;
+  --sun:#FFC93C; --sun-dark:#F0A400; --sun-soft:#FFF3D2;
+  --violet:#8B5CF6; --violet-dark:#6D28D9; --violet-soft:#EEE7FE;
+  --sky:#22C3E6; --sky-dark:#0E9EBD; --sky-soft:#DEF6FB;
+  --pink:#FF3D8A; --pink-soft:#FFE1EE;
+  --ink:#141E19; --ink-soft:#4B5A53;
+  --paper:#FFF6E8; --card:#FFFFFF; --line:rgba(20,30,25,.09);
+  --radius:26px;
+  --shadow-card:0 22px 44px -18px rgba(20,30,25,.30), 0 3px 8px rgba(20,30,25,.08);
+  --shadow-pop:4px 5px 0 rgba(20,30,25,.92);
+  --shadow-pop-sm:3px 3px 0 rgba(20,30,25,.9);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+html,body{background:#EDE3D0}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:22px;padding:36px 14px 60px}
+
+/* ---------- dış vitrin (deliverable çerçevesi) ---------- */
+.showcase-head{max-width:420px;text-align:center;color:#2A241A}
+.showcase-head .kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:2px;color:var(--coral-dark);background:var(--coral-soft);padding:5px 12px;border-radius:99px;margin-bottom:10px}
+.showcase-head h1{font-size:26px;letter-spacing:-.6px;color:#1B231D;margin-bottom:6px}
+.showcase-head p{font-size:12.5px;color:#5C5343;line-height:1.55}
+.tag-list{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:12px}
+.tag-list span{font-size:10.5px;font-weight:800;padding:5px 10px;border-radius:99px;background:#fff;border:1.5px solid #1B231D;box-shadow:var(--shadow-pop-sm)}
+
+/* ---------- telefon çerçevesi ---------- */
+.stage{position:relative;width:412px;max-width:100%;padding:26px;border-radius:54px;background:
+  radial-gradient(circle at 14% 8%, rgba(139,92,246,.35), transparent 42%),
+  radial-gradient(circle at 90% 6%, rgba(255,93,115,.32), transparent 40%),
+  radial-gradient(circle at 80% 96%, rgba(14,165,116,.4), transparent 45%),
+  radial-gradient(circle at 6% 92%, rgba(255,201,60,.32), transparent 40%),
+  #1B231D;
+  box-shadow:0 30px 70px rgba(20,30,25,.35);
+}
+.stage::after{content:"";position:absolute;inset:0;border-radius:54px;opacity:.5;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.phone{position:relative;width:100%;height:832px;background:var(--paper);border-radius:40px;overflow:hidden;border:8px solid #101A15;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
+.phone[data-theme="dark"]{
+  --paper:#0C1512; --card:#152420; --ink:#F2F7F4; --ink-soft:#A9C0B6; --line:rgba(255,255,255,.09);
+  --green-soft:#123227; --coral-soft:#3A1D24; --sun-soft:#3A2E12; --violet-soft:#241A3C; --sky-soft:#12313A; --pink-soft:#3A1930;
+  --shadow-card:0 22px 44px -18px rgba(0,0,0,.55), 0 3px 8px rgba(0,0,0,.35);
+}
+
+.screen{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:20px 18px 108px}
+.screen::-webkit-scrollbar{display:none}
+
+/* dekoratif fon lekeleri + doku (derinlik + doku) */
+.bg-blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;pointer-events:none;z-index:0}
+.blob1{width:210px;height:210px;top:-70px;right:-80px;background:radial-gradient(circle,var(--sun) 0%,transparent 70%)}
+.blob2{width:230px;height:230px;top:280px;left:-100px;background:radial-gradient(circle,var(--violet) 0%,transparent 70%);opacity:.28}
+.blob3{width:190px;height:190px;bottom:120px;right:-90px;background:radial-gradient(circle,var(--coral) 0%,transparent 70%);opacity:.25}
+.grain{position:absolute;inset:0;opacity:.05;mix-blend-mode:multiply;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.screen > *{position:relative;z-index:1}
+
+/* ---------- topbar ---------- */
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.brand{display:flex;flex-direction:column}
+.brand-row{display:flex;align-items:center;gap:8px}
+.brand-mark{font-size:26px;filter:drop-shadow(2px 3px 0 rgba(20,30,25,.15))}
+.brand h1{font-size:25px;letter-spacing:-1px;color:var(--ink);font-weight:900}
+.brand h1 em{font-style:normal;background:linear-gradient(120deg,var(--green),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-tag{font-size:9.5px;font-weight:800;letter-spacing:1.6px;color:var(--violet-dark);background:var(--violet-soft);padding:3px 9px;border-radius:99px;margin-top:5px;display:inline-block;width:fit-content;transform:rotate(-2deg)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.theme-btn{width:38px;height:38px;border-radius:14px;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:var(--shadow-pop-sm);transition:.15s}
+.theme-btn:active{transform:translate(2px,2px);box-shadow:none}
+.avatar-ring{width:40px;height:40px;border-radius:50%;padding:2.5px;background:conic-gradient(from 90deg,var(--green),var(--sun),var(--coral),var(--violet),var(--green))}
+.avatar-ring span{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:17px}
+.greet{font-size:13px;color:var(--ink-soft);margin:12px 2px 14px;font-weight:600}
+.greet b{color:var(--ink);font-weight:800}
+
+/* ---------- pati seçici ---------- */
+.pet-switch{display:flex;gap:10px;margin-bottom:18px;align-items:stretch}
+.pet-card{position:relative;flex:1;background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:var(--shadow-pop-sm);transition:.18s;font-family:inherit}
+.pet-card:nth-child(1){transform:rotate(-2.5deg)}
+.pet-card:nth-child(2){transform:rotate(2deg)}
+.pet-card.on{background:var(--green-soft);border-color:var(--green-dark)}
+.pet-card:active{transform:translate(2px,2px) rotate(0deg);box-shadow:none}
+.pet-ring{width:52px;height:52px;border-radius:50%;background:conic-gradient(from 120deg,var(--coral),var(--sun),var(--green),var(--sky),var(--coral));padding:3px;display:flex}
+.pet-ring span.pet-emoji{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:26px}
+.pet-name{font-size:12.5px;font-weight:800;color:var(--ink)}
+.pet-sub{font-size:10px;color:var(--ink-soft);font-weight:600}
+.pet-sticker{position:absolute;top:-10px;right:-8px;font-size:9.5px;font-weight:800;background:var(--sun);color:#3A2A00;padding:3px 7px;border-radius:99px;border:1.5px solid var(--ink);transform:rotate(8deg);box-shadow:2px 2px 0 rgba(20,30,25,.85)}
+.pet-card.add{border-style:dashed;justify-content:center;color:var(--ink-soft);transform:rotate(0)}
+.add-ring{width:52px;height:52px;border-radius:50%;border:2px dashed var(--ink-soft);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink-soft)}
+
+/* ---------- AI arama ---------- */
+.ai-search{display:flex;align-items:center;gap:8px;background:var(--card);border:2.5px solid var(--ink);border-radius:18px;padding:11px 13px;box-shadow:var(--shadow-pop);margin-bottom:10px}
+.ai-search-ico{font-size:17px}
+.ai-search input{flex:1;border:none;outline:none;background:none;font-size:13px;color:var(--ink);font-family:inherit;font-weight:600}
+.ai-search input::placeholder{color:var(--ink-soft);font-style:italic;font-weight:500}
+.ai-search button{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0}
+.ai-answer{display:none;background:var(--card);border:2px solid var(--violet-dark);border-radius:16px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow-pop-sm);position:relative}
+.ai-answer.show{display:block;animation:pop .25s ease}
+.ai-answer::before{content:"";position:absolute;left:22px;top:-8px;width:14px;height:14px;background:var(--card);border-left:2px solid var(--violet-dark);border-top:2px solid var(--violet-dark);transform:rotate(45deg)}
+.ai-answer .aa-h{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--violet-dark);margin-bottom:5px}
+.ai-answer p{font-size:12.5px;color:var(--ink);line-height:1.55;font-weight:600}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+
+/* ---------- hızlı çip şeridi ---------- */
+.chip-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:20px}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font-family:inherit;font-size:12px;font-weight:800;padding:9px 15px;border-radius:99px;border:2px solid var(--ink);cursor:pointer;color:var(--ink);background:var(--card);box-shadow:var(--shadow-pop-sm);transition:.15s}
+.chip:active{transform:translate(2px,2px);box-shadow:none}
+.chip.on.c-green{background:var(--green);color:#fff}
+.chip.c-coral.on{background:var(--coral);color:#fff}
+.chip.c-violet.on{background:var(--violet);color:#fff}
+.chip.c-sky.on{background:var(--sky);color:#08333c}
+.chip.c-sun.on{background:var(--sun);color:#3A2A00}
+.chip.c-pink.on{background:var(--pink);color:#fff}
+
+/* ---------- hero ilerleme kartı ---------- */
+.hero-card{position:relative;margin:26px -2px 22px;border-radius:28px;padding:26px 18px 18px;overflow:visible;
+  background:linear-gradient(150deg,var(--green) 0%,var(--green-dark) 55%,var(--green-deep) 100%);
+  box-shadow:var(--shadow-card);border:2px solid var(--ink);}
+.hero-card::before{content:"";position:absolute;inset:0;border-radius:26px;opacity:.5;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg fill='%23ffffff' fill-opacity='0.09'%3E%3Cellipse cx='30' cy='40' rx='10' ry='8'/%3E%3Cellipse cx='15' cy='24' rx='4.5' ry='6'/%3E%3Cellipse cx='26' cy='15' rx='4.5' ry='6'/%3E%3Cellipse cx='38' cy='15' rx='4.5' ry='6'/%3E%3Cellipse cx='48' cy='24' rx='4.5' ry='6'/%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-card::after{content:"🐾";position:absolute;right:-10px;bottom:-22px;font-size:118px;opacity:.13;transform:rotate(-16deg);pointer-events:none}
+.hero-tape{position:absolute;top:-16px;left:16px;background:var(--sun);color:#3A2A00;font-size:10.5px;font-weight:900;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:2px solid var(--ink);transform:rotate(-3deg);box-shadow:3px 3px 0 rgba(20,30,25,.9);z-index:2}
+.hero-badge{position:absolute;top:-14px;right:14px;background:var(--coral);color:#fff;font-size:11px;font-weight:800;padding:6px 12px;border-radius:99px;border:2px solid var(--ink);transform:rotate(4deg);box-shadow:3px 3px 0 rgba(20,30,25,.9);z-index:2}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
+.hero-label{font-size:10px;font-weight:800;letter-spacing:1.4px;color:rgba(255,255,255,.75)}
+.hero-big{font-size:clamp(38px,13vw,50px);font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;margin:5px 0 6px}
+.hero-desc{font-size:12px;color:rgba(255,255,255,.92);font-weight:600;line-height:1.5;max-width:190px}
+.hero-ring{position:relative;width:74px;height:74px;flex-shrink:0}
+.hero-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.hero-ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.hero-ring .bgc{stroke:rgba(255,255,255,.25)}
+.hero-ring .fgc{stroke:#fff;stroke-dasharray:264;stroke-dashoffset:85}
+.hero-ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
+.hero-track{height:12px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:16px;border:1.5px solid rgba(255,255,255,.3);position:relative;z-index:1}
+.hero-fill{height:100%;border-radius:99px;background:repeating-linear-gradient(45deg,#fff,#fff 8px,var(--sun) 8px,var(--sun) 16px)}
+.hero-foot{display:flex;justify-content:space-between;font-size:11px;color:#fff;font-weight:800;margin-top:12px;position:relative;z-index:1}
+
+/* ---------- bölüm başlığı ---------- */
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 12px}
+.sec-head h3{font-size:19px;font-weight:900;color:var(--ink);letter-spacing:-.4px}
+.sec-head span{font-size:11px;color:var(--green-dark);font-weight:800;cursor:pointer}
+
+/* ---------- bento modül ızgarası (grid kıran kompozisyon) ---------- */
+.bento{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:104px;gap:14px 12px;margin-bottom:20px}
+.bento-card{position:relative;border-radius:22px;border:2.5px solid var(--ink);padding:14px;display:flex;flex-direction:column;cursor:pointer;box-shadow:var(--shadow-pop);transition:transform .18s,box-shadow .18s;overflow:hidden;font-family:inherit;text-align:left}
+.bento-card:active,.bento-card:hover{transform:translate(3px,3px) rotate(0deg) !important;box-shadow:none}
+.bento-card b{font-size:14px;color:var(--ink);font-weight:900;margin:8px 0 3px;position:relative;z-index:1;display:block}
+.bento-card span{font-size:10.5px;color:var(--ink-soft);font-weight:600;line-height:1.4;position:relative;z-index:1}
+.bento-card span.bc-icon{font-size:24px;color:inherit;font-weight:400}
+.bento-card span.bc-tag{margin-top:auto;align-self:flex-start;font-size:9px;font-weight:900;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.7);color:var(--ink);border:1.5px solid var(--ink)}
+.bento-card span.bc-tag.warn{background:var(--coral);color:#fff;border-color:var(--ink)}
+.bento-card span.bc-deco{position:absolute;font-size:90px;opacity:.16;right:-16px;bottom:-20px;transform:rotate(-12deg);line-height:1;color:inherit}
+
+.bento-card:nth-child(1){grid-column:1;grid-row:1/3;background:var(--green-soft);transform:rotate(-1.6deg)}
+.bento-card:nth-child(1) b{font-size:17px}
+.bento-card:nth-child(1) .bc-icon{font-size:34px}
+.bento-card:nth-child(2){grid-column:2;grid-row:1;background:var(--coral-soft);transform:rotate(1.4deg)}
+.bento-card:nth-child(3){grid-column:2;grid-row:2;background:var(--violet-soft);transform:rotate(-1deg)}
+.bento-card:nth-child(4){grid-column:1/3;grid-row:3;background:var(--sky-soft);transform:rotate(.8deg);flex-direction:row;align-items:center;gap:12px}
+.bento-card:nth-child(4) .bc-icon{font-size:30px}
+.bento-card:nth-child(4) b{margin:0}
+.bento-card:nth-child(4) > span:not(.bc-icon){margin-top:2px}
+.bento-card:nth-child(5){grid-column:1;grid-row:4;background:var(--pink-soft);transform:rotate(1.5deg)}
+.bento-card:nth-child(6){grid-column:2;grid-row:4;background:var(--sun-soft);transform:rotate(-1.3deg)}
+
+/* ---------- hatırlatma bileti ---------- */
+.ticket{position:relative;display:flex;align-items:center;gap:12px;background:var(--card);border:2px dashed var(--ink);border-radius:18px;padding:13px 14px;margin-bottom:20px;box-shadow:var(--shadow-pop-sm)}
+.ticket::before,.ticket::after{content:"";position:absolute;width:18px;height:18px;background:var(--paper);border-radius:50%;top:50%;transform:translateY(-50%)}
+.ticket::before{left:-11px}
+.ticket::after{right:-11px}
+.ticket-ico{font-size:24px;flex-shrink:0}
+.ticket-body{flex:1}
+.ticket-body b{font-size:12.5px;color:var(--ink);display:block}
+.ticket-body span{font-size:10.5px;color:var(--ink-soft);font-weight:600}
+.ticket-btn{font-family:inherit;font-size:11px;font-weight:800;background:var(--ink);color:var(--paper);border:none;border-radius:10px;padding:9px 12px;cursor:pointer;flex-shrink:0}
+
+/* ---------- CTA ---------- */
+.cta-wrap{position:relative;text-align:center;margin-bottom:6px}
+.cta-sticker{position:absolute;top:-16px;right:6px;background:var(--violet);color:#fff;font-size:10px;font-weight:900;padding:6px 11px;border-radius:99px;border:2px solid var(--ink);transform:rotate(9deg);box-shadow:3px 3px 0 rgba(20,30,25,.9);z-index:2}
+.cta-btn{font-family:inherit;display:block;width:100%;border-radius:16px;padding:14px;font-size:14.5px;font-weight:900;cursor:pointer;margin-bottom:10px;transition:.15s}
+.cta-btn.primary{background:linear-gradient(120deg,var(--coral),var(--pink));color:#fff;border:2.5px solid var(--ink);box-shadow:var(--shadow-pop)}
+.cta-btn.primary:active{transform:translate(3px,3px);box-shadow:none}
+.cta-btn.ghost{background:var(--card);color:var(--ink);border:2.5px solid var(--ink)}
+.cta-btn.ghost:active{transform:translate(2px,2px)}
+.cta-note{font-size:10.5px;color:var(--ink-soft);font-weight:700}
+
+/* ---------- alt nav ---------- */
+.nav{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-top:2.5px solid var(--ink);display:flex;justify-content:space-around;align-items:flex-end;padding:9px 6px 16px;z-index:20}
+.nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);cursor:pointer;width:60px;font-weight:800;font-family:inherit}
+.nav button span{font-size:19px;filter:grayscale(1);opacity:.55}
+.nav button.on{color:var(--green-dark)}
+.nav button.on span{filter:none;opacity:1}
+.nav .ai-btn{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;font-size:23px;display:flex;align-items:center;justify-content:center;margin-top:-24px;box-shadow:0 8px 0 rgba(20,30,25,.9);border:3px solid var(--paper)}
+
+/* ---------- toast ---------- */
+.toast{position:absolute;left:50%;transform:translateX(-50%) translateY(8px);bottom:96px;background:var(--ink);color:var(--paper);font-size:12px;font-weight:800;padding:11px 18px;border-radius:99px;opacity:0;transition:.28s;z-index:90;max-width:86%;text-align:center;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:440px){.stage{padding:14px;border-radius:38px}.phone{border-radius:30px}}
+</style>
+</head>
+<body>
+
+<div class="showcase-head">
+  <span class="kicker">TASARIM KEŞFİ · MAKSİMALİZM</span>
+  <h1>PatiDost — Ana Sayfa</h1>
+  <p>Aynı marka (yeşil, hap butonlar, emoji ikonografi) — zengin katman, doku, ifade gücü yüksek tipografi ve grid kıran bento kompozisyonuyla yeniden yorumlandı.</p>
+  <div class="tag-list">
+    <span>🧊 Katmanlama / Derinlik</span>
+    <span>🐾 Doku (paw pattern + grain)</span>
+    <span>🔠 İfade gücü tipografi</span>
+    <span>🧩 Grid kıran bento</span>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="screen" id="screen">
+      <div class="bg-blob blob1"></div>
+      <div class="bg-blob blob2"></div>
+      <div class="bg-blob blob3"></div>
+      <div class="grain"></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-row"><span class="brand-mark">🐾</span><h1>Pati<em>Dost</em></h1></div>
+          <span class="brand-tag">AI DESTEKLİ BAKIM</span>
+        </div>
+        <div class="top-actions">
+          <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+          <div class="avatar-ring"><span>🧑</span></div>
+        </div>
+      </header>
+
+      <p class="greet">Merhaba Ayşe 👋 <b id="greetPet">Boncuk</b> bugün seni bekliyor.</p>
+
+      <div class="pet-switch" id="petSwitch">
+        <button class="pet-card on" onclick="setPet(0,this)">
+          <span class="pet-sticker">😻 Enerjik</span>
+          <span class="pet-ring"><span class="pet-emoji">🐱</span></span>
+          <span class="pet-name">Boncuk</span>
+          <span class="pet-sub">Tekir · 2 yaş</span>
+        </button>
+        <button class="pet-card" onclick="setPet(1,this)">
+          <span class="pet-sticker">🎾 Oyuncu</span>
+          <span class="pet-ring"><span class="pet-emoji">🐶</span></span>
+          <span class="pet-name">Zeytin</span>
+          <span class="pet-sub">Golden · 3 yaş</span>
+        </button>
+        <button class="pet-card add" onclick="toast('➕ Yeni pati ekleme ekranı açılıyor')">
+          <span class="add-ring">+</span>
+          <span class="pet-name">Ekle</span>
+        </button>
+      </div>
+
+      <form class="ai-search" onsubmit="return doSearch(event)">
+        <span class="ai-search-ico">✨</span>
+        <input id="qInput" placeholder="Bugün Boncuk için ne yapalım?">
+        <button type="submit">→</button>
+      </form>
+      <div class="ai-answer" id="aiAnswer">
+        <div class="aa-h">🤖 PATİ AI YANITI</div>
+        <p id="aiAnswerText"></p>
+      </div>
+
+      <div class="chip-row" id="chipRow">
+        <button class="chip c-green on" onclick="pickChip(this,'Eğitim')">🎓 Eğitim</button>
+        <button class="chip c-coral" onclick="pickChip(this,'Sağlık')">🩺 Sağlık</button>
+        <button class="chip c-violet" onclick="pickChip(this,'Davranış')">🐾 Davranış</button>
+        <button class="chip c-sky" onclick="pickChip(this,'Hizmetler')">❤️ Hizmetler</button>
+        <button class="chip c-sun" onclick="pickChip(this,'PatiMatch')">💘 PatiMatch</button>
+        <button class="chip c-pink" onclick="pickChip(this,'Pixel Oyun')">🎮 Pixel Oyun</button>
+      </div>
+
+      <section class="hero-card">
+        <span class="hero-tape">BUGÜNÜN GÖREVİ</span>
+        <span class="hero-badge">🔥 7 gün seri</span>
+        <div class="hero-top">
+          <div>
+            <span class="hero-label" id="heroLabel">BONCUK'UN GÜNLÜK İLERLEMESİ</span>
+            <h2 class="hero-big" id="heroPct">%68</h2>
+            <p class="hero-desc" id="heroDesc">3/5 görev tamam — "Tuvalet Eğitimi 2. Ders" seni bekliyor 🎬</p>
+          </div>
+          <div class="hero-ring">
+            <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="42"/><circle class="fgc" id="heroRingC" cx="50" cy="50" r="42"/></svg>
+            <span class="hero-ring-txt" id="heroRingTxt">68%</span>
+          </div>
+        </div>
+        <div class="hero-track"><div class="hero-fill" id="heroFill" style="width:68%"></div></div>
+        <div class="hero-foot">
+          <span>🏆 Seviye 4 — Meraklı Patici</span>
+          <span>+120 XP bugün</span>
+        </div>
+      </section>
+
+      <div class="sec-head"><h3>Keşfet</h3><span onclick="toast('📋 Tüm modüller listeleniyor')">tümü →</span></div>
+      <div class="bento">
+        <button class="bento-card big" onclick="openModule('Eğitim')">
+          <span class="bc-deco">🎓</span>
+          <span class="bc-icon">🎓</span>
+          <b>Eğitim</b>
+          <span>Kişisel dersler, animasyonlu sahneler, günlük görevler</span>
+          <span class="bc-tag">3 yeni ders</span>
+        </button>
+        <button class="bento-card" onclick="openModule('Sağlık')">
+          <span class="bc-icon">🩺</span>
+          <b>Sağlık</b>
+          <span>Aşı takvimi &amp; ilaçlar</span>
+          <span class="bc-tag warn">1 aşı yaklaşıyor</span>
+        </button>
+        <button class="bento-card" onclick="openModule('AI Davranış')">
+          <span class="bc-icon">🤖</span>
+          <b>AI Davranış</b>
+          <span>"Bana ne anlatmak istiyor?"</span>
+          <span class="bc-tag">YENİ</span>
+        </button>
+        <button class="bento-card" onclick="openModule('Hizmetler')">
+          <span class="bc-icon">❤️</span>
+          <div><b>Hizmetler &amp; Topluluk</b><span>Veteriner, otel, eğitmen, sahiplendirme</span></div>
+        </button>
+        <button class="bento-card" onclick="openModule('PatiMatch')">
+          <span class="bc-icon">💘</span>
+          <b>PatiMatch</b>
+          <span>Oyun arkadaşı bul</span>
+        </button>
+        <button class="bento-card" onclick="openModule('Pixel Oyun')">
+          <span class="bc-icon">🎮</span>
+          <b>Pixel Dünyası</b>
+          <span>Besle, oynat, büyüt</span>
+        </button>
+      </div>
+
+      <div class="ticket">
+        <span class="ticket-ico">💉</span>
+        <div class="ticket-body">
+          <b>Kuduz aşısı 12 gün sonra</b>
+          <span>Dr. Elif Kaya — Bahçelievler Pet Klinik</span>
+        </div>
+        <button class="ticket-btn" onclick="toast('📅 Randevu hatırlatıcı eklendi')">Hatırlat</button>
+      </div>
+
+      <div class="cta-wrap">
+        <span class="cta-sticker">%100 ÜCRETSİZ 🎉</span>
+        <button class="cta-btn primary" onclick="toast('🎉 Kayıt ekranına yönlendiriliyor...')">Ücretsiz Başla</button>
+        <button class="cta-btn ghost" onclick="toast('👋 Giriş ekranına yönlendiriliyor...')">Giriş Yap</button>
+        <p class="cta-note">Kaydolmadan da keşfedebilirsin 🐾</p>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+
+    <nav class="nav">
+      <button class="on"><span>🏠</span>Ana Sayfa</button>
+      <button onclick="openModule('Eğitim')"><span>🎓</span>Eğitim</button>
+      <button class="ai-btn" onclick="openModule('AI Davranış')">🐾</button>
+      <button onclick="openModule('Sağlık')"><span>🩺</span>Sağlık</button>
+      <button onclick="openModule('Hizmetler')"><span>❤️</span>Hizmetler</button>
+    </nav>
+
+    <div class="toast" id="toastEl"></div>
+  </div>
+</div>
+
+<script>
+const pets=[
+  {name:'Boncuk',emoji:'🐱',pct:68,label:"BONCUK'UN GÜNLÜK İLERLEMESİ",desc:'3/5 görev tamam — "Tuvalet Eğitimi 2. Ders" seni bekliyor 🎬'},
+  {name:'Zeytin',emoji:'🐶',pct:42,label:"ZEYTİN'İN GÜNLÜK İLERLEMESİ",desc:'2/5 görev tamam — "Otur Komutu 3. Ders" seni bekliyor 🎬'}
+];
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function setPet(i,el){
+  document.querySelectorAll('.pet-card').forEach(p=>p.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const p=pets[i];
+  document.getElementById('greetPet').textContent=p.name;
+  document.getElementById('heroLabel').textContent=p.label;
+  document.getElementById('heroPct').textContent='%'+p.pct;
+  document.getElementById('heroDesc').textContent=p.desc;
+  document.getElementById('heroRingTxt').textContent=p.pct+'%';
+  document.getElementById('heroFill').style.width=p.pct+'%';
+  const circ=2*Math.PI*42;
+  document.getElementById('heroRingC').style.strokeDasharray=circ;
+  document.getElementById('heroRingC').style.strokeDashoffset=circ-(circ*p.pct/100);
+  document.getElementById('qInput').placeholder='Bugün '+p.name+' için ne yapalım?';
+  document.getElementById('aiAnswer').classList.remove('show');
+}
+function pickChip(el,label){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  openModule(label);
+}
+const moduleMap={
+  'Eğitim':'egitim','Sağlık':'saglik','AI Davranış':'ai','Davranış':'ai',
+  'Hizmetler':'hizmet','PatiMatch':'match','Pixel Oyun':'oyun'
+};
+function openModule(name){
+  toast('→ '+name+' modülüne yönlendiriliyor');
+}
+const answers=[
+  'Boncuk son 3 gündür mama kabını daha yavaş bitiriyor — bu genelde sıcak havada normaldir, ama 2 gün daha sürerse Sağlık modülünden AI check-up başlatmanı öneririm.',
+  '"Tuvalet Eğitimi" serisinde 2. dersi tamamlarsan bugünkü hedefini bitirmiş olursun — 6 dakika sürüyor, canlandırmalı sahne içeriyor.',
+  'Kuduz aşısı 12 gün sonra — şimdi randevu oluşturursan takviminde hatırlatıcı otomatik eklenir.'
+];
+function doSearch(ev){
+  ev.preventDefault();
+  const box=document.getElementById('aiAnswer');
+  const txt=document.getElementById('aiAnswerText');
+  box.classList.remove('show');
+  txt.textContent='• • •';
+  setTimeout(()=>{
+    txt.textContent=answers[Math.floor(Math.random()*answers.length)];
+    box.classList.add('show');
+  },420);
+  return false;
+}
+function toggleTheme(){
+  const phone=document.getElementById('phone');
+  const dark=phone.getAttribute('data-theme')!=='dark';
+  phone.setAttribute('data-theme',dark?'dark':'light');
+  document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';
+  try{localStorage.setItem('patidostMaxTheme',dark?'1':'0')}catch(e){}
+}
+try{
+  if(localStorage.getItem('patidostMaxTheme')==='1'){
+    document.getElementById('phone').setAttribute('data-theme','dark');
+    document.getElementById('themeBtn').textContent='☀️';
+  }
+}catch(e){}
+setPet(0,document.querySelector('.pet-card.on'));
+</script>
+</body>
+</html>

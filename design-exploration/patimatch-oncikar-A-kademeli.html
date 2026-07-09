@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — Pet Uygulaması</title>
+<style>
+  :root{
+    --green:#0EA574; --green-dark:#0B8560; --green-soft:#E6F6F0; --green-mid:#B9E8D8;
+    --ink:#122B24; --gray:#6B7B75; --line:#E7EEEB; --bg:#F6FAF8; --card:#FFFFFF;
+    --amber:#F5A623; --amber-soft:#FEF3DF; --blue:#3B82F6; --blue-soft:#EAF2FE;
+    --red:#E5484D; --red-soft:#FDEBEC; --purple:#7C6BF0; --purple-soft:#EFEDFD;
+    --radius:20px; --shadow:0 4px 18px rgba(18,43,36,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:#E9F0ED;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 12px}
+  .phone{width:396px;max-width:100%;height:830px;background:var(--bg);border-radius:42px;box-shadow:0 24px 60px rgba(18,43,36,.22);overflow:hidden;position:relative;border:8px solid #12211C}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:18px 18px 96px;display:none;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+  .screen.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- ortak ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .topbar h1{font-size:20px;color:var(--ink);letter-spacing:-.3px}
+  .topbar .sub{font-size:12.5px;color:var(--gray);margin-top:2px}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid var(--green-mid)}
+  .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--line)}
+  .sec-title{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px}
+  .sec-title h2{font-size:15px;color:var(--ink)}
+  .sec-title a{font-size:12px;color:var(--green);text-decoration:none;font-weight:600;cursor:pointer}
+  .chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .chip-row::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:12.5px;color:var(--gray);cursor:pointer;font-weight:600;transition:.15s}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px}
+
+  /* ---------- PatiMatch öne çıkarma (kademeli) ---------- */
+  .chip.match-hl{position:relative;background:linear-gradient(135deg,#F472B6,#E11D48);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(225,29,72,.28)}
+  .chip-dot{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;background:#fff;color:#E11D48;font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.25);line-height:1}
+  .phone.dark .chip-dot{background:#1A2420;color:#F472B6}
+  .match-promo{background:linear-gradient(135deg,#F472B6,#E11D48);border-radius:var(--radius);padding:15px 16px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 10px 24px rgba(225,29,72,.28)}
+  .match-promo::after{content:"💘";position:absolute;right:-10px;bottom:-18px;font-size:84px;opacity:.16;transform:rotate(-14deg)}
+  .mp-badge{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.95);color:#C2295B;font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+  .match-promo .mp-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .match-promo .mp-emoji{font-size:26px}
+  .match-promo b{font-size:14.5px;display:block}
+  .match-promo span.mp-sub{font-size:11.5px;opacity:.92;display:block;margin-top:2px;line-height:1.45;max-width:82%}
+  .match-promo .mp-cta{margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 12px;border-radius:999px}
+  .btn{display:block;width:100%;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer}
+  .btn:active{background:var(--green-dark)}
+
+  /* ---------- alt nav ---------- */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;padding:8px 6px 16px;z-index:50}
+  .nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#9AA8A2;cursor:pointer;width:62px;font-weight:600}
+  .nav button .ic{font-size:21px;filter:grayscale(1);opacity:.55}
+  .nav button.on{color:var(--green)}
+  .nav button.on .ic{filter:none;opacity:1}
+  .nav .ai-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#0EA574,#0B8560);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 8px 20px rgba(14,165,116,.4);border:4px solid var(--bg)}
+
+  /* ---------- ana sayfa ---------- */
+  .pet-switch{display:flex;gap:10px;margin-bottom:16px}
+  .pet-pill{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer;transition:.15s}
+  .pet-pill.on{border-color:var(--green);background:var(--green-soft)}
+  .pet-pill .pp-emoji{font-size:26px}
+  .pet-pill b{font-size:13.5px;color:var(--ink);display:block}
+  .pet-pill span{font-size:11px;color:var(--gray)}
+  .hero{background:linear-gradient(135deg,#0EA574,#0A7A58);border-radius:var(--radius);padding:18px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+  .hero::after{content:"🐾";position:absolute;right:-6px;bottom:-14px;font-size:88px;opacity:.14;transform:rotate(-18deg)}
+  .hero .h-label{font-size:11px;opacity:.85;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+  .hero h3{font-size:17px;margin:4px 0 10px}
+  .prog-track{height:8px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--card);border-radius:99px;width:60%;transition:width .4s}
+  .hero .h-foot{font-size:12px;margin-top:8px;opacity:.9}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mod-card{border-radius:var(--radius);padding:16px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);transition:.15s}
+  .mod-card:active{transform:scale(.97)}
+  .mod-card .mi{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:10px}
+  .mod-card b{font-size:13.5px;color:var(--ink);display:block;margin-bottom:3px}
+  .mod-card span{font-size:11px;color:var(--gray);line-height:1.45;display:block}
+  .remind{display:flex;align-items:center;gap:12px}
+  .remind .ri{width:44px;height:44px;border-radius:14px;background:var(--amber-soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .remind b{font-size:13.5px;color:var(--ink);display:block}
+  .remind span{font-size:11.5px;color:var(--gray)}
+
+  /* ---------- eğitim ---------- */
+  .ring-wrap{display:flex;align-items:center;gap:16px}
+  .ring{width:86px;height:86px;flex-shrink:0}
+  .ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+  .ring .bgc{stroke:var(--green-soft)}
+  .ring .fgc{stroke:var(--green);stroke-dasharray:226;stroke-dashoffset:72;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .5s}
+  .ring text{font-size:17px;font-weight:800;fill:var(--ink)}
+  .task{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .task:last-child{border-bottom:none}
+  .task .cb{width:24px;height:24px;border-radius:8px;border:2px solid #CBDAD3;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-shrink:0;transition:.15s}
+  .task.done .cb{background:var(--green);border-color:var(--green)}
+  .task b{font-size:13.5px;color:var(--ink);display:block;font-weight:600}
+  .task.done b{text-decoration:line-through;color:var(--gray)}
+  .task span{font-size:11px;color:var(--gray)}
+  .task .pts{margin-left:auto;font-size:11px;font-weight:700;color:var(--amber);flex-shrink:0}
+  .lesson{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow)}
+  .lesson .thumb{width:74px;height:58px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;flex-shrink:0}
+  .lesson .thumb::after{content:"▶";position:absolute;right:5px;bottom:4px;font-size:9px;background:rgba(0,0,0,.5);color:#fff;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding-left:1.5px}
+  .lesson b{font-size:13.5px;color:var(--ink);display:block;margin-bottom:2px}
+  .lesson span{font-size:11px;color:var(--gray);display:block}
+  .lesson .lv{margin-top:5px;display:inline-block}
+  .streak{display:flex;justify-content:space-between;margin-top:4px}
+  .day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10.5px;color:var(--gray);font-weight:600}
+  .day .dot{width:32px;height:32px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .day.hit .dot{background:var(--green);color:#fff}
+
+  /* ---------- sağlık ---------- */
+  .score{display:flex;align-items:center;gap:14px}
+  .score .big{font-size:34px;font-weight:800;color:var(--green)}
+  .vac{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .vac:last-child{border-bottom:none}
+  .vac .vdot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .vac b{font-size:13.5px;color:var(--ink);display:block}
+  .vac span{font-size:11.5px;color:var(--gray)}
+  .vac .badge{margin-left:auto;align-self:center;flex-shrink:0}
+  .med{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .med:last-child{border-bottom:none}
+  .med .mi2{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .med b{font-size:13px;color:var(--ink);display:block}
+  .med span{font-size:11px;color:var(--gray)}
+  .switch{margin-left:auto;width:42px;height:24px;border-radius:99px;background:#D6E2DD;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+  .switch::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  .switch.on{background:var(--green)}
+  .switch.on::after{left:21px}
+  .bars{display:flex;align-items:flex-end;gap:10px;height:92px;margin-top:10px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .bar i{width:100%;max-width:30px;border-radius:8px 8px 4px 4px;background:var(--green-mid);display:block}
+  .bar.cur i{background:var(--green)}
+  .bar span{font-size:10px;color:var(--gray);font-weight:600}
+  .hist{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+  .hist:last-child{border-bottom:none}
+  .hist .hi{width:38px;height:38px;border-radius:12px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .hist b{font-size:13px;color:var(--ink);display:block}
+  .hist span{font-size:11px;color:var(--gray)}
+
+  /* ---------- AI ---------- */
+  .chat-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-height:250px;margin-bottom:12px}
+  .bub{max-width:82%;padding:11px 13px;border-radius:16px;font-size:13px;line-height:1.5}
+  .bub.ai{background:var(--green-soft);color:var(--ink);border-bottom-left-radius:5px;align-self:flex-start}
+  .bub.me{background:var(--green);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+  .qrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .qrow .chip{flex:0 1 auto}
+  .inp{display:flex;gap:8px}
+  .inp input{flex:1;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px;outline:none;background:var(--card);color:var(--ink)}
+  .inp input:focus{border-color:var(--green)}
+  .inp button{width:46px;height:46px;border-radius:14px;background:var(--green);color:#fff;border:none;font-size:18px;cursor:pointer;flex-shrink:0}
+  .mood{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .mood .m{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center;box-shadow:var(--shadow)}
+  .mood .m .me2{font-size:22px}
+  .mood .m b{font-size:11.5px;color:var(--ink);display:block;margin:5px 0 2px}
+  .mood .m span{font-size:10.5px;font-weight:700}
+
+  /* ---------- profil ---------- */
+  .idcard{background:linear-gradient(135deg,#123C30,#0EA574);border-radius:22px;padding:18px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+  .idcard::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);top:-60px;right:-40px}
+  .idcard .id-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+  .idcard .id-top .brand{font-size:11px;font-weight:700;letter-spacing:1.5px;opacity:.8}
+  .idcard .who{display:flex;gap:13px;align-items:center;margin-bottom:14px}
+  .idcard .who .pa{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid rgba(255,255,255,.4)}
+  .idcard .who b{font-size:19px;display:block}
+  .idcard .who span{font-size:12px;opacity:.85}
+  .idrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px}
+  .idrow div span{opacity:.7;display:block;font-size:10px}
+  .idrow div b{font-size:12px}
+  .qr{position:absolute;right:16px;bottom:16px;background:#fff;border-radius:10px;padding:5px}
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .ph{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px}
+  .tl{position:relative;padding-left:22px}
+  .tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--green-mid)}
+  .tl-item{position:relative;padding-bottom:16px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-item::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--green);border:3px solid var(--green-soft)}
+  .tl-item b{font-size:13px;color:var(--ink);display:block}
+  .tl-item span{font-size:11px;color:var(--gray)}
+
+  /* ---------- hizmetler ---------- */
+  .search{display:flex;align-items:center;gap:9px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .search input{border:none;outline:none;flex:1;font-size:13px;background:none;color:var(--ink)}
+  .srv{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .srv .si{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .srv b{font-size:13.5px;color:var(--ink);display:block}
+  .srv .meta{font-size:11px;color:var(--gray);display:block;margin-top:2px}
+  .srv .star{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:3px;display:block}
+  .srv .go{margin-left:auto;color:var(--green);font-weight:800;font-size:18px;flex-shrink:0}
+  .adopt{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+  .adopt::-webkit-scrollbar{display:none}
+  .ad-card{flex:0 0 136px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .ad-card .ad-img{height:88px;display:flex;align-items:center;justify-content:center;font-size:38px}
+  .ad-card .ad-body{padding:10px}
+  .ad-card b{font-size:12.5px;color:var(--ink);display:block}
+  .ad-card span{font-size:10.5px;color:var(--gray)}
+  .feed{padding:12px 0;border-bottom:1px solid var(--line)}
+  .feed:last-child{border-bottom:none}
+  .feed .fh{display:flex;gap:9px;align-items:center;margin-bottom:6px}
+  .feed .fa{width:32px;height:32px;border-radius:50%;background:var(--purple-soft);display:flex;align-items:center;justify-content:center;font-size:15px}
+  .feed .fh b{font-size:12.5px;color:var(--ink)}
+  .feed .fh span{font-size:10.5px;color:var(--gray);margin-left:auto}
+  .feed p{font-size:12.5px;color:#3E524B;line-height:1.5}
+  .feed .facts{display:flex;gap:16px;margin-top:8px;font-size:11.5px;color:var(--gray);font-weight:600}
+
+  /* ---------- modal / alt sayfa ---------- */
+  .overlay{position:absolute;inset:0;background:rgba(10,25,20,.45);z-index:70;display:none;align-items:flex-end}
+  .overlay.open{display:flex;animation:fade .2s}
+  .sheet{background:var(--bg);width:100%;max-height:94%;border-radius:26px 26px 0 0;padding:16px 18px 24px;overflow-y:auto;scrollbar-width:none}
+  .sheet::-webkit-scrollbar{display:none}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sheet-head h3{font-size:16.5px;color:var(--ink)}
+  .x{width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:14px;cursor:pointer;color:var(--gray);flex-shrink:0}
+  .meta-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .step{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .no{width:26px;height:26px;border-radius:50%;background:var(--green-soft);color:var(--green);font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step p{font-size:12.5px;color:#3E524B;line-height:1.55}
+  .tipbox{border-radius:14px;padding:12px;font-size:12px;line-height:1.55;margin-bottom:10px}
+
+  /* ---------- ders animasyon sahnesi ---------- */
+  .stage{position:relative;height:180px;border-radius:18px;background:linear-gradient(#EAF6F0 62%,#CDE8DA 62%);overflow:hidden;margin-bottom:10px;border:1px solid var(--line)}
+  .stage.video{height:auto;background:none;border:none;overflow:visible}
+  .actor{position:absolute;font-size:38px;line-height:1}
+  .sbub{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 10px;font-size:11.5px;font-weight:700;color:var(--ink);opacity:0;box-shadow:var(--shadow);white-space:nowrap}
+  @keyframes otPet{0%,40%{transform:none}50%,84%{transform:translateY(8px) scaleY(.8)}94%,100%{transform:none}}
+  @keyframes otHand{0%{left:78%;top:118px;opacity:0}8%{opacity:1}30%{left:48%;top:86px}46%,82%{left:48%;top:46px;opacity:1}92%,100%{left:48%;top:46px;opacity:0}}
+  @keyframes otStar{0%,52%{opacity:0;transform:none}62%,86%{opacity:1;transform:translateY(-12px)}96%,100%{opacity:0}}
+  @keyframes bubA{0%,6%{opacity:0}14%,36%{opacity:1}44%,100%{opacity:0}}
+  @keyframes bubM{0%,34%{opacity:0}42%,68%{opacity:1}76%,100%{opacity:0}}
+  @keyframes bubB{0%,72%{opacity:0}80%,96%{opacity:1}100%{opacity:0}}
+  @keyframes breath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.95)}}
+  @keyframes bkOwner{0%,18%{transform:none}38%,62%{transform:translateX(80px)}82%,100%{transform:none}}
+  @keyframes bkHand{0%{opacity:0}6%,28%{opacity:1}36%,100%{opacity:0}}
+  @keyframes glPet{0%,28%{transform:none}38%{transform:translate(55px,-12px)}48%{transform:translate(105px,0)}58%{transform:translate(150px,-12px)}68%,100%{transform:translate(190px,0)}}
+  @keyframes ptHand{0%{top:16px;opacity:0}10%{opacity:1}28%,86%{top:82px;opacity:1}96%,100%{top:82px;opacity:0}}
+  @keyframes ptPaw{0%,42%{opacity:0;transform:none}54%,80%{opacity:1;transform:translate(16px,-22px)}92%,100%{opacity:0}}
+  .st-otur .a-pet{animation:otPet 6s ease-in-out infinite;transform-origin:50% 100%}
+  .st-otur .a-hand{animation:otHand 6s ease-in-out infinite}
+  .st-bekle .a-pet{animation:breath 2s ease-in-out infinite;transform-origin:50% 100%}
+  .st-bekle .a-own{animation:bkOwner 6s ease-in-out infinite}
+  .st-bekle .a-hand{animation:bkHand 6s infinite}
+  .st-gel .a-pet{animation:glPet 6s ease-in-out infinite}
+  .st-pati .a-hand{animation:ptHand 6s infinite}
+  .st-pati .a-paw{animation:ptPaw 6s infinite}
+
+  /* ---------- form ---------- */
+  .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .f-item{display:flex;flex-direction:column;gap:5px}
+  .f-item.full{grid-column:1/-1}
+  .f-item label{font-size:11px;font-weight:700;color:var(--gray)}
+  .f-item input,.f-item select{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:var(--card);color:var(--ink);outline:none;width:100%;font-family:inherit}
+  .f-item input:focus,.f-item select:focus{border-color:var(--green)}
+
+  /* ---------- pixel oyun ---------- */
+  .g-room{position:relative;border-radius:22px;background:linear-gradient(#CDEBFA 58%,#BFE6C9 58%);height:290px;overflow:hidden;margin-bottom:12px;border:1px solid var(--line);transition:background .8s;cursor:pointer;user-select:none}
+  .g-room.night{background:linear-gradient(#232E52 58%,#33415E 58%)}
+  .g-sun{position:absolute;right:16px;top:14px;font-size:30px;transition:.6s}
+  .g-moon{position:absolute;right:16px;top:14px;font-size:26px;opacity:0;transition:.6s}
+  .night .g-sun{opacity:0}.night .g-moon{opacity:1}
+  .g-stars{position:absolute;top:14px;left:18px;font-size:11px;color:#fff;opacity:0;letter-spacing:26px;transition:.8s;pointer-events:none}
+  .night .g-stars{opacity:.9}
+  .g-hud{position:absolute;left:12px;top:12px;display:flex;gap:8px;z-index:4;pointer-events:none}
+  .g-chip{background:rgba(255,255,255,.88);border-radius:99px;padding:4px 11px;font-size:11px;font-weight:800;color:#2A5240;box-shadow:var(--shadow)}
+  .g-bub{position:absolute;left:50%;top:44px;transform:translateX(-50%);background:var(--card);border-radius:14px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--ink);box-shadow:var(--shadow);opacity:0;transition:.25s;max-width:86%;text-align:center;z-index:5;pointer-events:none}
+  .g-bub.show{opacity:1}
+  .g-bub::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%) rotate(45deg);width:11px;height:11px;background:var(--card)}
+  .g-wrap{position:absolute;bottom:34px;left:130px;z-index:2}
+  .g-wrap canvas{display:block;image-rendering:pixelated}
+  .g-acc{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;line-height:1;z-index:3}
+  .g-acc.pos-head{top:-15px}.g-acc.pos-face{top:22%}.g-acc.pos-neck{top:54%}
+  .g-emote{position:absolute;left:72%;top:-20px;font-size:15px;opacity:0;pointer-events:none}
+  .g-emote.pop{animation:partUp 1.3s ease-out}
+  .g-part{position:absolute;font-size:15px;animation:partUp 1.1s ease-out forwards;pointer-events:none;z-index:6}
+  @keyframes partUp{0%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-48px) scale(1.35)}}
+  .g-ball{position:absolute;font-size:20px;display:none;z-index:2;line-height:1;pointer-events:none}
+  .g-dot{position:absolute;width:13px;height:13px;border-radius:50%;background:#FF3B30;box-shadow:0 0 14px 5px rgba(255,59,48,.55);display:none;z-index:2;pointer-events:none}
+  .g-item{position:absolute;font-size:22px;opacity:0;transition:bottom .5s ease-in,opacity .3s;z-index:2;line-height:1;pointer-events:none}
+  .g-name{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:11px;font-weight:800;color:#2A5240;background:rgba(255,255,255,.75);padding:2px 12px;border-radius:99px;pointer-events:none}
+  .night .g-name{background:rgba(255,255,255,.35);color:#fff}
+  .g-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+  .g-stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow)}
+  .g-stat b{font-size:10.5px;color:var(--gray);display:flex;justify-content:space-between;margin-bottom:6px;font-weight:700}
+  .g-track{height:7px;border-radius:99px;background:#EDF3F0;overflow:hidden}
+  .g-fill{height:100%;border-radius:99px;transition:width .4s;background:var(--green)}
+  .g-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  #fCanvas{width:100%;border-radius:18px;display:block;touch-action:manipulation;cursor:pointer;border:1px solid var(--line)}
+  .g-act{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 2px;text-align:center;cursor:pointer;box-shadow:var(--shadow);font-weight:700;color:var(--ink);font-size:10.5px;transition:.12s}
+  .g-act span{font-size:20px;display:block;margin-bottom:3px}
+  .g-act:active{transform:scale(.93)}
+  .g-lvl{display:flex;align-items:center;gap:12px}
+  .jump{animation:gJump .5s ease 2}
+  @keyframes gJump{0%,100%{transform:none}50%{transform:translateY(-26px)}}
+  .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .shop-item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center;box-shadow:var(--shadow)}
+  .shop-item b{font-size:12.5px;color:var(--ink);display:block;margin:6px 0 9px}
+  .s-btn{border:none;border-radius:10px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;background:var(--green);color:#fff}
+  .s-btn.on{background:var(--green-soft);color:var(--green)}
+  .s-btn.no{background:#E8EEEB;color:#9AA8A2}
+  .s-btn:disabled{background:#E8EEEB;color:#9AA8A2;cursor:default}
+
+  /* ---------- PETID ana ekran ---------- */
+  .mini-pet{width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;transition:.15s}
+  .mini-pet.on{border-color:var(--green);background:var(--green-soft)}
+  .hero-search{position:relative;margin:58px 0 14px}
+  #hCanvas{position:absolute;left:240px;top:-48px;image-rendering:pixelated;cursor:pointer;z-index:2;transition:left .13s linear}
+  .bigpet-wrap{display:flex;justify-content:center;padding:6px 0 2px}
+  #bigFoto{height:195px;width:195px;object-fit:cover;border-radius:50%;opacity:.5;display:none;
+    -webkit-mask-image:radial-gradient(circle,#000 52%,transparent 74%);
+    mask-image:radial-gradient(circle,#000 52%,transparent 74%);
+    animation:begTilt 5s ease-in-out infinite;pointer-events:none}
+  #bigPet{opacity:.24;image-rendering:pixelated;animation:begTilt 4.5s ease-in-out infinite}
+  @keyframes begTilt{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+  .h-bub{position:absolute;right:78px;top:-46px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--ink);opacity:0;transition:.25s;box-shadow:var(--shadow);white-space:nowrap;z-index:3}
+  .h-bub.show{opacity:1}
+  .search.big{margin-bottom:0;padding:14px 15px;border-radius:18px;box-shadow:var(--shadow);border-color:var(--green-mid)}
+  .search.big input{font-size:13.5px}
+  .go-btn{border:none;background:var(--green);color:#fff;width:34px;height:34px;border-radius:11px;font-size:15px;cursor:pointer;flex-shrink:0;font-weight:800}
+  .big-cards .mod-card{padding:18px 15px}
+  .big-cards .mod-card .mi{width:48px;height:48px;font-size:24px;border-radius:15px}
+  .big-cards .mod-card b{font-size:14.5px}
+  .btn.ghost{background:var(--card);color:var(--green);border:1.5px solid var(--green)}
+  .auth{display:flex;gap:10px;margin-top:18px}
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:98px;background:#123C30;color:#fff;font-size:12px;font-weight:700;padding:10px 16px;border-radius:99px;opacity:0;transition:.3s;z-index:90;box-shadow:var(--shadow);max-width:86%;text-align:center;pointer-events:none}
+  .toast.show{opacity:1}
+  .landing{min-height:645px;display:flex;flex-direction:column}
+  .landing .chip{padding:12px 19px;font-size:14px;border-radius:999px;box-shadow:var(--shadow)}
+  .landing .chip-row{gap:10px}
+  .home-ans{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:16px;padding:13px 15px;margin-bottom:14px;box-shadow:var(--shadow);animation:fade .3s}
+  .ha-head{font-size:11px;font-weight:800;color:var(--purple);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .ha-head a{cursor:pointer;color:var(--gray);font-size:13px}
+  .ha-q{font-size:11.5px;color:var(--gray);font-style:italic;margin-bottom:6px}
+  .ha-body{font-size:12.5px;color:var(--ink);line-height:1.55}
+  .ha-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .ha-acts .chip{padding:8px 13px;font-size:12px;box-shadow:none}
+  @keyframes dotsBlink{0%,100%{opacity:.2}50%{opacity:1}}
+  .ha-dots{animation:dotsBlink 1s infinite}
+  .scroll-hint{text-align:center;font-size:11px;color:var(--gray);font-weight:700;padding-bottom:8px;cursor:pointer;animation:hintBob 1.7s ease-in-out infinite}
+  @keyframes hintBob{0%,100%{transform:none;opacity:.65}50%{transform:translateY(6px);opacity:1}}
+  .below{opacity:.22;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease,filter .55s;filter:saturate(.5)}
+  .below.reveal{opacity:1;transform:none;filter:none}
+
+  /* ---------- karanlık tema ---------- */
+  .phone.dark{
+    --bg:#0F1714; --card:#1A2420; --ink:#E9F1ED; --gray:#96A69F; --line:#27382F;
+    --green-soft:#173629; --green-mid:#20503C;
+    --amber-soft:#3A2E12; --blue-soft:#152A42; --red-soft:#3B181C; --purple-soft:#262047;
+    --shadow:0 4px 18px rgba(0,0,0,.4);
+    background:var(--bg);
+  }
+  .phone.dark .step p,.phone.dark .feed p{color:#B9C9C2}
+  .phone.dark #lDesc{color:#B9C9C2!important}
+  .phone.dark .g-chip{background:rgba(0,0,0,.45);color:#DCE7E2}
+  .phone.dark .g-name{background:rgba(0,0,0,.45);color:#DCE7E2}
+  .phone.dark .switch{background:#33463E}
+  .phone.dark .g-track{background:#22312B}
+  .phone.dark .task .cb{border-color:#3B4F46}
+  .phone.dark .toast{background:#E9F1ED;color:#12211C}
+  .phone.dark .ai-btn{border-color:var(--bg)!important}
+  .theme-btn{width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.2s}
+  .theme-btn:active{transform:rotate(40deg)}
+
+  /* ---------- eğitim sekmeleri (minimal) ---------- */
+  .eg-tab{animation:fade .25s}
+  .prog-head{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 2px 10px}
+  .prog-head b{font-size:16.5px;color:var(--ink);display:block;letter-spacing:-.2px}
+  .prog-head span{font-size:11.5px;color:var(--gray)}
+  .prog-head .pct{font-size:23px;font-weight:800;color:var(--green)}
+  .thinbar{height:5px;border-radius:99px;background:var(--green-soft);overflow:hidden;margin-bottom:6px}
+  .thinbar i{display:block;height:100%;background:var(--green);border-radius:99px}
+  .mini-label{font-size:10.5px;font-weight:800;letter-spacing:1.3px;color:var(--gray);margin:22px 2px 4px;display:flex;justify-content:space-between;align-items:center}
+  .mini-tasks .task{padding:11px 2px}
+  .syl-row{display:flex;align-items:center;gap:12px;padding:12.5px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+  .syl-row:last-child{border-bottom:none}
+  .syl-no{width:29px;height:29px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--gray);flex-shrink:0;background:var(--card)}
+  .syl-no.done{background:var(--green);border-color:var(--green);color:#fff}
+  .syl-no.next{border-color:var(--green);color:var(--green)}
+  .syl-row b{font-size:13.5px;color:var(--ink);display:block;font-weight:600}
+  .syl-row .sub2{font-size:11px;color:var(--gray)}
+  .syl-row .chev{margin-left:auto;color:#B9C7C0;font-size:19px;flex-shrink:0}
+  .mini-streak{display:flex;gap:13px;padding:6px 2px 10px}
+  .mstreak{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:9.5px;color:var(--gray);font-weight:700}
+  .mstreak i{width:11px;height:11px;border-radius:50%;background:var(--line)}
+  .mstreak.on i{background:var(--green)}
+  .mini-note{font-size:11.5px;color:var(--gray);line-height:1.6;margin-top:16px;padding:0 2px}
+  /* sağlık skor rozeti */
+  .score-pill{width:46px;height:46px;border-radius:50%;border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:var(--green);font-size:15px;background:var(--card);line-height:1}
+  .score-pill span{font-size:6.5px;letter-spacing:.8px;color:var(--gray);margin-top:1px}
+
+  /* ---------- PatiMatch ---------- */
+  .m-stack{position:relative;height:428px;margin-bottom:14px}
+  .m-card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .m-img{height:55%;display:flex;align-items:center;justify-content:center;font-size:100px;position:relative}
+  .m-uyum{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.92);color:#C2295B;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px}
+  .m-info{padding:13px 16px;flex:1}
+  .m-info b{font-size:17px;color:var(--ink)}
+  .m-meta{font-size:12px;color:var(--gray);display:block;margin:3px 0 7px}
+  .m-info p{font-size:12.5px;color:#3E524B;line-height:1.5;margin-bottom:9px}
+  .phone.dark .m-info p{color:#B9C9C2}
+  .m-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .m-actions{display:flex;justify-content:center;gap:28px;margin-bottom:12px}
+  .m-btn{width:60px;height:60px;border-radius:50%;border:none;font-size:24px;cursor:pointer;box-shadow:var(--shadow)}
+  .m-btn.no{background:var(--card);border:1.5px solid var(--line)}
+  .m-btn.yes{background:linear-gradient(135deg,#F472B6,#E11D48);color:#fff}
+  .m-btn:active{transform:scale(.9)}
+  @keyframes swipeR{to{transform:translateX(130%) rotate(14deg);opacity:0}}
+  @keyframes swipeL{to{transform:translateX(-130%) rotate(-14deg);opacity:0}}
+  .m-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gray);font-size:14px;font-weight:700;text-align:center;background:var(--card);border:1.5px dashed var(--line);border-radius:24px}
+  .m-empty a{color:var(--green);cursor:pointer}
+  .overlay.center{align-items:center;justify-content:center;padding:24px}
+  .match-pop{background:var(--card);border-radius:26px;padding:24px 22px;text-align:center;max-width:300px;box-shadow:var(--shadow);animation:fade .3s}
+  .match-pop .mp-heads{display:flex;justify-content:center;align-items:center;gap:6px;font-size:48px;margin:8px 0}
+
+  /* ---------- kayıt ol ---------- */
+  #scr-kayit{padding-bottom:100px}
+  .auth-wrap{min-height:100%;display:flex;flex-direction:column}
+  .auth-logo{text-align:center;margin:14px 0 6px}
+  .auth-logo .mark{width:66px;height:66px;border-radius:22px;background:linear-gradient(135deg,#0EA574,#0A7A58);display:inline-flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 10px 24px rgba(14,165,116,.35)}
+  .auth-logo h1{font-size:23px;color:var(--ink);margin-top:12px;letter-spacing:-.4px}
+  .auth-logo p{font-size:12.5px;color:var(--gray);margin-top:4px}
+  .auth-tabs{display:flex;background:var(--green-soft);border-radius:14px;padding:4px;margin:18px 0 16px}
+  .auth-tabs button{flex:1;border:none;background:none;padding:10px;border-radius:11px;font-size:13px;font-weight:700;color:var(--gray);cursor:pointer;transition:.15s;font-family:inherit}
+  .auth-tabs button.on{background:var(--card);color:var(--green);box-shadow:var(--shadow)}
+  .auth-form{display:flex;flex-direction:column;gap:13px}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld label{font-size:11.5px;font-weight:700;color:var(--gray)}
+  .fld .box{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:13px;padding:12px 14px;background:var(--card);transition:.15s}
+  .fld .box:focus-within{border-color:var(--green)}
+  .fld .box span.ic{font-size:16px;flex-shrink:0}
+  .fld .box input{flex:1;border:none;outline:none;background:none;font-size:13.5px;color:var(--ink);font-family:inherit}
+  .fld .box .eye{cursor:pointer;font-size:15px;color:var(--gray);user-select:none}
+  .fld .hint{font-size:10.5px;color:var(--gray)}
+  .fld .err{font-size:10.5px;color:var(--red);font-weight:700;display:none}
+  .fld.bad .box{border-color:var(--red);background:var(--red-soft)}
+  .fld.bad .err{display:block}
+  .pettype{display:flex;gap:10px}
+  .pettype .pt{flex:1;border:1.5px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;background:var(--card);transition:.15s}
+  .pettype .pt.on{border-color:var(--green);background:var(--green-soft)}
+  .pettype .pt .e{font-size:26px}
+  .pettype .pt b{font-size:11.5px;color:var(--ink);display:block;margin-top:4px;font-weight:700}
+  .agree{display:flex;align-items:flex-start;gap:10px;margin:2px 0}
+  .agree .cbx{width:22px;height:22px;border-radius:7px;border:2px solid #CBDAD3;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;cursor:pointer;transition:.15s}
+  .agree .cbx.on{background:var(--green);border-color:var(--green)}
+  .agree p{font-size:11.5px;color:var(--gray);line-height:1.5}
+  .agree p a{color:var(--green);font-weight:700;cursor:pointer;text-decoration:none}
+  .auth-div{display:flex;align-items:center;gap:12px;margin:6px 0;color:var(--gray);font-size:11px;font-weight:600}
+  .auth-div::before,.auth-div::after{content:"";flex:1;height:1px;background:var(--line)}
+  .soc-row{display:flex;gap:10px}
+  .soc{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--line);border-radius:13px;padding:12px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;transition:.15s}
+  .soc:active{transform:scale(.97)}
+  .soc .g{font-size:15px}
+  .auth-foot{text-align:center;font-size:12.5px;color:var(--gray);margin-top:16px}
+  .auth-foot a{color:var(--green);font-weight:800;cursor:pointer;text-decoration:none}
+  .auth-back{background:none;border:none;color:var(--gray);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;padding:2px 0;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ================= ANA SAYFA (PETID) ================= -->
+  <section class="screen active" id="scr-home">
+    <div class="landing">
+    <div class="topbar">
+      <div>
+        <h1>🐾 PET<span style="color:var(--green)">ID</span></h1>
+        <div class="sub">Merhaba Leo — can dostunun dijital dünyası</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="mini-pet on" id="mp0" onclick="setPet(0,this)">🐱</div>
+        <div class="mini-pet" id="mp1" onclick="setPet(1,this)">🐶</div>
+        <div class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="bigpet-wrap">
+      <img id="bigFoto" alt="" onerror="fotoYok(this)">
+      <canvas id="bigPet" width="176" height="187" style="display:none"></canvas>
+    </div>
+
+    <div class="hero-search">
+      <div class="h-bub" id="hBub"></div>
+      <canvas id="hCanvas" width="48" height="51" onclick="heroPetTap()"></canvas>
+      <form class="search big" onsubmit="homeSearch(event)">🔍<input id="homeQ" placeholder="Bugün nasıl yardımcı olabilirim?"><button type="submit" class="go-btn">→</button></form>
+    </div>
+
+    <div class="home-ans" id="homeAns" style="display:none"></div>
+
+    <div class="match-promo" onclick="go('match');openMatch()">
+      <div class="mp-badge" id="mpBadge">💘 3 yeni aday</div>
+      <div class="mp-top" style="padding-right:80px"><span class="mp-emoji">💘</span><b>PatiMatch — <span id="mpPetAd">Boncuk</span> için eş bul</b></div>
+      <span class="mp-sub">Sana en uyumlu 3 aday hazır · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
+      <div class="mp-cta">Adaylara bak →</div>
+    </div>
+
+    <div class="chip-row" style="margin-bottom:16px">
+      <div class="chip match-hl" onclick="go('match');openMatch()">💘 PatiMatch<span class="chip-dot" id="chipDot">3</span></div>
+      <div class="chip" onclick="go('egitim')">🎓 Eğitim</div>
+      <div class="chip" onclick="go('saglik')">🩺 Sağlık</div>
+      <div class="chip" onclick="go('ai')">🐾 Davranış</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('vet')">🧑‍⚕️ Veteriner</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('otel')">🏨 Pet Oteli</div>
+      <div class="chip" onclick="go('hizmet');filtSrvKey('hepsi')">❤️ Hizmetler</div>
+      <div class="chip" onclick="go('saglik')">💉 Aşı Takvimi</div>
+      <div class="chip" onclick="go('profil')">🪪 Profil</div>
+      <div class="chip" onclick="go('oyun')">🎮 Pixel Oyun</div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="scroll-hint" onclick="scrollHome()">Keşfetmek için kaydır ⌄</div>
+    </div><!-- /landing -->
+
+    <div class="below" id="homeBelow">
+    <div class="grid2 big-cards">
+      <div class="mod-card" onclick="go('egitim')">
+        <div class="mi" style="background:var(--green-soft)">🎓</div>
+        <b>Eğitim</b><span>Kişiselleştirilmiş dersler, animasyonlar ve günlük görevler</span>
+      </div>
+      <div class="mod-card" onclick="go('saglik')">
+        <div class="mi" style="background:var(--red-soft)">🩺</div>
+        <b>Sağlık</b><span>Aşı takibi, ilaçlar ve AI sağlık rehberi</span>
+      </div>
+      <div class="mod-card" onclick="go('ai')">
+        <div class="mi" style="background:var(--purple-soft)">🤖</div>
+        <b>AI Yardım</b><span>"Can dostum bana ne anlatmak istiyor?"</span>
+      </div>
+      <div class="mod-card" onclick="go('hizmet')">
+        <div class="mi" style="background:var(--blue-soft)">❤️</div>
+        <b>Hizmetler &amp; Topluluk</b><span>Veteriner, otel, eğitmen ve sahiplendirme</span>
+      </div>
+    </div>
+
+    <div class="auth">
+      <button class="btn" onclick="openAuth('kayit')">Ücretsiz Başla</button>
+      <button class="btn ghost" onclick="openAuth('giris')">Giriş Yap</button>
+    </div>
+    <div style="text-align:center;font-size:10.5px;color:var(--gray);margin-top:10px">Kaydolmadan da tüm özellikleri keşfedebilirsin 🐾</div>
+    </div><!-- /below -->
+  </section>
+
+  <!-- ================= KAYIT OL / GİRİŞ ================= -->
+  <section class="screen" id="scr-kayit">
+    <div class="auth-wrap">
+      <button class="auth-back" onclick="go('home')">‹ Geri</button>
+
+      <div class="auth-logo">
+        <div class="mark">🐾</div>
+        <h1>PatiDost'a Katıl</h1>
+        <p id="authSub">Can dostunun dijital dünyasına ilk adım</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabKayit" class="on" onclick="authMode('kayit')">Kayıt Ol</button>
+        <button id="tabGiris" onclick="authMode('giris')">Giriş Yap</button>
+      </div>
+
+      <div class="auth-form">
+        <div class="fld" id="fName">
+          <label>Ad Soyad</label>
+          <div class="box"><span class="ic">👤</span><input id="kAd" placeholder="Örn. Leo Yılmaz" autocomplete="name"></div>
+          <div class="err">Lütfen adını gir</div>
+        </div>
+
+        <div class="fld" id="fMail">
+          <label>E-posta</label>
+          <div class="box"><span class="ic">✉️</span><input id="kMail" type="email" placeholder="ornek@eposta.com" autocomplete="email"></div>
+          <div class="err">Geçerli bir e-posta gir</div>
+        </div>
+
+        <div class="fld" id="fPass">
+          <label>Şifre</label>
+          <div class="box"><span class="ic">🔒</span><input id="kPass" type="password" placeholder="En az 6 karakter" autocomplete="new-password"><span class="eye" onclick="togglePass(this,'kPass')">👁️</span></div>
+          <div class="hint">En az 6 karakter kullan</div>
+          <div class="err">Şifre en az 6 karakter olmalı</div>
+        </div>
+
+        <div class="fld reg-only">
+          <label>Hangi can dostun var?</label>
+          <div class="pettype">
+            <div class="pt on" data-t="kedi" onclick="pickPetType(this)"><div class="e">🐱</div><b>Kedi</b></div>
+            <div class="pt" data-t="kopek" onclick="pickPetType(this)"><div class="e">🐶</div><b>Köpek</b></div>
+            <div class="pt" data-t="diger" onclick="pickPetType(this)"><div class="e">🐾</div><b>Diğer</b></div>
+          </div>
+        </div>
+
+        <div class="agree reg-only" id="fAgree">
+          <div class="cbx" id="agreeBox" onclick="toggleAgree()"></div>
+          <p><a onclick="toast('📄 Kullanım Koşulları (prototip)')">Kullanım Koşulları</a> ve <a onclick="toast('🔒 Gizlilik Politikası (prototip)')">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.</p>
+        </div>
+
+        <button class="btn" id="authBtn" onclick="submitAuth()">Hesap Oluştur</button>
+
+        <div class="auth-div">veya</div>
+        <div class="soc-row">
+          <div class="soc" onclick="toast('🔵 Google ile devam (prototip)')"><span class="g">🅶</span> Google</div>
+          <div class="soc" onclick="toast('🍎 Apple ile devam (prototip)')"><span class="g"></span> Apple</div>
+        </div>
+
+        <div class="auth-foot" id="authFoot">
+          Zaten hesabın var mı? <a onclick="authMode('giris')">Giriş yap</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EĞİTİM ================= -->
+  <section class="screen" id="scr-egitim">
+    <div class="topbar">
+      <div><h1>Eğitim 🎓</h1><div class="sub">Kişiselleştirilmiş program</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="egChips">
+      <div class="chip on" onclick="egTab('kedi',this)">🐱 Kedi Programı</div>
+      <div class="chip" onclick="egTab('kopek',this)">🐶 Köpek Programı</div>
+      <div class="chip" onclick="egTab('zeka',this)">🧩 Zeka Oyunları</div>
+      <div class="chip" onclick="egTab('aktivite',this)">🏃 Antreman</div>
+    </div>
+
+    <div class="eg-tab" id="tab-kedi">
+    <div class="prog-head"><div><b>Temel İtaat — Kedi</b><span>2. hafta · 8/12 ders tamamlandı</span></div><span class="pct">%68</span></div>
+    <div class="thinbar"><i style="width:68%"></i></div>
+
+    <div class="mini-label">BUGÜNÜN GÖREVLERİ <span id="taskCount">3/5</span></div>
+    <div class="mini-tasks" id="taskList">
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Sabah oyun seansı</b><span>10 dk · Enerji atma</span></div><div class="pts">+10 🏆</div></div>
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>"Otur" komutu tekrarı</b><span>5 dk · Ödüllü pekiştirme</span></div><div class="pts">+15 🏆</div></div>
+      <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Tımar &amp; tüy bakımı</b><span>5 dk · Alışkanlık</span></div><div class="pts">+5 🏆</div></div>
+      <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>"Bekle" komutu — yeni ders</b><span>10 dk · Animasyonlu anlatım</span></div><div class="pts">+20 🏆</div></div>
+      <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Akşam zeka oyunu</b><span>8 dk · Ödül avı</span></div><div class="pts">+10 🏆</div></div>
+    </div>
+
+    <div class="mini-label">DERSLER</div>
+    <div class="syllabus">
+      <div class="syl-row" onclick="openLesson('otur')"><span class="syl-no done">✓</span><div><b>"Otur" Komutu</b><span class="sub2">3 dk · Başlangıç · Tamamlandı</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('bekle')"><span class="syl-no next">2</span><div><b>"Bekle" Komutu</b><span class="sub2">4 dk · Sıradaki ders</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('gel')"><span class="syl-no">3</span><div><b>"Gel" Çağrısı</b><span class="sub2">5 dk · Orta seviye</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('pati')"><span class="syl-no">4</span><div><b>"Pati Ver" Numarası</b><span class="sub2">4 dk · Eğlence</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('tuvalet')"><span class="syl-no">5</span><div><b>Tuvalet Eğitimi</b><span class="sub2">6 dk · Başlangıç</span></div><span class="chev">›</span></div>
+      <div class="syl-row" onclick="openLesson('yatak')"><span class="syl-no">6</span><div><b>"Yatağına Git" Komutu</b><span class="sub2">4 dk · Sakinleşme</span></div><span class="chev">›</span></div>
+    </div>
+
+    <div class="mini-label">HAFTALIK SERİ <span>🔥 6 gün</span></div>
+    <div class="mini-streak">
+      <div class="mstreak on"><i></i>Pzt</div>
+      <div class="mstreak on"><i></i>Sal</div>
+      <div class="mstreak on"><i></i>Çar</div>
+      <div class="mstreak on"><i></i>Per</div>
+      <div class="mstreak on"><i></i>Cum</div>
+      <div class="mstreak on"><i></i>Cmt</div>
+      <div class="mstreak"><i></i>Paz</div>
+    </div>
+    </div><!-- /tab-kedi -->
+
+    <!-- KÖPEK PROGRAMI -->
+    <div class="eg-tab" id="tab-kopek" style="display:none">
+      <div class="prog-head"><div><b>PETID Temel Eğitim — Köpek</b><span>1. hafta · 2/12 kademe tamamlandı</span></div><span class="pct">%17</span></div>
+      <div class="thinbar"><i style="width:17%"></i></div>
+
+      <div class="mini-label">BUGÜNÜN GÖREVLERİ <span>2/4</span></div>
+      <div class="mini-tasks">
+        <div class="task done" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>Sabah yürüyüşü</b><span>25 dk · Tasma adabıyla</span></div><div class="pts">+15 🏆</div></div>
+        <div class="task done" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>"Otur-Bekle" zinciri</b><span>5 dk · Mama öncesi rutin</span></div><div class="pts">+10 🏆</div></div>
+        <div class="task" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>"Gel" çağrısı pratiği</b><span>10 dk · Bahçede uzun tasmayla</span></div><div class="pts">+20 🏆</div></div>
+        <div class="task" onclick="this.classList.toggle('done')"><div class="cb">✓</div><div><b>Akşam koku oyunu</b><span>10 dk · Zihinsel yorgunluk</span></div><div class="pts">+10 🏆</div></div>
+      </div>
+
+      <div class="mini-label">12 KADEME MÜFREDATI</div>
+      <div class="syllabus">
+        <div class="syl-row" onclick="openLesson('k1')"><span class="syl-no done">✓</span><div><b>İsmini Öğrenme</b><span class="sub2">🎥 Videolu ders · İsmini duyunca sana bakması</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k2')"><span class="syl-no done">✓</span><div><b>Gel Komutu</b><span class="sub2">Çağrı sinyalinde sahibine gelmesi</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k3')"><span class="syl-no next">3</span><div><b>Dikkat Kurma</b><span class="sub2">Göz teması · Sıradaki kademe</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k4')"><span class="syl-no">4</span><div><b>Otur Komutu</b><span class="sub2">Güvenli ve sakin otur pozisyonu</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k5')"><span class="syl-no">5</span><div><b>Bekle Komutu</b><span class="sub2">Yerinde kalma + serbest bırakma</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k6')"><span class="syl-no">6</span><div><b>Yat Komutu</b><span class="sub2">Sakinleşme ve kontrol pozisyonu</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k7')"><span class="syl-no">7</span><div><b>Pati Ver</b><span class="sub2">Eğlenceli numara + güven bağı</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k8')"><span class="syl-no">8</span><div><b>Bırak Komutu</b><span class="sub2">Nesneyi gönüllü bırakma</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k9')"><span class="syl-no">9</span><div><b>Hayır / Durdurma Sinyali</b><span class="sub2">Alternatife yönlendirme</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k10')"><span class="syl-no">10</span><div><b>Tuvalet Eğitimi</b><span class="sub2">Uygun yerde tuvalet alışkanlığı</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k11')"><span class="syl-no">11</span><div><b>Tasmalı Yürüyüş</b><span class="sub2">Tasmada çekmeden yürüme</span></div><span class="chev">›</span></div>
+        <div class="syl-row" onclick="openLesson('k12')"><span class="syl-no">12</span><div><b>Dikkat Dağıtıcıda Gel</b><span class="sub2">Dış ortamda geri çağırma · İleri</span></div><span class="chev">›</span></div>
+      </div>
+
+      <div class="mini-note">🐾 Amaç köpeği zorlamak değil, doğru davranışı kolaylaştırıp ödülle güçlendirmek. Bir kademede %80 başarı olmadan sonrakine geçme — eğitim, geri bildirimine göre kişiselleşir.</div>
+    </div><!-- /tab-kopek -->
+
+    <!-- ZEKA OYUNLARI -->
+    <div class="eg-tab" id="tab-zeka" style="display:none">
+      <div class="card" style="background:var(--purple-soft);border:none">
+        <b style="font-size:13.5px;color:var(--ink)">🧩 Zihinsel egzersiz neden önemli?</b>
+        <span style="font-size:12px;color:var(--gray);display:block;margin-top:4px;line-height:1.55">10 dakikalık zihin oyunu, 30 dakikalık fiziksel aktiviteye eşdeğer yorgunluk sağlar. Sıkılan hayvan yıkıcı davranışa yönelir — zihni çalışan hayvan mutludur.</span>
+      </div>
+
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--amber-soft);flex-shrink:0">🥤</div><div><b style="font-size:13.5px;color:var(--ink)">Bardak Oyunu</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">5 dk · Kolay · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Ödülü 3 bardaktan birinin altına sakla, gözünün önünde karıştır ve bulmasına izin ver. Doğru bardağı gösterince büyük ödül! Her seferinde karıştırmayı hızlandır.</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--green-soft);flex-shrink:0">🧦</div><div><b style="font-size:13.5px;color:var(--ink)">Koku Avı</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">10 dk · Orta · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Ödül mamalarını odanın farklı köşelerine sakla (önce görünür, sonra gizli yerlere). "Ara!" komutuyla başlat. Burun çalıştırmak, hayvanlar için en doğal ve en yorucu zihin egzersizidir.</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--blue-soft);flex-shrink:0">🍽️</div><div><b style="font-size:13.5px;color:var(--ink)">Puzzle Mama Kabı</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">Her öğün · Kolay · Kedi + Köpek</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Normal mama kabı yerine yalama matı veya puzzle kap kullan. Hızlı yemeyi engeller, sindirime iyi gelir ve her öğünü zihin egzersizine çevirir. Evde yapım: muffin kalıbı + tenis topları!</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--red-soft);flex-shrink:0">🗣️</div><div><b style="font-size:13.5px;color:var(--ink)">İsim Tanıma</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">15 dk · Zor · İleri seviye</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Bir oyuncağa isim ver ("Top nerede?") ve doğru oyuncağı getirince ödüllendir. Kelime dağarcığı köpeklerde 100+ kelimeye çıkabilir. Border Collie Chaser 1000+ kelime biliyordu!</p></div></div></div>
+      <div class="card"><div style="display:flex;gap:12px"><div class="mi" style="background:var(--purple-soft);flex-shrink:0">📦</div><div><b style="font-size:13.5px;color:var(--ink)">Kutu Keşfi (Kediler)</b><span style="font-size:11px;color:var(--gray);display:block;margin:2px 0 5px">Serbest · Kolay · Kedi</span><p style="font-size:12px;color:var(--gray);line-height:1.5">Farklı boylarda karton kutuları odaya diz, bazılarına ödül ve oyuncak sakla. Kediler için kutu = güven + av alanı. Haftada bir düzeni değiştir, keşif hissi hep taze kalsın.</p></div></div></div>
+    </div><!-- /tab-zeka -->
+
+    <!-- ANTRENMAN -->
+    <div class="eg-tab" id="tab-aktivite" style="display:none">
+      <div class="sec-title" style="margin-top:0"><h2>Haftalık Aktivite (dk)</h2><a>Hedef: 45 dk/gün</a></div>
+      <div class="card">
+        <div class="bars">
+          <div class="bar"><i style="height:62%"></i><span>Pzt</span></div>
+          <div class="bar"><i style="height:80%"></i><span>Sal</span></div>
+          <div class="bar"><i style="height:55%"></i><span>Çar</span></div>
+          <div class="bar"><i style="height:90%"></i><span>Per</span></div>
+          <div class="bar"><i style="height:70%"></i><span>Cum</span></div>
+          <div class="bar"><i style="height:96%"></i><span>Cmt</span></div>
+          <div class="bar cur"><i style="height:40%"></i><span>Paz</span></div>
+        </div>
+      </div>
+
+      <div class="sec-title"><h2>Günlük Hedefler</h2><a>Düzenle</a></div>
+      <div class="card">
+        <div class="med"><div class="mi2" style="background:var(--green-soft)">🏃</div><div><b>Aktif oyun / yürüyüş</b><span>Kedi: 3×10 dk av oyunu · Köpek: 2×25 dk yürüyüş</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">%67</span></div>
+        <div class="med"><div class="mi2" style="background:var(--blue-soft)">🧩</div><div><b>Zihinsel egzersiz</b><span>Günde en az 1 zeka oyunu · Bugün: Koku avı ✓</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">✓</span></div>
+        <div class="med"><div class="mi2" style="background:var(--purple-soft)">🤸</div><div><b>Esneme &amp; tırmanma</b><span>Kedi rafı / engel atlama · Eklem sağlığı</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">✓</span></div>
+      </div>
+
+      <div class="tipbox" style="background:var(--amber-soft);color:#8A5B10">⚡ Enerji ipucu: Kediler kısa-yoğun (sprint), köpekler uzun-tempolu egzersizi sever. Kedinle 10 dakikalık tüy oltası seansı, köpeğinle tempolu yürüyüş + koku molası kombinasyonu idealdir. Yaz sıcağında egzersizi sabah/akşam saatlerine kaydır.</div>
+    </div><!-- /tab-aktivite -->
+  </section>
+
+  <!-- ================= SAĞLIK ================= -->
+  <section class="screen" id="scr-saglik">
+    <div class="topbar">
+      <div><h1>Sağlık 🩺</h1><div class="sub" id="subSag">Boncuk'un sağlık takibi</div></div>
+      <div style="display:flex;gap:9px;align-items:center">
+        <div class="score-pill" title="Sağlık Skoru — Çok İyi (▲ +3)">92<span>SKOR</span></div>
+        <div class="avatar" onclick="go('profil')">🐱</div>
+      </div>
+    </div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="sagChips">
+      <div class="chip on" onclick="sagJump('sagAsi',this)">💉 Aşılar</div>
+      <div class="chip" onclick="sagJump('sagGecmis',this)">📋 Geçmiş</div>
+      <div class="chip" onclick="sagJump('sagIlac',this)">💊 İlaçlar</div>
+      <div class="chip" onclick="sagJump('sagKilo',this)">⚖️ Kilo</div>
+      <div class="chip" onclick="sagJump('sagBesin',this)">🍽️ Beslenme</div>
+      <div class="chip" onclick="go('ai')">🤖 AI Rehber</div>
+    </div>
+
+    <div class="sec-title" id="sagAsi" style="margin-top:4px"><h2>Aşı Takvimi</h2><a>Takvime ekle</a></div>
+    <div class="card">
+      <div class="vac"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>Karma Aşı (5'li)</b><span>14 Mart 2026 · Pati Veteriner</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span></div>
+      <div class="vac"><div class="vdot" style="background:var(--amber-soft)">💉</div><div><b>Kuduz Aşısı</b><span>12 Temmuz 2026 · Randevu alındı</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber)">6 GÜN</span></div>
+      <div class="vac"><div class="vdot" style="background:var(--blue-soft)">🗓️</div><div><b>Lösemi (FeLV)</b><span>Eylül 2026 · Planlandı</span></div><span class="badge" style="background:var(--blue-soft);color:var(--blue)">PLANLI</span></div>
+      <div class="vac"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>İç-Dış Parazit</b><span>1 Haziran 2026 · Uygulandı</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span></div>
+    </div>
+
+    <div class="sec-title" id="sagGecmis"><h2>Sağlık Geçmişi</h2><a>+ Kayıt ekle</a></div>
+    <div class="card">
+      <div class="hist"><div class="hi">🏥</div><div><b>Genel kontrol muayenesi</b><span>1 Haziran 2026 · Dr. Elif Kaya — sonuç: normal</span></div></div>
+      <div class="hist"><div class="hi">🔬</div><div><b>Kan tahlili</b><span>14 Mart 2026 · Tüm değerler referans aralığında</span></div></div>
+      <div class="hist"><div class="hi">✂️</div><div><b>Kısırlaştırma operasyonu</b><span>10 Ekim 2025 · Sorunsuz iyileşme</span></div></div>
+      <div class="hist"><div class="hi">📄</div><div><b>Tüm kayıtları görüntüle / dışa aktar</b><span>PDF olarak paylaşılabilir</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">→</span></div>
+    </div>
+
+    <div class="sec-title" id="sagIlac"><h2>İlaç &amp; Takviyeler</h2><a>+ Ekle</a></div>
+    <div class="card">
+      <div class="med"><div class="mi2" style="background:var(--red-soft)">💧</div><div><b>Parazit damlası</b><span>Ayda 1 · Sıradaki: 1 Ağustos</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🦴</div><div><b>Eklem takviyesi</b><span>Her gün · Akşam maması ile</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💊</div><div><b>Tüy yumağı macunu</b><span>Haftada 3 · Hatırlatıcı kapalı</span></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+
+    <div class="sec-title" id="sagKilo"><h2>Kilo Takibi</h2><a>4.2 kg · İdeal</a></div>
+    <div class="card">
+      <div class="bars">
+        <div class="bar"><i style="height:58%"></i><span>Şub</span></div>
+        <div class="bar"><i style="height:64%"></i><span>Mar</span></div>
+        <div class="bar"><i style="height:70%"></i><span>Nis</span></div>
+        <div class="bar"><i style="height:74%"></i><span>May</span></div>
+        <div class="bar"><i style="height:72%"></i><span>Haz</span></div>
+        <div class="bar cur"><i style="height:75%"></i><span>Tem</span></div>
+      </div>
+    </div>
+
+    <div class="sec-title" id="sagBesin"><h2>Beslenme Planı 🍽️</h2><a>Düzenle</a></div>
+    <div class="card">
+      <div class="med"><div class="mi2" style="background:var(--green-soft)">🥣</div><div><b>Günlük mama: 65 g kuru + 1 poş yaş</b><span>2 öğün · Sabah 08:00 / Akşam 19:00</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">İDEAL</span></div>
+      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💧</div><div><b>Su hedefi: ~220 ml/gün</b><span>Bugün: 160 ml · Çeşme tipi suluk öneriliyor</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">%73</span></div>
+      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🎁</div><div><b>Ödül maması limiti</b><span>Günlük kalorinin en fazla %10'u · Bugün 2/5</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">2/5</span></div>
+    </div>
+
+  </section>
+
+  <!-- ================= DAVRANIŞ & AI ================= -->
+  <section class="screen" id="scr-ai">
+    <div class="topbar">
+      <div><h1>Davranış &amp; AI 🤖</h1><div class="sub">"Can dostum bana ne anlatmak istiyor?"</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="sec-title" style="margin-top:0"><h2>Bu Haftanın Davranış Analizi</h2><a>Detay</a></div>
+    <div class="mood" style="margin-bottom:16px">
+      <div class="m"><div class="me2">⚡</div><b>Enerji</b><span style="color:var(--green)">Yüksek ▲</span></div>
+      <div class="m"><div class="me2">🍽️</div><b>İştah</b><span style="color:var(--blue)">Normal</span></div>
+      <div class="m"><div class="me2">😌</div><b>Stres</b><span style="color:var(--green)">Düşük ▼</span></div>
+    </div>
+
+    <div class="chat-box" id="chat">
+      <div class="bub ai">Merhaba Leo! 🐾 Ben PatiDost AI. Boncuk'un bir davranışını anlat, ne anlatmak istediğini birlikte çözelim.</div>
+    </div>
+
+    <div class="qrow">
+      <div class="chip" onclick="ask(this.textContent)">Sürekli miyavlıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Patisini yalıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Kuyruğu kabarık</div>
+      <div class="chip" onclick="ask(this.textContent)">Gece uyumuyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Mama yemiyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Kum kabı dışına yapıyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Çok su içiyor</div>
+      <div class="chip" onclick="ask(this.textContent)">Eşyaları deviriyor</div>
+    </div>
+
+    <div class="inp">
+      <input id="aiInput" type="text" placeholder="Bir davranış yaz... örn: kulaklarını geriye yatırıyor" onkeydown="if(event.key==='Enter')ask()">
+      <button onclick="ask()">➤</button>
+    </div>
+
+    <div style="font-size:10.5px;color:var(--gray);margin-top:10px;line-height:1.5;text-align:center">⚠️ AI yanıtları bilgilendirme amaçlıdır, veteriner muayenesinin yerini tutmaz.</div>
+  </section>
+
+  <!-- ================= PROFİL ================= -->
+  <section class="screen" id="scr-profil">
+    <div class="topbar">
+      <div><h1>Hayvan Profili 🐾</h1><div class="sub">Dijital kimlik &amp; yaşam geçmişi</div></div>
+      <div class="avatar">🐱</div>
+    </div>
+
+    <div class="idcard">
+      <div class="id-top"><span class="brand">PATİDOST · DİJİTAL KİMLİK</span><span style="font-size:16px">🐾</span></div>
+      <div class="who">
+        <div class="pa" id="pAvatar">🐱</div>
+        <div><b id="pName">Boncuk</b><span id="pMeta">Tekir Kedi · Dişi · 2 yaş</span></div>
+      </div>
+      <div class="idrow">
+        <div><span>Doğum Tarihi</span><b id="pBirth">15.05.2024</b></div>
+        <div><span>Çip No</span><b id="pChip">TR-90-2647-8812</b></div>
+        <div><span>Kan Grubu</span><b id="pBlood">A</b></div>
+        <div><span>Kısırlaştırma</span><b id="pNeuter">Evet</b></div>
+        <div><span>Kilo</span><b id="pKilo">4.2 kg</b></div>
+        <div><span>Alerji / Not</span><b id="pAlerji">Yok</b></div>
+      </div>
+      <div class="qr">
+        <svg width="52" height="52" viewBox="0 0 21 21">
+          <rect width="21" height="21" fill="#fff"/>
+          <path fill="#122B24" d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM9 0h1v2H9zM11 1h2v1h-2zM9 4h2v1H9zM12 3h1v3h-1zM9 7h1v2H9zM0 9h2v1H0zM3 9h2v2H3zM6 10h2v1H6zM9 10h2v2H9zM12 9h2v1h-2zM15 9h1v2h-1zM17 10h2v1h-2zM20 9h1v2h-1zM12 12h1v2h-1zM14 13h2v1h-2zM17 12h1v2h-1zM19 13h2v1h-2zM9 14h2v2H9zM14 16h3v3h-3zM9 17h1v2H9zM11 18h2v1h-2zM18 16h1v1h-1zM20 15h1v2h-1zM12 20h3v1h-3zM18 19h3v2h-3z"/>
+        </svg>
+      </div>
+      <div style="font-size:10px;opacity:.75;margin-top:12px">Kayıp durumunda QR okutulduğunda iletişim bilgilerin görünür</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:6px">
+      <button class="btn" style="background:var(--card);color:var(--green);border:1.5px solid var(--green)" onclick="openEdit()">✏️ Bilgileri Düzenle</button>
+      <button class="btn" onclick="go('oyun')">🎮 Pixel <span id="gameBtnName">Boncuk</span></button>
+    </div>
+
+    <div class="sec-title"><h2>Fotoğraflar</h2><a>+ Ekle</a></div>
+    <div class="photos" style="margin-bottom:6px">
+      <div class="ph" style="background:linear-gradient(135deg,#FDE8CD,#F8CBA0)">🐱</div>
+      <div class="ph" style="background:linear-gradient(135deg,#D8F1E6,#A9DEC7)">😺</div>
+      <div class="ph" style="background:linear-gradient(135deg,#E4E0FB,#C7BFF5)">🐈</div>
+      <div class="ph" style="background:linear-gradient(135deg,#FBE3E4,#F5BFC2)">😸</div>
+      <div class="ph" style="background:linear-gradient(135deg,#DCEBFB,#B6D4F5)">🧶</div>
+      <div class="ph" style="background:linear-gradient(135deg,#F0F4F2,#D8E2DD);color:var(--gray);font-size:22px">+12</div>
+    </div>
+
+    <div class="sec-title"><h2>Yaşam Geçmişi</h2><a>+ Anı ekle</a></div>
+    <div class="card">
+      <div class="tl">
+        <div class="tl-item"><b>Kuduz aşısı randevusu 💉</b><span>12 Temmuz 2026 · Yaklaşan</span></div>
+        <div class="tl-item"><b>Temel itaat eğitimine başladı 🎓</b><span>22 Haziran 2026</span></div>
+        <div class="tl-item"><b>Kısırlaştırma operasyonu ✂️</b><span>10 Ekim 2025</span></div>
+        <div class="tl-item"><b>İlk aşıları tamamlandı 💪</b><span>20 Ağustos 2024</span></div>
+        <div class="tl-item"><b>Ailemize katıldı ❤️</b><span>2 Temmuz 2024 · Sahiplenildi</span></div>
+      </div>
+    </div>
+
+    <div class="sec-title"><h2>Belgeler &amp; Kayıtlar</h2><a>Tümü</a></div>
+    <div class="card">
+      <div class="hist"><div class="hi">📄</div><div><b>Aşı karnesi (PDF)</b><span>Son güncelleme: 1 Haziran 2026</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+      <div class="hist"><div class="hi">🔬</div><div><b>Kan tahlili sonuçları</b><span>14 Mart 2026</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+      <div class="hist"><div class="hi">🪪</div><div><b>Çip kayıt belgesi</b><span>Tarım Bakanlığı sistemi</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">↓</span></div>
+    </div>
+
+    <button class="btn" style="margin-top:4px">Kimlik Kartını Paylaş</button>
+  </section>
+
+  <!-- ================= HİZMETLER & TOPLULUK ================= -->
+  <section class="screen" id="scr-hizmet">
+    <div class="topbar">
+      <div><h1>Hizmetler ❤️</h1><div class="sub">Çevrende &amp; toplulukta</div></div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="search">🔍<input type="text" placeholder="Veteriner, otel, eğitmen ara..."></div>
+
+    <div class="chip-row" style="margin-bottom:14px" id="srvChips">
+      <div class="chip on" onclick="filtSrv('hepsi',this)">Hepsi</div>
+      <div class="chip" onclick="filtSrv('vet',this)">🩺 Veteriner</div>
+      <div class="chip" onclick="filtSrv('otel',this)">🏨 Pet Oteli</div>
+      <div class="chip" onclick="filtSrv('egt',this)">🎓 Eğitmen</div>
+      <div class="chip" onclick="filtSrv('gez',this)">🦮 Gezdirici</div>
+      <div class="chip" onclick="filtSrv('kuafor',this)">✂️ Kuaför</div>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,#F472B6,#E11D48);border:none;cursor:pointer;position:relative" onclick="go('match');openMatch()">
+      <div class="mp-badge" id="mpBadge2">💘 3 yeni aday</div>
+      <div style="display:flex;gap:12px;align-items:center;color:#fff">
+        <div style="font-size:26px">💘</div>
+        <div style="flex:1;padding-right:64px">
+          <b style="font-size:14px">PatiMatch — Can dostuna eş bul</b>
+          <span style="font-size:11.5px;opacity:.9;display:block;margin-top:2px">Çiftleşme için güvenli eşleşme · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
+        </div><span style="font-weight:800">→</span>
+      </div>
+    </div>
+
+    <div id="srvList">
+      <div class="srv" data-t="vet"><div class="si" style="background:var(--red-soft)">🩺</div><div><b>Pati Veteriner Kliniği</b><span class="meta">7/24 acil · 850 m · Açık</span><span class="star">★ 4.9 (312 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="otel"><div class="si" style="background:var(--blue-soft)">🏨</div><div><b>Mutlu Patiler Pet Oteli</b><span class="meta">Kameralı odalar · 2.1 km</span><span class="star">★ 4.8 (198 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="egt"><div class="si" style="background:var(--green-soft)">🎓</div><div><b>Deniz Yılmaz — Köpek Eğitmeni</b><span class="meta">Pozitif pekiştirme · Evde ders</span><span class="star">★ 5.0 (87 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="gez"><div class="si" style="background:var(--amber-soft)">🦮</div><div><b>Mert K. — Köpek Gezdirici</b><span class="meta">Hafta içi her gün · 45 dk tur</span><span class="star">★ 4.7 (64 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="vet"><div class="si" style="background:var(--red-soft)">🐾</div><div><b>VetPlus Hayvan Hastanesi</b><span class="meta">Görüntüleme + cerrahi · 3.4 km</span><span class="star">★ 4.6 (521 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="egt"><div class="si" style="background:var(--green-soft)">🐱</div><div><b>Elif Aydın — Kedi Davranış Uzmanı</b><span class="meta">Online seans · Saldırganlık &amp; stres</span><span class="star">★ 4.9 (142 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="gez"><div class="si" style="background:var(--amber-soft)">🐕</div><div><b>PatiRun — Grup Yürüyüşü</b><span class="meta">Hafta sonu park buluşması · Sosyalleşme</span><span class="star">★ 4.8 (53 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="kuafor"><div class="si" style="background:var(--purple-soft)">✂️</div><div><b>Tüylü Dostlar Pet Kuaförü</b><span class="meta">Yıkama + tıraş + tırnak · Evden alma servisi</span><span class="star">★ 4.9 (231 değerlendirme)</span></div><div class="go">→</div></div>
+      <div class="srv" data-t="kuafor"><div class="si" style="background:var(--purple-soft)">🛁</div><div><b>Pati SPA &amp; Bakım</b><span class="meta">Kedi dostu sessiz salon · Tüy açma uzmanı</span><span class="star">★ 4.7 (96 değerlendirme)</span></div><div class="go">→</div></div>
+    </div>
+
+    <div class="sec-title"><h2>Sahiplendirme 🏡</h2><a>Tümü</a></div>
+    <div class="adopt">
+      <div class="ad-card"><div class="ad-img" style="background:var(--amber-soft)">🐈</div><div class="ad-body"><b>Minnoş</b><span>3 aylık · Dişi · Kadıköy</span></div></div>
+      <div class="ad-card"><div class="ad-img" style="background:var(--blue-soft)">🐕</div><div class="ad-body"><b>Karabaş</b><span>2 yaş · Erkek · Beşiktaş</span></div></div>
+      <div class="ad-card"><div class="ad-img" style="background:var(--green-soft)">🐈‍⬛</div><div class="ad-body"><b>Gece</b><span>1 yaş · Erkek · Üsküdar</span></div></div>
+      <div class="ad-card"><div class="ad-img" style="background:var(--purple-soft)">🐶</div><div class="ad-body"><b>Pamuk</b><span>4 aylık · Dişi · Maltepe</span></div></div>
+    </div>
+
+    <div class="sec-title"><h2>Yardımlaşma Topluluğu 🤝</h2><a>+ Gönderi</a></div>
+    <div class="card">
+      <div class="feed">
+        <div class="fh"><div class="fa">👩</div><b>Ayşe D.</b><span>2 sa önce</span></div>
+        <p>Moda sahilinde sokak kedileri için mama bağışı topluyoruz. Bu hafta sonu dağıtım yapacağız, katılmak isteyen var mı? 🐾</p>
+        <div class="facts">❤️ 48 &nbsp; 💬 12 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--blue-soft)">👨</div><b>Emre T.</b><span>5 sa önce</span></div>
+        <p>Acil! Kadıköy'de yaralı bir güvercin bulduk, kuşlara bakan veteriner önerisi olan var mı?</p>
+        <div class="facts">❤️ 23 &nbsp; 💬 31 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--green-soft)">🧕</div><b>Zeynep A.</b><span>1 gün önce</span></div>
+        <p>Tatile çıkarken kedime bakacak birini arıyordum, buradan bulduğum gönüllü sayesinde çok rahat ettim. Teşekkürler PatiDost topluluğu! 💚</p>
+        <div class="facts">❤️ 96 &nbsp; 💬 8 &nbsp; ↗ Paylaş</div>
+      </div>
+      <div class="feed">
+        <div class="fh"><div class="fa" style="background:var(--amber-soft)">🧑</div><b>Mert B.</b><span>2 gün önce</span></div>
+        <p>Kış geliyor — mahalledeki sokak hayvanları için tahta kulübe yapımına başlıyoruz. Marangozluğu olan ya da malzeme desteği verebilecek herkesi bekleriz! 🔨🏠</p>
+        <div class="facts">❤️ 154 &nbsp; 💬 27 &nbsp; ↗ Paylaş</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PATİMATCH ================= -->
+  <section class="screen" id="scr-match">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="go('hizmet')">←</button>
+        <div><h1>PatiMatch 💘</h1><div class="sub" id="matchSub">Adaylar yükleniyor...</div></div>
+      </div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="chip-row" id="matchStrip" style="margin-bottom:12px"></div>
+    <div class="m-stack" id="mStack"></div>
+    <div class="m-actions">
+      <button class="m-btn no" onclick="matchPass()">✖️</button>
+      <button class="m-btn yes" onclick="matchLike()">💘</button>
+    </div>
+    <div style="text-align:center;font-size:10.5px;color:var(--gray);line-height:1.6">🧬 Sorumlu üretim: eşleşme öncesi veteriner kontrolü, genetik ve sağlık testleri önerilir.<br>Kediler kedilerle 🐱 · Köpekler köpeklerle 🐶 eşleşir.</div>
+  </section>
+
+  <!-- ================= EŞLEŞME POP-UP ================= -->
+  <div class="overlay center" id="matchPop">
+    <div class="match-pop">
+      <div style="font-size:30px">💘</div>
+      <b style="font-size:18px;color:var(--ink)">Eşleşme!</b>
+      <div class="mp-heads"><span id="mpMine">🐱</span><span style="font-size:26px">💞</span><span id="mpEmoji">🐱</span></div>
+      <p style="font-size:12.5px;color:var(--gray);line-height:1.55;margin-bottom:14px"><b id="mpName" style="color:var(--ink)">Duman</b>'ın sahibi de seni beğendi! Sorumlu eşleştirme için önce veteriner kontrolü ve sağlık testlerini konuşmayı unutma 🩺</p>
+      <button class="btn" onclick="closeM('matchPop');toast('💬 Mesajlaşma prototipte temsilidir')">Mesaj Gönder</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="closeM('matchPop')">Keşfetmeye Devam</button>
+    </div>
+  </div>
+
+  <!-- ================= PİXEL OYUN ================= -->
+  <section class="screen" id="scr-oyun">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="go('profil')">←</button>
+        <div><h1 id="gTitle">Pixel Boncuk 🎮</h1><div class="sub" id="gStageSub">Yavru · Seviye 1</div></div>
+      </div>
+      <div class="avatar" onclick="go('profil')">🐱</div>
+    </div>
+
+    <div class="g-room" id="gRoom">
+      <div class="g-sun">☀️</div>
+      <div class="g-moon">🌙</div>
+      <div class="g-stars">✦ ✦ ✦ ✦</div>
+      <div class="g-hud">
+        <span class="g-chip">🪙 <span id="gCoin">15</span></span>
+        <span class="g-chip" id="gTimer" style="display:none"></span>
+      </div>
+      <div class="g-bub" id="gBub"></div>
+      <div class="g-dot" id="gDot"></div>
+      <div class="g-item" id="gFood">🍖</div>
+      <div class="g-ball" id="gBall">🎾</div>
+      <div class="g-wrap" id="gWrap">
+        <canvas id="gCanvas"></canvas>
+        <span class="g-acc" id="gAcc"></span>
+        <span class="g-emote" id="gEmote"></span>
+      </div>
+      <div class="g-name" id="gName">Boncuk</div>
+    </div>
+
+    <div class="g-stats">
+      <div class="g-stat"><b>🍖 Tokluk <span id="gTokV">80%</span></b><div class="g-track"><div class="g-fill" id="gTok"></div></div></div>
+      <div class="g-stat"><b>😊 Mutluluk <span id="gMutV">70%</span></b><div class="g-track"><div class="g-fill" id="gMut"></div></div></div>
+      <div class="g-stat"><b>⚡ Enerji <span id="gEnjV">90%</span></b><div class="g-track"><div class="g-fill" id="gEnj"></div></div></div>
+    </div>
+
+    <div class="g-actions">
+      <div class="g-act" onclick="gFeed()"><span>🍖</span>Besle</div>
+      <div class="g-act" onclick="gPlay()" id="gPlayBtn"><span>🎾</span>Oyna</div>
+      <div class="g-act" onclick="gPet2()"><span>🤗</span>Sev</div>
+      <div class="g-act" onclick="gSleep()"><span>💤</span>Uyut</div>
+      <div class="g-act" onclick="openFlap()"><span>🪶</span>Pati Uçuşu</div>
+      <div class="g-act" onclick="openShop()"><span>🛍️</span>Mağaza</div>
+    </div>
+
+    <div class="card g-lvl">
+      <div style="font-size:26px">🏆</div>
+      <div style="flex:1">
+        <b style="font-size:13px;color:var(--ink)">Seviye <span id="gLvlNo">1</span> — <span id="gStageName">Yavru</span></b>
+        <div class="g-track" style="margin:8px 0 6px"><div class="g-fill" id="gXp" style="background:var(--purple)"></div></div>
+        <span style="font-size:10.5px;color:var(--gray)">XP kazan → dostun büyüsün · 🪙 kazan → mağazadan aksesuar al · Odaya dokun → yanına koşsun!</span>
+      </div>
+    </div>
+
+    <div class="qrow">
+      <div class="chip" onclick="gTalk(this.textContent)">Seni seviyorum ❤️</div>
+      <div class="chip" onclick="gTalk('Nasılsın?')">Nasılsın?</div>
+      <div class="chip" onclick="gTalk('Aç mısın?')">Aç mısın?</div>
+      <div class="chip" onclick="gTalk('Oyun ister misin?')">Oyun?</div>
+    </div>
+    <div class="inp">
+      <input id="gInput" type="text" placeholder="Onunla konuş..." onkeydown="if(event.key==='Enter')gTalk()">
+      <button onclick="gTalk()">➤</button>
+    </div>
+  </section>
+
+  <!-- ================= DERS MODALI ================= -->
+  <div class="overlay" id="lessonModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3 id="lTitle">Ders</h3><button class="x" onclick="closeM('lessonModal')">✕</button></div>
+      <div class="stage" id="lStage"></div>
+      <div class="meta-row" id="lMeta"></div>
+      <p id="lDesc" style="font-size:12.5px;color:#3E524B;line-height:1.6;margin-bottom:6px"></p>
+      <div id="lAges" class="grid2" style="display:none;margin-bottom:10px"></div>
+      <div class="sec-title" style="margin-top:10px"><h2>Adım Adım Eğitim</h2><a onclick="replayStage()">↻ Animasyonu başlat</a></div>
+      <div class="card" id="lSteps"></div>
+      <div id="lVarsWrap" style="display:none">
+        <div class="sec-title"><h2>Duruma Göre Sorun Giderme</h2><a>🔧</a></div>
+        <div class="card" id="lVars"></div>
+      </div>
+      <div class="tipbox" id="lTip" style="background:var(--green-soft);color:#1E5C46"></div>
+      <div class="tipbox" id="lErr" style="background:var(--amber-soft);color:#8A5B10"></div>
+      <button class="btn" onclick="closeM('lessonModal')">Dersi Tamamla ✓ &nbsp;+20 🏆</button>
+    </div>
+  </div>
+
+  <!-- ================= PROFİL DÜZENLEME MODALI ================= -->
+  <div class="overlay" id="editModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Profili Düzenle ✏️</h3><button class="x" onclick="closeM('editModal')">✕</button></div>
+      <div class="f-grid">
+        <div class="f-item"><label>İsim</label><input id="f_ad"></div>
+        <div class="f-item"><label>Tür</label><select id="f_tur"><option value="kedi">Kedi 🐱</option><option value="kopek">Köpek 🐶</option></select></div>
+        <div class="f-item"><label>Cins</label><input id="f_cins"></div>
+        <div class="f-item"><label>Cinsiyet</label><select id="f_cinsiyet"><option>Dişi</option><option>Erkek</option></select></div>
+        <div class="f-item"><label>Doğum Tarihi</label><input id="f_dogum" type="date"></div>
+        <div class="f-item"><label>Kilo (kg)</label><input id="f_kilo" type="number" step="0.1" min="0"></div>
+        <div class="f-item"><label>Çip No</label><input id="f_cip"></div>
+        <div class="f-item"><label>Kan Grubu</label><input id="f_kan"></div>
+        <div class="f-item"><label>Kısırlaştırma</label><select id="f_kisir"><option>Evet</option><option>Hayır</option></select></div>
+        <div class="f-item"><label>Pixel Rengi 🎨</label><select id="f_renk"><option value="gri">Gri</option><option value="turuncu">Turuncu</option><option value="siyah">Siyah</option><option value="beyaz">Beyaz</option><option value="altin">Altın</option><option value="kahve">Kahve</option></select></div>
+        <div class="f-item full"><label>Alerjiler / Notlar</label><input id="f_alerji" placeholder="örn: tavuk proteini alerjisi"></div>
+        <div class="f-item full"><label>Fotoğraf 📷 (ana ekranda silik görünür)</label>
+          <input type="file" id="f_foto" accept="image/*" onchange="fotoSec(this)">
+          <div id="fotoPrev" style="margin-top:6px;display:flex;align-items:center;gap:10px"></div>
+        </div>
+      </div>
+      <div style="font-size:10.5px;color:var(--gray);margin-top:10px">🎮 Tür ve pixel rengi seçimin, oyundaki pixel dostunun görünümünü belirler.</div>
+      <button class="btn" style="margin-top:12px" onclick="saveEdit()">Kaydet</button>
+    </div>
+  </div>
+
+  <!-- ================= MAĞAZA MODALI ================= -->
+  <div class="overlay" id="shopModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Pati Mağazası 🛍️</h3><button class="x" onclick="closeM('shopModal')">✕</button></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:12px">Paran: <b id="shopCoin" style="color:var(--amber)">🪙 15</b> · Besleyerek, oynayarak ve Pati Uçuşu'nda uçarak kazanırsın.</div>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </div>
+
+  <!-- ================= PATİ UÇUŞU MODALI ================= -->
+  <div class="overlay" id="flapModal">
+    <div class="sheet" style="padding-bottom:18px">
+      <div class="sheet-head"><h3>Pati Uçuşu 🪶</h3><button class="x" onclick="closeFlap()">✕</button></div>
+      <canvas id="fCanvas" width="340" height="430" onclick="fTap()"></canvas>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--gray);font-weight:700">
+        <span>🏆 Rekor: <b id="fBest" style="color:var(--ink)">0</b></span>
+        <span>Geçilen her engel = <b style="color:var(--amber)">+1 🪙</b></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast"></div>
+
+  <!-- ================= ALT NAVİGASYON ================= -->
+  <nav class="nav">
+    <button class="on" data-s="home" onclick="go('home')"><span class="ic">🏠</span>Ana Sayfa</button>
+    <button data-s="egitim" onclick="go('egitim')"><span class="ic">🎓</span>Eğitim</button>
+    <button class="ai-btn" onclick="go('ai')">🐾</button>
+    <button data-s="saglik" onclick="go('saglik')"><span class="ic">🩺</span>Sağlık</button>
+    <button data-s="hizmet" onclick="go('hizmet')"><span class="ic">❤️</span>Hizmetler</button>
+  </nav>
+</div>
+
+<script>
+/* ---------- ekran geçişi ---------- */
+function go(s){
+  document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+  document.getElementById('scr-'+s).classList.add('active');
+  document.querySelectorAll('.nav button[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  document.getElementById('scr-'+s).scrollTop=0;
+}
+
+/* ---------- kayıt ol / giriş ---------- */
+let authIsReg=true, agreeOK=false, pickedType='kedi';
+function openAuth(mode){authMode(mode||'kayit');go('kayit');}
+function authMode(m){
+  authIsReg = (m!=='giris');
+  document.getElementById('tabKayit').classList.toggle('on',authIsReg);
+  document.getElementById('tabGiris').classList.toggle('on',!authIsReg);
+  document.querySelectorAll('#scr-kayit .reg-only').forEach(e=>e.style.display=authIsReg?'':'none');
+  document.getElementById('authBtn').textContent = authIsReg?'Hesap Oluştur':'Giriş Yap';
+  document.getElementById('authSub').textContent = authIsReg?"Can dostunun dijital dünyasına ilk adım":"Tekrar hoş geldin — seni özledik 🐾";
+  document.getElementById('authFoot').innerHTML = authIsReg
+    ? 'Zaten hesabın var mı? <a onclick="authMode(\'giris\')">Giriş yap</a>'
+    : 'Hesabın yok mu? <a onclick="authMode(\'kayit\')">Kayıt ol</a>';
+  ['fName','fMail','fPass'].forEach(id=>document.getElementById(id).classList.remove('bad'));
+}
+function togglePass(el,id){
+  const inp=document.getElementById(id);
+  const show = inp.type==='password';
+  inp.type = show?'text':'password';
+  el.textContent = show?'🙈':'👁️';
+}
+function pickPetType(el){
+  document.querySelectorAll('#scr-kayit .pettype .pt').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  pickedType = el.dataset.t;
+}
+function toggleAgree(){
+  agreeOK=!agreeOK;
+  const b=document.getElementById('agreeBox');
+  b.classList.toggle('on',agreeOK);
+  b.textContent = agreeOK?'✓':'';
+}
+function submitAuth(){
+  const ad=document.getElementById('kAd').value.trim();
+  const mail=document.getElementById('kMail').value.trim();
+  const pass=document.getElementById('kPass').value;
+  let ok=true;
+  const bad=(id,cond)=>{document.getElementById(id).classList.toggle('bad',cond); if(cond)ok=false;};
+  if(authIsReg) bad('fName', ad.length<2);
+  bad('fMail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail));
+  bad('fPass', pass.length<6);
+  if(!ok){toast('⚠️ Lütfen alanları kontrol et');return;}
+  if(authIsReg && !agreeOK){toast('📋 Koşulları kabul etmelisin');return;}
+  if(authIsReg){
+    toast('🎉 Hoş geldin '+(ad.split(' ')[0]||'dostum')+'! Hesabın oluşturuldu 🐾');
+  }else{
+    toast('✓ Giriş yapıldı: '+mail);
+  }
+  setTimeout(()=>go('profil'),700);
+}
+
+/* ---------- evcil hayvan verileri ---------- */
+let store={};
+try{store=JSON.parse(localStorage.getItem('patidost')||'{}')}catch(e){}
+const petData=store.pets||[
+  {ad:'Boncuk',tur:'kedi',cins:'Tekir',cinsiyet:'Dişi',dogum:'2024-05-15',kilo:'4.2',cip:'TR-90-2647-8812',kan:'A',kisir:'Evet',alerji:'Yok',renk:'gri'},
+  {ad:'Zeytin',tur:'kopek',cins:'Golden Retriever',cinsiyet:'Erkek',dogum:'2023-03-10',kilo:'28',cip:'TR-90-1103-4471',kan:'DEA 1.1+',kisir:'Evet',alerji:'Tavuk proteini',renk:'altin'}
+];
+const gameStates=store.game||[{tok:82,mut:74,enj:90,xp:12},{tok:70,mut:80,enj:65,xp:34}];
+let curPet=0;
+function saveAll(){try{localStorage.setItem('patidost',JSON.stringify({pets:petData,game:gameStates}))}catch(e){}}
+function petEmoji(i){return petData[i===undefined?curPet:i].tur==='kedi'?'🐱':'🐶'}
+function yas(d){const y=(Date.now()-new Date(d).getTime())/31557600000;return y<1?Math.max(1,Math.round(y*12))+' aylık':Math.floor(y)+' yaş'}
+function pID(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
+
+function setPet(i,el){
+  curPet=i;
+  document.querySelectorAll('.pet-pill').forEach((p,j)=>p.classList.toggle('on',j===i));
+  if(typeof resetGameScene==='function')resetGameScene();
+  renderAll();
+}
+function renderAll(){
+  const p=petData[curPet];
+  document.querySelectorAll('.avatar').forEach(a=>a.textContent=petEmoji());
+  [0,1].forEach(i=>{
+    const m=document.getElementById('mp'+i);
+    if(m){m.textContent=petEmoji(i);m.classList.toggle('on',i===curPet);m.title=petData[i].ad}
+  });
+  if(typeof drawHeroPet==='function')drawHeroPet();
+  if(typeof drawBigPet==='function')drawBigPet();
+  if(typeof updateBigFoto==='function')updateBigFoto();
+  pID('aiBannerName',p.ad);
+  pID('subSag',p.ad+"'un sağlık takibi");
+  pID('pAvatar',petEmoji());pID('pName',p.ad);
+  pID('pMeta',p.cins+' '+(p.tur==='kedi'?'Kedi':'Köpek')+' · '+p.cinsiyet+' · '+yas(p.dogum));
+  pID('pBirth',(p.dogum||'').split('-').reverse().join('.'));
+  pID('pChip',p.cip);pID('pBlood',p.kan);pID('pNeuter',p.kisir);
+  pID('pKilo',p.kilo+' kg');pID('pAlerji',p.alerji||'—');
+  pID('gameBtnName',p.ad);
+  if(typeof updateMatchPromo==='function')updateMatchPromo();
+  renderGame();
+}
+
+/* ---------- profil düzenleme ---------- */
+function closeM(id){document.getElementById(id).classList.remove('open')}
+function openEdit(){
+  const p=petData[curPet];
+  ['ad','cins','dogum','kilo','cip','kan','alerji'].forEach(k=>document.getElementById('f_'+k).value=p[k]||'');
+  document.getElementById('f_tur').value=p.tur;
+  document.getElementById('f_cinsiyet').value=p.cinsiyet;
+  document.getElementById('f_kisir').value=p.kisir;
+  document.getElementById('f_renk').value=p.renk;
+  fotoTemp=undefined;
+  const fi=document.getElementById('f_foto');if(fi)fi.value='';
+  if(typeof fotoPrevGoster==='function')fotoPrevGoster(p.foto||'');
+  document.getElementById('editModal').classList.add('open');
+}
+function saveEdit(){
+  const p=petData[curPet];
+  ['ad','cins','dogum','kilo','cip','kan','alerji'].forEach(k=>p[k]=document.getElementById('f_'+k).value);
+  p.tur=document.getElementById('f_tur').value;
+  p.cinsiyet=document.getElementById('f_cinsiyet').value;
+  p.kisir=document.getElementById('f_kisir').value;
+  p.renk=document.getElementById('f_renk').value;
+  if(fotoTemp!==undefined)p.foto=fotoTemp;
+  saveAll();renderAll();closeM('editModal');
+}
+
+/* ---------- eğitim dersleri ---------- */
+const LESSONS={
+  otur:{t:'"Otur" Komutu 🪑',lvl:'Başlangıç',dk:'3 dk',
+    desc:'"Otur", tüm eğitimin temel taşıdır. Bu komut can dostunun dikkatini sana vermesini sağlar ve diğer bütün komutların kapısını açar. Hem kediler hem köpekler, ödül temelli (pozitif pekiştirme) yöntemle bu komutu genellikle 3-7 günde öğrenir.',
+    steps:[
+      'Can dostun sakin ve hafif açken çalış (yemekten hemen sonra değil). Eline en sevdiği ödül mamasını al ve önce koklamasına izin ver — motivasyonu ödülün kokusuyla başlar.',
+      'Ödülü burnunun hafif üzerine getir ve <b>yavaşça geriye</b> doğru hareket ettir. Başı ödülü takip ederken arka bacakları doğal olarak yere iner.',
+      'Poposu yere değdiği <b>anda</b> net ve neşeli bir sesle "Otur!" de ve ödülü hemen ver. Zamanlama her şeydir: ödül 1-2 saniye içinde gelmezse bağlantı kurulamaz.',
+      'Günde 2-3 kez, <b>5 dakikayı geçmeyen</b> seanslarla tekrar et. Kısa ve eğlenceli seanslar, uzun ve sıkıcı olanlardan çok daha etkilidir.',
+      'Komut oturunca ödülü her seferinde değil <b>rastgele</b> ver (değişken ödüllendirme). Bu, davranışı kalıcı hale getiren en güçlü tekniktir.'
+    ],
+    tip:'💡 İpucu: Ödül elindeyken yaptığın el hareketini, elin boşken de aynı şekilde yap. El işareti zamanla sesli komutun yerini alabilir — bu, kalabalık ortamlarda çok işine yarar.',
+    err:'⚠️ Sık yapılan hata: Poposunu elle bastırarak oturtmak. Bu, güven kaybettirir ve öğrenmeyi yavaşlatır. Her zaman kendi isteğiyle oturmasını bekle.'},
+  bekle:{t:'"Bekle" Komutu ✋',lvl:'Orta seviye',dk:'4 dk',
+    desc:'"Bekle", bir güvenlik komutudur: kapı açıldığında fırlamayı, sokakta tehlikeye koşmayı engeller. Sabır ve öz kontrol öğretir. "Otur" komutunu öğrendikten sonra çalışılmalıdır.',
+    steps:[
+      'Önce "Otur" pozisyonuyla başla. Avuç içini yüzüne dönük şekilde göster ve sakin, uzatılmış bir tonla <b>"Beklee..."</b> de.',
+      'Bir adım geri çekil ve 2 saniye bekle. Yerinde kaldıysa <b>ona doğru dönüp</b> ödülü olduğu yerde ver — sana gelerek değil. Ödül hep "beklediği noktada" olmalı.',
+      'Mesafeyi ve süreyi <b>kademeli</b> artır: 1 adım / 2 sn → 3 adım / 5 sn → 5 adım / 10 sn. Her seviyede birkaç başarılı tekrar olmadan bir sonrakine geçme.',
+      'Kalkarsa asla kızma. Sakince başlangıç noktasına dön ve süreyi kısaltarak tekrar dene — başarısızlık, seviyenin çok hızlı yükseldiğinin işaretidir.',
+      'Bir <b>serbest bırakma kelimesi</b> ekle: "Tamam!" Beklemenin ne zaman bittiğini bilmek, komutu onun için öngörülebilir ve güvenli yapar.'
+    ],
+    tip:'💡 İpucu: Bu komutu gerçek hayatta kullan: mama kabını yere koyarken, kapıyı açarken, tasmayı takarken. Günlük rutine işlenen komut asla unutulmaz.',
+    err:'⚠️ Sık yapılan hata: Mesafeyi çok hızlı artırmak. İki adımda başarılı olmadan beş adıma çıkmak, öğrenilenleri de bozar. Yavaş ilerlemek aslında en hızlı yoldur.'},
+  gel:{t:'"Gel" Çağrısı 🔔',lvl:'Orta seviye',dk:'5 dk',
+    desc:'"Gel", hayat kurtaran komuttur — açık kapı, kaçan tasma, trafik... Amaç, sana gelmenin her zaman dünyanın en iyi şeyi olduğuna onu ikna etmektir. Bu yüzden bu komutta cömertlik esastır.',
+    steps:[
+      'Sessiz bir odada, birkaç adım öteden neşeli ve yüksek tonda ismini söyle + <b>"Gel!"</b> de. Çömelmek ve kollarını açmak daveti güçlendirir.',
+      'Sana geldiği anda <b>parti başlasın</b>: en sevdiği ödül, coşkulu övgü, sevgi. Gelmek = muhteşem bir şey olmalı. İlk günlerde her geliş büyük ödül alır.',
+      'Mesafeyi artır: başka odadan çağır, sonra bahçede/uzun tasmayla dene. Her başarıda ortam biraz daha zorlaşabilir.',
+      'Dikkat dağıtıcılar ekle: oyuncak varken, başka biri odadayken çağır. Zor koşulda gelmek, en büyük ödülü hak eder.',
+      'Haftada birkaç kez "boş çağrı" yap: gel → ödül → tekrar oyununa devam. Böylece "gel" hiçbir zaman "eğlence bitti" anlamına gelmez.'
+    ],
+    tip:'💡 İpucu: Kediler için çağrıyı mama kabı sesi veya ödül paketi hışırtısıyla eşleştir — klasik şartlanma kedilerde mükemmel çalışır.',
+    err:'⚠️ Asla yapma: "Gel" dedikten sonra tırnak kesme, banyo, veteriner gibi sevmediği bir şey yapma. Komut bir kez "kötü sürprizle" eşleşirse zehirlenir ve güven aylarca geri gelmez.'},
+  pati:{t:'"Pati Ver" Numarası 🐾',lvl:'Eğlence',dk:'4 dk',
+    desc:'"Pati ver" pratik bir komut değil, bir bağ kurma oyunudur. Birlikte öğrenilen her numara güveni artırır, zihinsel egzersiz sağlar ve misafirlere hava atmak için birebirdir. 😄',
+    steps:[
+      'Ödül mamasını avucunun içine koy ve yumruğunu kapat. Yumruğunu burnunun hizasında, göğüs yüksekliğinde tut.',
+      'Koklayacak, yalayacak ve sonunda <b>patisiyle eline dokunacak</b>. Pati eline değdiği anda "Pati!" de, yumruğunu aç ve ödülü ver.',
+      'Birkaç tekrardan sonra elini <b>açık avuçla</b> uzat. Patisini koyarsa ödül! Artık el işareti oluştu.',
+      'Sesli komutu öne al: önce "Pati!" de, sonra elini uzat. Doğru sıra: komut → hareket → ödül.',
+      'Ustalaşınca "Diğer pati!" ile öbür patiyi öğret, hatta "Çak!" için avucunu dikey tut. Her yeni numara bir öncekinden daha hızlı öğrenilir.'
+    ],
+    tip:'💡 İpucu: Numara eğitimleri en verimli oyun zamanından hemen önce çalışılır — enerjisi yüksek ama dikkati dağınık değilken.',
+    err:'⚠️ Sık yapılan hata: Patisini tutup kaldırmak. Kendi iradesiyle vermediği pati bir numara değildir; sadece elinden yemek almayı öğrenir.'},
+  tuvalet:{t:'Tuvalet Eğitimi 🚽',lvl:'Başlangıç',dk:'6 dk',
+    desc:'Kedilerde kum kabı alışkanlığı büyük ölçüde içgüdüseldir — doğru kurulum yeterlidir. Köpeklerde ise dışarı tuvalet rutini sabır ve zamanlamayla 2-4 haftada oturur. Her iki türde de altın kural aynıdır: kazayı değil, doğru davranışı yakala ve ödüllendir.',
+    steps:[
+      '<b>Kediler:</b> Kum kabını sessiz, kolay ulaşılır ve mama kabından uzak bir köşeye koy. Kap sayısı kuralı: kedi sayısı + 1. Kumu her gün temizle — kirli kaba girmeyi reddetmesi en sık kaza sebebidir.',
+      '<b>Köpekler:</b> Yavrular uyanınca, yemekten 15-20 dk sonra ve oyun sonrası tuvalete gelir. Bu anlarda hemen dışarı çıkar ve hep aynı noktaya götür — koku hafızası rutini kurar.',
+      'Doğru yere yaptığı <b>anda</b> (eve dönünce değil!) coşkuyla ödüllendir. 3 saniye içinde gelen ödül, davranışla bağ kurar.',
+      'Kazaları asla cezalandırma; burnunu sürtme gibi yöntemler yalnızca senden saklanmayı öğretir. Kazayı sessizce, enzimli temizleyiciyle temizle ki koku geri çağırmasın.',
+      'İlerlemeyi takip et: 1 hafta kazasız geçerse aralıkları uzat. Gerileme olursa (yeni ev, stres) başa dönmek normaldir — rutini sıkılaştır.'
+    ],
+    tip:'💡 İpucu: Kediler kum tipine duyarlıdır — kabı reddediyorsa önce kumu değiştir (topaklanan, kokusuz kum çoğunluğun favorisi). Köpekte "çiş" gibi bir komut kelimesini işlem sırasında söylersen, zamanla komutla tuvalete gider.',
+    err:'⚠️ Sık yapılan hata: Kum kabını çamaşır makinesi gibi gürültülü eşyaların yanına koymak. Bir kez korkarsa kabı tamamen reddedebilir; sakin bir köşe şarttır.'},
+  yatak:{t:'"Yatağına Git" Komutu 🛏️',lvl:'Orta seviye',dk:'4 dk',
+    desc:'"Yatağına git", misafir geldiğinde, yemek yerken ya da sakinleşmesi gerektiğinde paha biçilmez bir komuttur. Can dostuna "güvenli bölgesini" öğretir — orası ceza yeri değil, güzel şeylerin olduğu huzur köşesidir.',
+    steps:[
+      'Yatağını herkesin geçtiği yerde değil, odayı görebildiği sakin bir köşeye yerleştir. İçine kokunu taşıyan bir kumaş koymak bağ kurmayı hızlandırır.',
+      'Eline ödül al, yatağı işaret et ve ödülü yatağın üzerine at. Dört patisi de yatağa değdiği anda <b>"Yatağına!"</b> de ve ek bir ödül ver.',
+      'Tekrarlarla ödülü atmayı bırak: önce sadece işaret et, sonra sadece komutu söyle. Her başarılı geçişte yatakta ödüllendir.',
+      'Süre ekle: yatağa gittikten sonra 5-10-30 saniye bekleyip ödül ver. "Bekle" komutuyla birleştirince misafir ziyaretlerinde bile yerinde kalır.',
+      'Yatağı asla ceza için kullanma. Oraya gitmek her zaman gönüllü ve keyifli olmalı — kediler için yatak yerine kedi yuvası/rafı da aynı yöntemle öğretilir.'
+    ],
+    tip:'💡 İpucu: Akşam sakinleşme rutini kur: yatağına git → çiğneme oyuncağı/ödül → ışıklar kısılır. Birkaç haftada yatak "uyku vakti" sinyaline dönüşür.',
+    err:'⚠️ Sık yapılan hata: Komutu öğrenmeden süreyi uzatmak. Önce "gitmek" davranışı sağlamlaşmalı, "kalmak" sonra eklenmelidir.'},
+  /* ===== PETID TEMEL EĞİTİM MÜFREDATI (12 Kademe) ===== */
+  k1:{t:"Kademe 1 — İsmini Öğrenme 📢",lvl:"Kademe 1",dk:"3-5 dk",video:"isim_egitimi_video.mp4",
+    desc:"Amaç: köpeğin ismini duyduğunda dikkatini sahibine çevirmesi. Bu eğitimde amaç köpeği zorlamak değil, doğru davranışı kolaylaştırmak ve ödülle güçlendirmektir — her köpek farklı hızda öğrenir.",
+    yavru:"8 haftadan itibaren kısa ve oyun gibi seanslarla başlanabilir.",
+    yetiskin:"Yetişkinlerde de başlanabilir; eski olumsuz isim çağrışımları varsa daha yavaş ilerleyin.",
+    steps:["Sessiz bir odada, köpek size bakmıyorken ismini normal ve neşeli bir tonla <b>bir kez</b> söyleyin.","Size baktığı anda işaretleyin: neşeli bir 'Evet!' veya clicker sesi (marker).","İşaretten sonra <b>1 saniye içinde</b> küçük ödülü verin — zamanlama bağlantıyı kurar.","8-10 tekrar yapın; başarı yakaladıysanız seansı orada bitirin.","Aynı çalışmayı farklı odalarda tekrarlayın.","Başarı %80'in üzerine çıkınca hafif bir dikkat dağıtıcı ekleyin."],
+    vars:[["Hiç bakmıyor","Ödül değerini artırın, mesafeyi azaltın, daha sessiz ortam seçin; ismi tekrar tekrar söylemeyin."],["Sadece ödülü görünce bakıyor","Ödülü elinizde göstermeyin, cebinizde tutun; önce bakışı yakalayın, sonra ödülü çıkarın."],["Çok heyecanlı","Kısa bir oyun/yürüyüş sonrası sakinleşince çalışın; 1-2 dakikalık mini seans yapın."],["İsmine olumsuz tepki veriyor","İsmi ceza ile kullanmayı bırakın; birkaç gün ismi sadece ödül ve sevgiyle eşleştirin."],["Evde çocuk/gürültü var","İlk aşamada sessiz bir oda seçin; çocukların ismi tekrarlamasını engelleyin."]],
+    yasak:["İsmi bağırarak söylemek","İsmi ceza verirken kullanmak","Aynı anda 5-6 kez ismi tekrar etmek","Köpek bakmadan ödül vermek","Uzun ve yorucu seans yapmak"],
+    kriter:"10 denemenin en az 8'inde ilk seslenişte sahibine bakması."},
+  k2:{t:"Kademe 2 — Gel Komutu 🔔",lvl:"Kademe 2",dk:"3-5 dk",
+    desc:"Amaç: köpeğin çağrı sinyalini duyduğunda sahibine doğru gelmesi. İsim eğitiminde başarı sağlandıktan sonra başlanır.",
+    yavru:"Ev içinde kısa mesafede ve oyun gibi başlanır.",
+    yetiskin:"Uzun tasma veya kapalı güvenli alanla başlanır.",
+    steps:["İsim eğitiminde başarı sağlandıktan sonra başlayın.","1-2 metre mesafede neşeli şekilde <b>'Gel'</b> deyin.","Köpek hareket ettiği anda neşeli sesle destekleyin.","Yanınıza gelince marker kullanın ve ödül verin.","Günde 5-10 başarılı tekrar yapın.","Mesafeyi yavaş yavaş artırın; dış ortama en son geçin."],
+    vars:[["Gelirken yavaşlıyor","Ödül değerini artırın; geri geri birkaç adım giderek oyuna çevirin."],["Yarı yolda duruyor","Mesafeyi azaltın; ilk başarıları kısa mesafede garantiye alın."],["Dışarıda gelmiyor","Dış ortam erken olabilir; önce ev/bahçe, sonra düşük dikkat dağıtıcılı açık alan."],["Gelince yakalanacağını sanıyor","Gelince tasmayı takıp hemen eve götürmeyin; bazen ödül verip tekrar serbest bırakın."],["Köpek küçük/yavru","Daha sık ama çok kısa tekrar; enerji yüksekse önce oyunla boşaltın."]],
+    yasak:["Gel komutunu cezadan önce kullanmak","Köpek gelince azarlamak","Dışarıda tasmasız erken denemek","Komutu başarısız ortamda sürekli kullanmak","Komutu 'gel gel gel' diye aşındırmak"],
+    kriter:"Ev içinde 10 denemenin 8'inde çağrı sonrası sahibine gelmesi."},
+  k3:{t:"Kademe 3 — Dikkat Kurma 👀",lvl:"Kademe 3",dk:"3-5 dk",
+    desc:"Amaç: köpeğin sahibine göz teması ve dikkat vermeyi öğrenmesi. Tüm komutların temeli olan 'bağlantı' bu kademede kurulur.",
+    yavru:"1-2 saniyelik göz teması hedeflenir.",
+    yetiskin:"Dikkat dağıtıcıları yönetmek için kullanılır.",
+    steps:["Ödülü iki elinizde saklayın; köpeğin <b>kendi kendine</b> size bakmasını bekleyin.","Göz teması yakalandığında marker kullanın.","Ödül verin.","Süreyi 1 saniyeden 3-5 saniyeye çıkarın.","Köpeğin adını söyleyip göz teması bekleyin.","Farklı odalarda tekrar edin."],
+    vars:[["Sürekli ele bakıyor","Ödülleri arkanızda veya cebinizde tutun; göz temasını bekleyin."],["Çabuk sıkılıyor","Seansı 1 dakika yapın, araya oyun koyun."],["Çok hareketli","Önce kısa yürüyüş/oyun, sonra eğitim."],["Korkak köpek","Direkt göz temasını zorlamayın; başını size çevirmesi de kabul edilir."],["Çocuklu ev","Çocukların köpeği aynı anda çağırmasını önleyin; tek kişi çalışsın."]],
+    yasak:["Göz temasını zorlamak","Köpeğin yüzünü tutmak","Ödülü rüşvet gibi göstermek","Uzun süre bekletmek","Göz temasını azarlamayla ilişkilendirmek"],
+    kriter:"Adı söylendiğinde 5 denemenin 4'ünde sahibine bakması."},
+  k4:{t:"Kademe 4 — Otur Komutu 🪑",lvl:"Kademe 4",dk:"3-5 dk",
+    desc:"Amaç: köpeğin otur pozisyonunu güvenli ve sakin şekilde öğrenmesi. Fiziksel baskı asla uygulanmaz.",
+    yavru:"Kısa tekrarlarla başlanır; fiziksel baskı uygulanmaz.",
+    yetiskin:"Eklem rahatsızlığı ihtimali gözlenir; oturmakta zorlanıyorsa veteriner önerilir.",
+    steps:["Ödülü köpeğin burnuna yaklaştırın.","Ödülü yavaşça başının biraz üstüne ve geriye doğru götürün.","Köpeğin kalçası yere yaklaşınca marker kullanın.","Oturunca ödül verin.","Davranış oturduktan sonra <b>'Otur'</b> kelimesini ekleyin.","El işaretini kademeli küçültün."],
+    vars:[["Zıplıyor","Ödülü daha düşük ve kontrollü tutun; fazla heyecanlıysa seansı kısa yapın."],["Geri geri gidiyor","Arkası duvara yakın ama sıkışmayacak şekilde çalışın."],["Oturmak istemiyor","Zorlamayın; eklem/ağrı ihtimali varsa veteriner görüşü alın."],["Küçük ırk","Eğilerek çalışın; ödülü çok yükseğe kaldırmayın."],["Büyük ırk","Kaymayan zemin seçin; uzun süre otur bekletmeyin."]],
+    yasak:["Kalçasına bastırmak","Tasmayla yukarı çekmek","Oturmadı diye kızmak","Komutu davranış oluşmadan tekrar etmek","Kaygan zeminde çalışmak"],
+    kriter:"5 denemenin 4'ünde el işareti veya sözlü komutla oturması."},
+  k5:{t:"Kademe 5 — Bekle Komutu ✋",lvl:"Kademe 5",dk:"3-5 dk",
+    desc:"Amaç: köpeğin kısa süre yerinde kalmayı öğrenmesi. Kapı, mama ve yolda güvenlik için kritik bir komuttur.",
+    yavru:"1-2 saniye ile başlanır.",
+    yetiskin:"Kapı, mama ve yolda güvenlik için kullanılır.",
+    steps:["Köpeği otur pozisyonuna alın.","Açık avuç işareti gösterip <b>'Bekle'</b> deyin.","1 saniye bekleyin, marker kullanın, ödül verin.","Süreyi 1, 2, 3 saniye şeklinde artırın.","Sonra yarım adım uzaklaşın.","Her başarılı beklemeden sonra serbest bırakma kelimesi kullanın: <b>'Tamam'</b>."],
+    vars:[["Hemen kalkıyor","Süreyi azaltın; 1 saniyeye geri dönün."],["Sahibi uzaklaşınca kalkıyor","Önce sadece bedeninizi hafif oynatın; adım atmayı sonra ekleyin."],["Heyecanlı köpek","Seansı günün sakin saatine alın."],["Korkak köpek","Uzaklaşmayı çok yavaş artırın; kaybolma hissi oluşturmayın."],["Kapı önünde deneme","Önce ev içinde öğretmeden kapıda kullanmayın."]],
+    yasak:["Bir anda uzun süre bekletmek","Serbest bırakma kelimesi kullanmamak","Başarısız olacağı yerde zorlamak","Kalkınca kızmak","Bekle ile kal komutlarını karıştırmak"],
+    kriter:"3-5 saniye yerinde kalması ve serbest bırakma kelimesini beklemesi."},
+  k6:{t:"Kademe 6 — Yat Komutu 🛌",lvl:"Kademe 6",dk:"3-5 dk",
+    desc:"Amaç: köpeğin sakinleşme ve kontrol için yat pozisyonunu öğrenmesi. Yatmak savunmasız hissettirebilir; önce güven kurulur.",
+    yavru:"Yumuşak zemin ve kısa tekrarlar kullanılır.",
+    yetiskin:"Büyük/yaşlı köpeklerde eklem ağrısı varsa zorlanmaz.",
+    steps:["Köpek otur pozisyonundayken ödülü burnuna yaklaştırın.","Ödülü yavaşça yere doğru indirin.","Dirsekleri yere yaklaşınca marker kullanın.","Tam yatınca ödül verin.","Davranış oturduktan sonra <b>'Yat'</b> kelimesini ekleyin.","El işaretini kademeli azaltın."],
+    vars:[["Yere eğilmiyor","Ödülü daha yavaş indirin; kaymayan zemin seçin."],["Ayağa kalkıyor","Oturdan başlayın, ödülü göğsüne doğru indirin."],["Küçük köpek","Sahip yere yakın çalışmalı."],["Büyük/yaşlı köpek","Ağrı ihtimali varsa veteriner kontrolü önerilir."],["Dışarıda yatmıyor","Yatmak savunmasız hissettirebilir; önce evde güven kurun."]],
+    yasak:["Köpeği bastırarak yatırmak","Tasmayla çekmek","Soğuk/kaygan zeminde zorlamak","Korkak köpeği dışarıda yatırmaya çalışmak","Uzun süre yat bekletmek"],
+    kriter:"Ev içinde 5 denemenin 4'ünde el işaretiyle yatması."},
+  k7:{t:"Kademe 7 — Pati Ver 🐾",lvl:"Kademe 7",dk:"3-5 dk",
+    desc:"Amaç: köpeğin pati uzatmayı eğlenceli bir numara olarak öğrenmesi. Güven ilişkisi kurulduktan sonra uygulanır.",
+    yavru:"Oyun motivasyonu yüksekse kısa seanslarla uygundur.",
+    yetiskin:"Güven ilişkisi kurulduktan sonra uygulanır.",
+    steps:["Köpeği otur pozisyonuna alın.","Kapalı avucunuzda ödül tutun.","Köpek patisiyle dokunursa marker kullanın.","Patisini nazikçe elinizde karşılarken ödül verin.","Davranış tekrarlandıktan sonra <b>'Pati'</b> kelimesini ekleyin.","Elinizi boş uzatarak çalışın."],
+    vars:[["Pati kullanmıyor","Ödülü kapalı avuçta tutun; burnuyla değil patisiyle denemesini bekleyin."],["Ağzıyla almaya çalışıyor","Elinizi geri çekmeden bekleyin; patiyi yakalayınca ödüllendirin."],["Dokunmaktan çekiniyor","Patilerine hassasiyeti olabilir; önce dokunmaya alışma çalışması yapın."],["Çok iri köpek","Elinizi sağlam konumlandırın; zıplamayı ödüllendirmeyin."],["Çocukla eğitim","Çocuklar patiyi çekmemeli; yetişkin gözetimi şart."]],
+    yasak:["Patiyi zorla çekmek","Köpeği dengesiz bırakmak","Tırnak hassasiyetini yok saymak","Aşırı tekrar yapıp sıkmak","Patiyi sert tutmak"],
+    kriter:"Boş el uzatıldığında patisini nazikçe vermesi."},
+  k8:{t:"Kademe 8 — Bırak Komutu 🧸",lvl:"Kademe 8",dk:"3-5 dk",
+    desc:"Amaç: köpeğin ağzındaki nesneyi gönüllü bırakmasını öğretmek. Güvenli nesne takası ile öğretilir — asla zorla alınmaz.",
+    yavru:"Eşya çalma/kemirme döneminde çok önemlidir.",
+    yetiskin:"Güvenli nesne takası ile öğretilir.",
+    steps:["Köpeğin güvenli bir oyuncakla oynamasını sağlayın.","Daha değerli bir ödül gösterin.","Köpek nesneyi bıraktığında marker kullanın.","Ödül verin ve mümkünse oyuncağı geri verin.","Davranış oturduktan sonra <b>'Bırak'</b> kelimesini ekleyin.","Farklı güvenli oyuncaklarla tekrar edin."],
+    vars:[["Nesneyi kaçırıyor","Kovalama yapmayın; takas değerini artırın."],["Hırlıyor","Kaynak koruma olabilir; profesyonel destek önerilir."],["Tehlikeli nesne aldı","Güvenli takas yapın; zorla ağzından almak risklidir."],["Yavru köpek","Oyuncak takası ve çiğneme alternatifleri sunun."],["Çocuklu ev","Çocuklar köpeğin ağzından nesne almaya çalışmamalı."]],
+    yasak:["Ağzını zorla açmak","Kovalayıp oyuna çevirmek","Nesneyi bırakınca sürekli tamamen almak","Hırlamayı cezalandırmak","Düşük değerli ödülle zorlamak"],
+    kriter:"Güvenli oyuncaklarda 'Bırak' işaretiyle nesneyi gönüllü bırakması."},
+  k9:{t:"Kademe 9 — Hayır / Durdurma Sinyali 🚫",lvl:"Kademe 9",dk:"3-5 dk",
+    desc:"Amaç: istenmeyen davranışı durdurup alternatif davranışa geçmeyi öğretmek. Sadece 'hayır' yeterli değildir — her zaman alternatif gösterilir.",
+    yavru:"Çevre düzenleme ve alternatif sunma önceliklidir.",
+    yetiskin:"Davranışın nedeni analiz edilmelidir; sadece 'hayır' yeterli değildir.",
+    steps:["Köpeğin sık yaptığı istenmeyen davranışı belirleyin.","Davranış başlamadan ortamı yönetin.","Kısa ve sakin bir durdurma sinyali seçin: <b>'Hayır'</b> veya <b>'Olmaz'</b>.","Hemen ardından yapılacak alternatif davranışı gösterin.","Alternatif davranışı ödüllendirin.","Başarıyı çevre düzenleme ile destekleyin."],
+    vars:[["Eşya kemiriyor","Eşyayı kaldırın; çiğneme oyuncağı verin; doğru oyuncağı ödüllendirin."],["Zıplıyor","Dikkati sadece dört pati yerdeyken verin."],["Sürekli tekrarlıyor","Davranışın ödül kaynağını bulun; sadece 'hayır' etkisiz kalır."],["Korkuyor","Sert ses tonu kullanmayın; güveni koruyun."],["Çocuklu ev","Çocuklar bağırarak 'hayır' dememeli; yetişkin tutarlı yönlendirmeli."]],
+    yasak:["Hayır deyip alternatif göstermemek","Bağırmak","Köpeği korkutmak","Aynı davranışa bazen izin verip bazen yasaklamak","Ceza ile bastırmak"],
+    kriter:"Durdurma sinyalinden sonra alternatif davranışa yönelmesi."},
+  k10:{t:"Kademe 10 — Tuvalet Eğitimi 🚽",lvl:"Kademe 10",dk:"3-5 dk",
+    desc:"Amaç: köpeğin uygun yerde tuvalet yapma alışkanlığı kazanması. Kazayı değil, doğru davranışı yakalayıp ödüllendirmek esastır.",
+    yavru:"Mesane kontrolü sınırlıdır; sık dışarı çıkarma gerekir.",
+    yetiskin:"Sağlık problemi ve geçmiş alışkanlıklar göz önüne alınır.",
+    steps:["Tuvalet alanını net seçin.","Uyku, yemek, oyun sonrası <b>hemen</b> tuvalet alanına götürün.","Doğru yerde yapınca sakin övgü ve ödül verin.","Kazalarda bağırmayın; kokuyu enzimatik temizleyiciyle giderin.","Rutin oluşturun.","Başarı günlüğü tutun."],
+    vars:[["Yavru çok sık yapıyor","Normal olabilir; daha sık dışarı/pede götürün."],["Gece kaçırıyor","Gece su/tuvalet rutini düzenlenir; çok küçük yavruda beklenen bir durumdur."],["Yetişkin aniden kaçırıyor","Veteriner kontrolü önerilir: idrar yolu, böbrek, hormonal vb."],["Pedden dışarı yapıyor","Ped alanını büyütün; başarı arttıkça küçültün."],["Çok korkak köpek","Dışarıda korkuyorsa önce güvenli, sakin alan seçin."]],
+    yasak:["Kazadan sonra burnunu sürtmek","Bağırmak","Kaza üzerinden zaman geçtikten sonra ceza vermek","Rutin olmadan beklenti kurmak","Temizlikte koku bırakmak"],
+    kriter:"7 gün boyunca kazaların belirgin azalması ve köpeğin seçili alana yönelmesi."},
+  k11:{t:"Kademe 11 — Tasmalı Yürüyüş 🦮",lvl:"Kademe 11",dk:"3-5 dk",
+    desc:"Amaç: köpeğin tasmada sahibini çekmeden yürümeyi öğrenmesi. Altın kural: çekmek asla hedefe ulaştırmaz.",
+    yavru:"Önce tasma ve göğüs tasmasına alışma yapılır.",
+    yetiskin:"Çekiştiren köpekte kısa, kontrollü seanslarla başlanır.",
+    steps:["Tasma/göğüs tasmasını evde kısa süre takıp ödüllendirin.","Dışarı çıkmadan önce ev içinde birkaç adım yürüyün.","Tasma <b>gevşekken</b> marker ve ödül verin.","Köpek çekince durun; gevşeyince yürümeye devam edin.","Kısa mesafe ve sık ödül kullanın.","Dikkat dağıtıcıları yavaş artırın."],
+    vars:[["Tasmayı ısırıyor","Önce alışma çalışması; tasma takılınca ödül/oyun."],["Sürekli çekiyor","Hedefe çekerek ulaşmasına izin vermeyin; dur-kalk çalışın."],["Küçük köpek","Tasma baskısı yerine uygun göğüs tasması kullanın."],["Büyük güçlü köpek","Güvenli ekipman ve gerekirse profesyonel destek."],["Trafik/gürültü korkusu","Daha sakin saat ve kısa maruziyet."]],
+    yasak:["Boğma/dikenli tasma kullanmak","Çekiştirerek düzeltmek","Çektiğinde hedefe ulaşmasına izin vermek","Çok uzun yürüyüşte eğitim beklemek","Köpeği koklamadan tamamen engellemek"],
+    kriter:"5 dakikalık yürüyüşte tasmanın çoğu zaman gevşek kalması."},
+  k12:{t:"Kademe 12 — Dikkat Dağıtıcıda Gel 📣",lvl:"Kademe 12",dk:"3-5 dk",
+    desc:"Amaç: dış ortamda ve dikkat dağıtıcılar varken geri çağırmayı sürdürebilmek. Ev içi 'Gel' %80 başarıya ulaşmadan bu kademeye geçilmez.",
+    yavru:"Güvenli kapalı alan ve uzun tasma ile çalışılır.",
+    yetiskin:"Uzun tasma, yüksek ödül ve basamaklı dikkat dağıtıcılar gerekir.",
+    steps:["Ev içi gel komutu <b>%80 başarıya</b> ulaşmadan dışarı geçmeyin.","Bahçe/kapalı alan gibi güvenli yerde uzun tasma kullanın.","Düşük dikkat dağıtıcı ortamda çağırın.","Geldiğinde çok değerli ödül verin.","Bazen geldikten sonra tekrar serbest bırakın.","Dikkat dağıtıcıları kademeli artırın."],
+    vars:[["Kedi/kuş görünce gelmiyor","Av motivasyonu yüksek; uyaran mesafesini artırın, uzun tasma kullanın."],["Parkta gelmiyor","Park çok zor seviyedir; daha sakin alana dönün."],["Gelince oyun bitiyor sanıyor","Gelince ödül verip tekrar oynamasına izin verin."],["Büyük/enerjik köpek","Önce enerji boşaltma ve kontrollü uzun tasma."],["Küçük köpek","Güvenlik ve korku faktörleri; kalabalık ortamdan kaçının."]],
+    yasak:["Tasmayı çıkartıp erken denemek","Gelince kızmak veya hemen eve götürmek","Komutu başarısız ortamda defalarca kullanmak","Yüksek dikkat dağıtıcıya erken geçmek","Güvenli alan olmadan çalışmak"],
+    kriter:"Uzun tasmada, düşük-orta dikkat dağıtıcılı ortamda 10 denemenin 8'inde gelmesi."}
+};
+function openLesson(id){
+  const L=LESSONS[id];
+  pID('lTitle',L.t);
+  document.getElementById('lMeta').innerHTML=
+    '<span class="badge" style="background:var(--green-soft);color:var(--green)">'+L.lvl+'</span>'+
+    '<span class="badge" style="background:var(--blue-soft);color:var(--blue)">🎬 '+L.dk+' animasyon</span>'+
+    '<span class="badge" style="background:var(--amber-soft);color:var(--amber)">+20 🏆 puan</span>';
+  pID('lDesc',L.desc);
+  const ages=document.getElementById('lAges');
+  if(L.yavru){
+    ages.style.display='grid';
+    ages.innerHTML=
+      '<div class="card" style="margin:0"><b style="font-size:12px;color:var(--ink)">🐣 Yavru</b><span style="font-size:11.5px;color:var(--gray);display:block;margin-top:3px;line-height:1.5">'+L.yavru+'</span></div>'+
+      '<div class="card" style="margin:0"><b style="font-size:12px;color:var(--ink)">🐕 Yetişkin</b><span style="font-size:11.5px;color:var(--gray);display:block;margin-top:3px;line-height:1.5">'+L.yetiskin+'</span></div>'+
+      '<div class="card" style="margin:0;grid-column:1/-1"><b style="font-size:12px;color:var(--ink)">🎒 Eğitim öncesi hazırlık</b><span style="font-size:11.5px;color:var(--gray);display:block;margin-top:3px;line-height:1.5">Sessiz ve güvenli ortam seç · sevilen küçük ödüller hazırla · seansları 3-5 dakikada tut · yorgun, korkmuş veya aşırı heyecanlıyken ara ver · tek seferde tek şey öğret.</span></div>';
+  }else{ages.style.display='none';ages.innerHTML=''}
+  document.getElementById('lSteps').innerHTML=L.steps.map((s,i)=>'<div class="step"><div class="no">'+(i+1)+'</div><p>'+s+'</p></div>').join('');
+  const vw=document.getElementById('lVarsWrap');
+  if(L.vars){
+    vw.style.display='block';
+    document.getElementById('lVars').innerHTML=L.vars.map(v=>'<div class="step"><div class="no">?</div><p><b>'+v[0]+':</b> '+v[1]+'</p></div>').join('');
+  }else vw.style.display='none';
+  const tipEl=document.getElementById('lTip'),errEl=document.getElementById('lErr');
+  if(L.kriter){
+    tipEl.innerHTML='🎯 <b>Başarı kriteri:</b> '+L.kriter+
+      '<br>📅 <b>Günlük görev:</b> Bugün 2-4 kısa seans uygula (her biri 3-5 dk). Başarısız denemeyi büyütme; kolay seviyeye dön.'+
+      '<br>🤖 <b>PETID kuralı:</b> Başarı yüksekse zorluğu küçük bir kademe artır; ortaysa aynı seviyede farklı ortam/ödülle tekrar et; düşükse bir önceki kademeye dön. Stres, korku, ağrı veya ani davranış değişimi varsa veteriner/uzman desteği al.';
+    errEl.innerHTML='⚠️ <b>Yapılmaması gerekenler:</b><br>• '+L.yasak.join('<br>• ');
+  }else{
+    tipEl.textContent=L.tip;errEl.textContent=L.err;
+  }
+  buildStage(id);
+  document.getElementById('lessonModal').classList.add('open');
+}
+const SCENE_MAP={k1:'gel',k2:'gel',k3:'bekle',k4:'otur',k5:'bekle',k6:'otur',k7:'pati',k8:'pati',k9:'bekle',k10:'tuvalet',k11:'gel',k12:'gel'};
+function buildStage(id){
+  const st=document.getElementById('lStage');
+  const L=LESSONS[id];
+  if(L&&L.video){ /* gerçek eğitim videosu */
+    st.className='stage video';
+    st.innerHTML='<video controls autoplay muted loop playsinline src="'+L.video+'" style="width:100%;display:block;border-radius:18px" onerror="pixelSahne(\''+id+'\')"></video>'+
+      '<div style="text-align:center;font-size:9.5px;color:var(--gray);padding:5px 0 0">🎥 Eğitim videosu · ses için 🔊 simgesine dokun</div>';
+    return;
+  }
+  pixelSahne(id);
+}
+function pixelSahne(id){
+  const st=document.getElementById('lStage');
+  id=SCENE_MAP[id]||id;
+  st.className='stage st-'+id;
+  const pe=petEmoji(),ad=petData[curPet].ad;
+  const scenes={
+    otur:'<div class="actor a-pet" style="left:42%;bottom:22px">'+pe+'</div>'+
+         '<div class="actor a-hand" style="font-size:26px">🍖</div>'+
+         '<div class="sbub" style="left:18px;top:16px;animation:bubM 6s infinite">“Otur!”</div>'+
+         '<div class="actor" style="left:58%;top:56px;font-size:20px;opacity:0;animation:otStar 6s infinite">✨</div>',
+    bekle:'<div class="actor a-pet" style="left:13%;bottom:22px">'+pe+'</div>'+
+          '<div class="actor a-own" style="left:46%;bottom:20px">🧍</div>'+
+          '<div class="actor a-hand" style="left:34%;top:48px;font-size:26px;opacity:0">✋</div>'+
+          '<div class="sbub" style="left:16px;top:14px;animation:bubA 6s infinite">“Beklee...”</div>'+
+          '<div class="sbub" style="left:30%;top:14px;animation:bubB 6s infinite">Aferin! 🍖</div>',
+    gel:'<div class="actor a-pet" style="left:5%;bottom:22px">'+pe+'</div>'+
+        '<div class="actor" style="right:11%;bottom:20px">🧍</div>'+
+        '<div class="sbub" style="right:8%;top:16px;animation:bubA 6s infinite">“'+ad+', Gel!”</div>'+
+        '<div class="actor" style="right:20%;top:96px;font-size:24px;opacity:0;animation:bubB 6s infinite">🍖</div>',
+    pati:'<div class="actor a-pet" style="left:26%;bottom:22px">'+pe+'</div>'+
+         '<div class="actor a-hand" style="left:52%;top:16px;font-size:30px;opacity:0">🖐️</div>'+
+         '<div class="actor a-paw" style="left:40%;top:104px;font-size:22px;opacity:0">🐾</div>'+
+         '<div class="sbub" style="left:16px;top:14px;animation:bubA 6s infinite">“Pati!”</div>'+
+         '<div class="actor" style="left:58%;top:62px;font-size:20px;opacity:0;animation:bubB 6s infinite">✨</div>',
+    tuvalet:'<div class="actor" style="left:5%;bottom:22px;animation:glPet 6s ease-in-out infinite">'+pe+'</div>'+
+         '<div class="actor" style="right:9%;bottom:20px">'+(petData[curPet].tur==='kedi'?'🧺':'🌳')+'</div>'+
+         '<div class="sbub" style="left:16px;top:14px;animation:bubA 6s infinite">'+(petData[curPet].tur==='kedi'?'Kum kabı burada!':'Tuvalet vakti!')+'</div>'+
+         '<div class="sbub" style="right:8%;top:14px;animation:bubB 6s infinite">Aferin! ✨🍖</div>',
+    yatak:'<div class="actor" style="left:5%;bottom:22px;animation:glPet 6s ease-in-out infinite">'+pe+'</div>'+
+         '<div class="actor" style="right:9%;bottom:20px;font-size:34px">🛏️</div>'+
+         '<div class="sbub" style="left:16px;top:14px;animation:bubA 6s infinite">“Yatağına!”</div>'+
+         '<div class="actor" style="right:14%;top:60px;font-size:20px;opacity:0;animation:bubB 6s infinite">💤</div>'
+  };
+  st.innerHTML=scenes[id]+'<div style="position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:9.5px;color:var(--gray)">🎬 animasyon otomatik tekrar eder</div>';
+}
+function replayStage(){const st=document.getElementById('lStage');const h=st.innerHTML;st.innerHTML='';void st.offsetWidth;st.innerHTML=h;}
+
+/* ---------- pixel oyun ---------- */
+const CAT=[
+"....o......o....","...obo....obo...","...obbo..obbo...","..obbbboobbbbo..",
+"..obbbbbbbbbbo..","..obebbbbbbebo..","..obbblnnlbbbo..","..obbbllllbbbo..",
+"...obbbbbbbbo...","..obbbbbbbbbboo.",".obbllllllllbobo",".obbllllllllbobo",
+".obbllllllllboo.","..obbbbbbbbbbo..","..oboobbbboobo..","...oo.oooo.oo..."];
+const DOG=[
+"..oo........oo..",".obbo......obbo.",".obbboooooobbbo.",".obbbbbbbbbbbbo.",
+".obbebbbbbbebbo.",".obbbbllllbbbbo.",".obbbblnnlbbbbo.","..obbblpplbbbo..",
+"..obbbbbbbbbbo..",".obbbbbbbbbbbboo",".oblllllllllbobo",".oblllllllllboo.",
+".oblllllllllbo..","..obbbbbbbbbbo..","..oboobbbboobo..","...oo.oooo.oo..."];
+/* yandan görünüm — yürüyüş kareleri (sağa bakar, sola giderken aynalanır) */
+const CAT_W1=[
+"..........o...o.",".........obbobbo",".........obbbbbo","o........obbbebo",
+"ob.......obblbno","ob.......obbbbo.",".oooooooobbbbbo.","obbbbbbbbbbbbo..",
+"obbbllllllllbo..","obbbllllllllbo..",".obbbbbbbbbbbo..","..obo.....obo...",
+"..obo.....obo...","..ooo.....ooo...","................","................"];
+const CAT_W2=[
+"..........o...o.",".........obbobbo",".........obbbbbo","o........obbbebo",
+"ob.......obblbno","ob.......obbbbo.",".oooooooobbbbbo.","obbbbbbbbbbbbo..",
+"obbbllllllllbo..","obbbllllllllbo..",".obbbbbbbbbbbo..","...obo...obo....",
+"...obo...obo....","...ooo...ooo....","................","................"];
+const DOG_W1=[
+"................",".........oooooo.",".........obbbbbo","o........oobbebo",
+"ob.......oobblno","ob.......obbbbo.",".oooooooobbbbbo.","obbbbbbbbbbbbo..",
+"obbbllllllllbo..","obbbllllllllbo..",".obbbbbbbbbbbo..","..obo.....obo...",
+"..obo.....obo...","..ooo.....ooo...","................","................"];
+const DOG_W2=[
+"................",".........oooooo.",".........obbbbbo","o........oobbebo",
+"ob.......oobblno","ob.......obbbbo.",".oooooooobbbbbo.","obbbbbbbbbbbbo..",
+"obbbllllllllbo..","obbbllllllllbo..",".obbbbbbbbbbbo..","...obo...obo....",
+"...obo...obo....","...ooo...ooo....","................","................"];
+const CAT_WALK=[CAT_W1,CAT_W2],DOG_WALK=[DOG_W1,DOG_W2];
+const PALS={
+  gri:{b:'#98A5B3',l:'#D9E0E9',o:'#39414E'},turuncu:{b:'#E8913A',l:'#F8D9AC',o:'#7A4414'},
+  siyah:{b:'#454B55',l:'#8E97A5',o:'#1E2229'},beyaz:{b:'#EDE9E1',l:'#FFFFFF',o:'#8C857A'},
+  altin:{b:'#D9A441',l:'#F3DCA8',o:'#7C5A1E'},kahve:{b:'#8B5E3C',l:'#C9A177',o:'#4A2E17'}};
+const STAGE_NAMES=['Minik Yavru','Yavru','Genç','Yetişkin','Efsane Dost'];
+const SHOP=[
+  {id:'papyon',e:'🎀',ad:'Papyon',f:20,pos:'neck'},
+  {id:'bandana',e:'🧣',ad:'Bandana',f:25,pos:'neck'},
+  {id:'sapka',e:'🎩',ad:'Şapka',f:30,pos:'head'},
+  {id:'gozluk',e:'🕶️',ad:'Gözlük',f:40,pos:'face',lvl:2},
+  {id:'tac',e:'👑',ad:'Taç',f:60,pos:'head',lvl:3},
+  {id:'kanat',e:'🦋',ad:'Peri Kanadı',f:80,pos:'head',lvl:4}
+];
+gameStates.forEach(g=>{if(g.coin===undefined)g.coin=15;if(!g.items)g.items=[];if(g.worn===undefined)g.worn=''});
+let bob=0,blink=false,walk=false,dir=1,tickN=0,petX=130,tgtX=130,mode='idle',
+    eatT=0,foodX=0,laserT=0,dotT=0,dotX=100,combo=0,
+    ballX=0,ballY=0,ballVX=0,ballVY=0,ballFly=false,rounds=0,idleEmoteT=100;
+function el(id){return document.getElementById(id)}
+function gState(){return gameStates[curPet]}
+function gLvl(){return Math.min(5,Math.floor(gState().xp/60)+1)}
+function petW(){return 16*(5+Math.min(3,gLvl()-1))}
+function drawSpr(ctx,spr,pal,px,ox,oy,flip,closed){
+  const cols={o:pal.o,b:pal.b,l:pal.l,e:closed?pal.b:'#20242B',n:'#E0787D',p:'#E89AA6'};
+  spr.forEach((row,y)=>{for(let x=0;x<row.length;x++){const c=row[x];
+    if(c==='.')continue;ctx.fillStyle=cols[c]||pal.b;
+    ctx.fillRect(ox+(flip?15-x:x)*px,oy+y*px,px,px);}});
+}
+function petSprite(){
+  const p=petData[curPet];
+  if(walk&&mode!=='sleep')return (p.tur==='kedi'?CAT_WALK:DOG_WALK)[bob?1:0];
+  return p.tur==='kedi'?CAT:DOG;
+}
+function drawPet(){
+  const cv=el('gCanvas');if(!cv)return;
+  const p=petData[curPet],pal=PALS[p.renk]||PALS.gri;
+  const px=5+Math.min(3,gLvl()-1);
+  cv.width=16*px;cv.height=17*px;
+  const ctx=cv.getContext('2d'),oy=(!walk&&bob)?px:0;
+  drawSpr(ctx,petSprite(),pal,px,0,oy,walk&&dir<0,blink||mode==='sleep');
+}
+function renderAcc(){
+  const g=gState(),it=SHOP.find(s=>s.id===g.worn),a=el('gAcc');if(!a)return;
+  if(!it){a.textContent='';return}
+  a.textContent=it.e;a.className='g-acc pos-'+it.pos;
+  a.style.fontSize=(14+4*Math.min(3,gLvl()-1))+'px';
+}
+function renderGame(){
+  const p=petData[curPet];
+  pID('gTitle','Pixel '+p.ad+' 🎮');pID('gName',p.ad);
+  pID('gLvlNo',gLvl());pID('gStageName',STAGE_NAMES[gLvl()-1]);
+  pID('gStageSub',STAGE_NAMES[gLvl()-1]+' · Seviye '+gLvl());
+  pID('gCoin',gState().coin);
+  const xp=el('gXp');if(xp)xp.style.width=(gLvl()>=5?100:(gState().xp%60)/60*100)+'%';
+  renderStats();renderAcc();drawPet();
+}
+function renderStats(){
+  [['tok','gTok'],['mut','gMut'],['enj','gEnj']].forEach(([k,id])=>{
+    const f=el(id);if(!f)return;
+    const v=Math.round(gState()[k]);
+    f.style.width=v+'%';
+    f.style.background=v>60?'var(--green)':v>30?'var(--amber)':'var(--red)';
+    pID(id+'V',v+'%');
+  });
+}
+function gBubble(t,ms){
+  const b=el('gBub');b.textContent=t;b.classList.add('show');
+  clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),ms||2600);
+}
+function addXp(n){
+  const before=gLvl();gState().xp+=n;
+  if(gLvl()>before)setTimeout(()=>{gBubble('🎉 Seviye atladı! Artık bir '+STAGE_NAMES[gLvl()-1]+'! Büyüdüm!',3400);jump();},2400);
+  renderGame();saveAll();
+}
+function gEarn(mut,xp,coin){
+  const g=gState();g.mut=Math.min(100,g.mut+mut);g.coin+=coin;
+  if(coin>0)spawnPart('🪙',petX+petW()/2,50+petW());
+  pID('gCoin',g.coin);addXp(xp);
+}
+function jump(){const c=el('gWrap');if(!c)return;c.classList.remove('jump');void c.offsetWidth;c.classList.add('jump')}
+function spawnPart(e,x,y){
+  const r=el('gRoom');if(!r)return;
+  const s=document.createElement('span');s.className='g-part';s.textContent=e;
+  s.style.left=x+'px';s.style.bottom=y+'px';r.appendChild(s);
+  setTimeout(()=>s.remove(),1200);
+}
+function showEmote(e){const m=el('gEmote');if(!m)return;m.textContent=e;m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}
+function resetGameScene(){
+  mode='idle';ballFly=false;eatT=0;combo=0;rounds=0;walk=false;
+  ['gDot','gBall'].forEach(id=>{const e=el(id);if(e)e.style.display='none'});
+  const t=el('gTimer');if(t)t.style.display='none';
+  const f=el('gFood');if(f)f.style.opacity=0;
+  const r=el('gRoom');if(r)r.classList.remove('night');
+}
+function uykuda(){if(mode==='sleep'){gBubble('Şşşt... 💤 Uyandırmak için 💤 butonuna tekrar bas');return true}return false}
+function mesgul(){return mode==='laser'||mode==='fetch'||mode==='return'||mode==='wait'||ballFly}
+/* --- aksiyonlar --- */
+function gFeed(){
+  if(uykuda()||mesgul())return;
+  const w=el('gRoom').clientWidth;
+  foodX=24+Math.random()*(w-70);
+  const f=el('gFood');f.textContent=petData[curPet].tur==='kedi'?'🐟':'🍖';
+  f.style.transition='none';f.style.left=foodX+'px';f.style.bottom='230px';f.style.opacity=1;
+  requestAnimationFrame(()=>{f.style.transition='bottom .5s ease-in,opacity .3s';f.style.bottom='38px'});
+  mode='food';
+}
+function gPlay(){
+  if(uykuda()||mesgul())return;
+  if(gState().enj<15){gBubble('Çok yorgunum... önce biraz uyusam? 😴');showEmote('😪');return}
+  if(petData[curPet].tur==='kedi')startLaser();else startFetch();
+}
+function startLaser(){
+  mode='laser';combo=0;laserT=250;
+  const w=el('gRoom').clientWidth;
+  dotX=30+Math.random()*(w-60);dotT=25;
+  el('gDot').style.display='block';posDot();
+  el('gTimer').style.display='inline-block';
+  gBubble('Kırmızı nokta!! 🔴 Odaya dokunup noktayı sen de kaçırabilirsin!',3400);
+}
+function posDot(){const d=el('gDot');d.style.left=dotX+'px';d.style.bottom=(42+Math.random()*46)+'px'}
+function endLaser(){
+  mode='idle';el('gDot').style.display='none';el('gTimer').style.display='none';
+  const g=gState();g.enj=Math.max(0,g.enj-10);
+  gEarn(Math.min(20,combo*3),combo*2+4,combo);
+  gBubble(combo>0?('Miyav! '+combo+' kez yakaladım! ✨ +'+combo+' 🪙'):'Bu nokta çok hızlıydı... 😾 Bir daha!');
+}
+function startFetch(){rounds=0;throwBall();gBubble('Top oyunu! 🎾 Hazır... AT!')}
+function throwBall(){
+  ballX=18;ballY=130;ballVX=3.5+Math.random()*2.5;ballVY=2;ballFly=true;mode='wait';
+  el('gBall').style.display='block';posBall();
+  el('gTimer').style.display='inline-block';pID('gTimer','🎾 '+(rounds+1)+'/3 tur');
+}
+function posBall(){const b=el('gBall');b.style.left=ballX+'px';b.style.bottom=(36+ballY)+'px'}
+function endFetch(){
+  el('gBall').style.display='none';el('gTimer').style.display='none';mode='idle';
+  const g=gState();g.enj=Math.max(0,g.enj-12);
+  gBubble('Hav hav! 3 tur getirdim, şampiyon benim! 🏆');
+}
+function gPet2(){
+  if(uykuda())return;
+  const g=gState();g.mut=Math.min(100,g.mut+8);
+  for(let i=0;i<3;i++)setTimeout(()=>spawnPart('❤️',petX+petW()/2-12+Math.random()*24,44+petW()),i*180);
+  gBubble(petData[curPet].tur==='kedi'?'Mırrrrr... ❤️':'Kuyruk sallama modu: AÇIK ❤️');
+  jump();gEarn(0,2,0);renderStats();
+}
+function gSleep(){
+  if(mode==='sleep'){wakeUp(true);return}
+  if(mesgul())return;
+  mode='sleep';el('gRoom').classList.add('night');
+  el('gFood').style.opacity=0;
+  gBubble('İyi geceler... 💤 (enerjisi dolunca kendisi uyanır)',3200);drawPet();
+}
+function wakeUp(erken){
+  mode='idle';el('gRoom').classList.remove('night');
+  gBubble(erken?'Hoop, uyandım! Ne oluyor? 👀':'Günaydın! Enerjim fulledi ⚡☀️');
+  if(!erken)gEarn(4,3,1);
+  drawPet();
+}
+/* --- oda etkileşimi --- */
+el('gRoom').addEventListener('click',ev=>{
+  const r=el('gRoom').getBoundingClientRect(),x=ev.clientX-r.left;
+  if(mode==='laser'){dotX=Math.max(14,Math.min(r.width-24,x));dotT=32;posDot();return}
+  if(mode==='idle'){tgtX=Math.max(4,Math.min(r.width-petW()-4,x-petW()/2));showEmote('❗')}
+});
+/* --- konuşma --- */
+function gTalk(q){
+  const inp=el('gInput');
+  const text=(q||inp.value).trim();if(!text)return;inp.value='';
+  if(mode==='sleep'){gBubble('Zzz... 💤 (rüyasında sana miyavlıyor)');return}
+  const g=gState(),p=petData[curPet],low=text.toLowerCase();
+  let r;
+  if(g.tok<35)r='Karnım çok aç, önce mama olsa? 🍖';
+  else if(g.enj<25)r='Esneme... çok uykum var 😴';
+  else if(low.includes('seviyorum')||low.includes('❤'))r='Ben de seni çok seviyorum! ❤️';
+  else if(low.includes('nasılsın'))r=g.mut>60?'Bugün harikayım! Sen nasılsın? ✨':'Biraz keyifsizim... benimle oynar mısın? 🥺';
+  else if(low.includes('aç'))r=g.tok>60?'Tokum, sağ ol! Ama ödül mamasına hayır demem 😏':'Evet! Mama! MAMA! 🍖';
+  else if(low.includes('oyun')||low.includes('oyna'))r='Oyun mu dedin?! Hadi hadi hadi! 🎾';
+  else if(low.includes('uyu'))r='Söz, kısa bir şekerleme... 💤';
+  else if(low.includes(p.ad.toLowerCase()))r='Evet? Beni mi çağırdın? 👀';
+  else if(low.includes('aferin')||low.includes('akıllı'))r='Hihi, biliyorum! 😊';
+  else if(low.includes('güzel')||low.includes('tatlı'))r='Kızarıyorum... 😊 '+(gState().worn?'Aksesuarım da yakışmış, değil mi?':'');
+  else r=[p.tur==='kedi'?'Miyav miyav! 🐾':'Hav hav! 🐾','Seni dinliyorum, devam et! 👂','Bunu duyunca kuyruğum sallandı! 😄','Sen yanımdayken her şey güzel ✨'][Math.floor(Math.random()*4)];
+  gBubble(r,3200);showEmote('💬');addXp(2);
+}
+/* --- mağaza --- */
+function openShop(){renderShop();document.getElementById('shopModal').classList.add('open')}
+function renderShop(){
+  const g=gState();pID('shopCoin','🪙 '+g.coin);
+  el('shopGrid').innerHTML=SHOP.map(it=>{
+    const owned=g.items.includes(it.id),worn=g.worn===it.id,locked=gLvl()<(it.lvl||1);
+    let btn;
+    if(locked)btn='<button class="s-btn" disabled>🔒 Seviye '+it.lvl+'</button>';
+    else if(worn)btn='<button class="s-btn on" onclick="wearItem(\''+it.id+'\')">Çıkar ✓</button>';
+    else if(owned)btn='<button class="s-btn" onclick="wearItem(\''+it.id+'\')">Tak</button>';
+    else btn='<button class="s-btn'+(g.coin<it.f?' no':'')+'" onclick="buyItem(\''+it.id+'\')">Satın al · 🪙'+it.f+'</button>';
+    return '<div class="shop-item"><div style="font-size:30px">'+it.e+'</div><b>'+it.ad+'</b>'+btn+'</div>';
+  }).join('');
+}
+function buyItem(id){
+  const g=gState(),it=SHOP.find(s=>s.id===id);
+  if(g.coin<it.f){gBubble('Param yetmiyor... 🪙 Biraz oyun oynayıp kazanalım mı?');closeM('shopModal');return}
+  g.coin-=it.f;g.items.push(id);g.worn=id;
+  saveAll();renderShop();renderGame();
+  gBubble('Bu '+it.ad.toLowerCase()+' bana çok yakıştı! '+it.e);jump();
+}
+function wearItem(id){const g=gState();g.worn=g.worn===id?'':id;saveAll();renderShop();renderGame()}
+/* --- tema --- */
+function applyTheme(dark){
+  document.querySelector('.phone').classList.toggle('dark',dark);
+  const b=document.getElementById('themeBtn');if(b)b.textContent=dark?'☀️':'🌙';
+}
+function toggleTheme(){
+  const dark=!document.querySelector('.phone').classList.contains('dark');
+  applyTheme(dark);
+  try{localStorage.setItem('patidostTheme',dark?'1':'0')}catch(e){}
+  toast(dark?'🌙 Karanlık tema açıldı':'☀️ Aydınlık tema açıldı');
+}
+try{applyTheme(localStorage.getItem('patidostTheme')==='1')}catch(e){}
+
+/* --- büyük foto (gerçek hayvan görseli) --- */
+const DEFAULT_FOTO={
+  kedi:'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=70&fit=crop',
+  kopek:'https://images.unsplash.com/photo-1552053831-71594a27632d?w=500&q=70&fit=crop'
+};
+function updateBigFoto(){
+  const img=document.getElementById('bigFoto'),cv=document.getElementById('bigPet');
+  if(!img||!cv)return;
+  const p=petData[curPet];
+  const src=p.foto||DEFAULT_FOTO[p.tur]||'';
+  if(!src){fotoYok(img);return}
+  img.style.display='block';cv.style.display='none';
+  if(img.getAttribute('src')!==src)img.src=src;
+}
+function fotoYok(img){ /* foto yüklenemedi → pixel dosta dön */
+  img.style.display='none';
+  const cv=document.getElementById('bigPet');if(cv)cv.style.display='block';
+}
+let fotoTemp;
+function fotoSec(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const im=new Image();
+    im.onload=()=>{
+      const mx=520,k=Math.min(1,mx/Math.max(im.width,im.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      fotoTemp=c.toDataURL('image/jpeg',.82);
+      fotoPrevGoster(fotoTemp);
+    };
+    im.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+}
+function fotoPrevGoster(src){
+  const pv=document.getElementById('fotoPrev');if(!pv)return;
+  pv.innerHTML=src
+    ?'<img src="'+src+'" style="height:54px;width:54px;object-fit:cover;border-radius:12px;border:1px solid var(--line)"><a style="font-size:11px;color:var(--red);cursor:pointer;font-weight:700" onclick="fotoKaldir()">Kaldır ✕</a>'
+    :'<span style="font-size:11px;color:var(--gray)">Fotoğraf yok — varsayılan görsel kullanılır</span>';
+}
+function fotoKaldir(){fotoTemp='';const i=document.getElementById('f_foto');if(i)i.value='';fotoPrevGoster('')}
+
+/* --- PETID ana ekran --- */
+let hBob=0,hBlink=false,hX=230,hTgt=90,hDir=-1,hMode='walk',hWait=10,hTick=0,bWave=false,bBlink=false;
+function drawHeroPet(){
+  const cv=el('hCanvas');if(!cv)return;
+  const p=petData[curPet],pal=PALS[p.renk]||PALS.gri;
+  cv.width=48;cv.height=51;
+  const yuru=(hMode==='walk');
+  const spr=yuru?(p.tur==='kedi'?CAT_WALK:DOG_WALK)[hBob?1:0]:(p.tur==='kedi'?CAT:DOG);
+  drawSpr(cv.getContext('2d'),spr,pal,3,0,(!yuru&&hBob)?3:0,yuru&&hDir<0,hBlink);
+}
+/* büyük silik "yardım ister ama mutlu" pixel dost */
+function drawBigPet(){
+  const cv=el('bigPet');if(!cv)return;
+  const p=petData[curPet],pal=PALS[p.renk]||PALS.gri,S=11;
+  cv.width=16*S;cv.height=17*S;
+  const ctx=cv.getContext('2d'),oy=bWave?S:0;
+  drawSpr(ctx,p.tur==='kedi'?CAT:DOG,pal,S,0,oy,false,bBlink);
+  const ey=p.tur==='kedi'?5:4;
+  if(!bBlink){ /* kocaman yalvaran gözler + ışıltı */
+    ctx.fillStyle='#20242B';
+    ctx.fillRect(4*S,ey*S+oy,2*S,2*S);
+    ctx.fillRect(10*S,ey*S+oy,2*S,2*S);
+    ctx.fillStyle='#FFFFFF';
+    ctx.fillRect(4*S+3,ey*S+oy+3,S*.62,S*.62);
+    ctx.fillRect(10*S+3,ey*S+oy+3,S*.62,S*.62);
+    ctx.fillRect(5*S,ey*S+oy+S,S*.35,S*.35);
+    ctx.fillRect(11*S,ey*S+oy+S,S*.35,S*.35);
+  }
+  if(p.tur==='kedi'){ /* gülümseme */
+    ctx.fillStyle='#E0787D';ctx.fillRect(6*S,7*S+oy+S*.45,4*S,S*.6);
+  }
+  /* sallanan pati (gövde zıplar, pati sabit kalır → el sallama) */
+  ctx.fillStyle=pal.o;ctx.fillRect(0,8*S-2,2*S,2*S+4);
+  ctx.fillStyle=pal.b;ctx.fillRect(2,8*S,2*S-4,2*S);
+  ctx.fillStyle=pal.l;ctx.fillRect(S*.4,8*S+S*.4,S*1.2,S*1.2);
+}
+setInterval(()=>{
+  hTick++;
+  const cv=el('hCanvas');
+  if(cv){
+    const W=(cv.parentElement?cv.parentElement.clientWidth:320)-54;
+    if(hMode==='walk'){
+      hBob=1-hBob;hX+=hDir*3;
+      if((hDir<0&&hX<=hTgt)||(hDir>0&&hX>=hTgt)||hX<6||hX>W){
+        hX=Math.max(6,Math.min(W,hX));hMode='sit';hWait=10+Math.random()*26;
+      }
+    }else{
+      if(hTick%5===0)hBob=1-hBob;
+      if(--hWait<=0){hTgt=6+Math.random()*(W-12);hDir=hX<hTgt?1:-1;hMode='walk'}
+    }
+    hBlink=Math.random()<.1;
+    cv.style.left=hX+'px';
+    drawHeroPet();
+  }
+  if(hTick%5===0){bWave=!bWave;bBlink=Math.random()<.18;drawBigPet()}
+},130);
+function heroPetTap(){
+  const cv=el('hCanvas');cv.classList.remove('jump');void cv.offsetWidth;cv.classList.add('jump');
+  hMode='sit';hWait=18;
+  const msgs=petData[curPet].tur==='kedi'
+    ?['Miyav! 🐾','Mırrr... bana bir soru sor!','Bugün oyun var mı? 🔴','Aşağıya yazabilirsin 👇']
+    :['Hav hav! 🐾','Kuyruğum seni görünce sallandı!','Yürüyüşe çıkalım mı? 🦮','Aşağıya yazabilirsin 👇'];
+  const b=el('hBub');b.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  b.style.left=Math.max(4,Math.min(hX-40,240))+'px';b.style.right='auto';
+  b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),2200);
+}
+function toast(t){
+  const e=el('appToast');if(!e)return;
+  e.textContent=t;e.classList.add('show');
+  clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600);
+}
+function filtSrvKey(t){
+  const map={hepsi:0,vet:1,otel:2,egt:3,gez:4,kuafor:5};
+  const chips=document.querySelectorAll('#srvChips .chip');
+  if(chips[map[t]])filtSrv(t,chips[map[t]]);
+}
+/* --- sağlık bölüm gezinmesi --- */
+function sagJump(id,chip){
+  if(chip){chip.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));chip.classList.add('on')}
+  const e=document.getElementById(id);
+  if(e)e.scrollIntoView({behavior:'smooth',block:'start'});
+}
+/* --- eğitim sekmeleri --- */
+function egTab(t,chip){
+  document.querySelectorAll('#egChips .chip').forEach(c=>c.classList.remove('on'));
+  chip.classList.add('on');
+  document.querySelectorAll('.eg-tab').forEach(d=>d.style.display='none');
+  const e=document.getElementById('tab-'+t);if(e)e.style.display='block';
+}
+/* --- PatiMatch --- */
+const MATCH_POOL={
+  kedi:[
+    {ad:'Duman',cins:'British Shorthair',yas:'3 yaş',cinsiyet:'Erkek',km:'2.4 km',e:'🐱',bg:'linear-gradient(135deg,#B8C6D9,#8FA3BF)',bio:'Sakin, mırıltısı bol bir beyefendi. Soy kütüğü belgeli, sağlık testleri eksiksiz.',uyum:92,likes:true},
+    {ad:'Zeus',cins:'Tekir',yas:'4 yaş',cinsiyet:'Erkek',km:'1.2 km',e:'🐈‍⬛',bg:'linear-gradient(135deg,#CDE3D2,#A8CBB2)',bio:'Mahallenin en yakışıklısı. Deneyimli sahip, ilk görüşme evde yapılabilir.',uyum:78,likes:true},
+    {ad:'Pamuk',cins:'Van Kedisi',yas:'2 yaş',cinsiyet:'Erkek',km:'5.1 km',e:'🐈',bg:'linear-gradient(135deg,#F6EFE6,#E4D5C0)',bio:'Enerjik ve oyuncu — suyla arası şaşırtıcı derecede iyi! Aşı karnesi güncel.',uyum:85,likes:false},
+    {ad:'Leo',cins:'Scottish Fold',yas:'2.5 yaş',cinsiyet:'Erkek',km:'7.8 km',e:'😺',bg:'linear-gradient(135deg,#F3DCC8,#E1B894)',bio:'Katlanmış kulaklar, kocaman gözler. Genetik taraması yapıldı, sonuçlar paylaşılır.',uyum:88,likes:true},
+    {ad:'Gölge',cins:'Ankara Kedisi',yas:'3 yaş',cinsiyet:'Erkek',km:'4.5 km',e:'🐱',bg:'linear-gradient(135deg,#EFEFEF,#D5D5DC)',bio:'Uzun tüylü, zarif ve sakin. Ev ortamında büyüdü, çocuklarla arası iyi.',uyum:81,likes:false}
+  ],
+  kopek:[
+    {ad:'Luna',cins:'Golden Retriever',yas:'2 yaş',cinsiyet:'Dişi',km:'3.3 km',e:'🐕',bg:'linear-gradient(135deg,#F3DCA8,#DDB05F)',bio:'Kalça displazisi taraması temiz. Neşeli, itaat eğitimi tamamlanmış.',uyum:95,likes:true},
+    {ad:'Maya',cins:'Labrador',yas:'3 yaş',cinsiyet:'Dişi',km:'2.1 km',e:'🦮',bg:'linear-gradient(135deg,#E8D3B8,#C9A876)',bio:'Su ve apport delisi. Daha önce sağlıklı bir doğum yaptı, veteriner referanslı.',uyum:89,likes:true},
+    {ad:'Bella',cins:'Border Collie',yas:'2.5 yaş',cinsiyet:'Dişi',km:'6.7 km',e:'🐕‍🦺',bg:'linear-gradient(135deg,#D8D8E0,#A9A9BC)',bio:'Zeka küpü — 40+ komut biliyor. Aktif bir eş arıyor, çoban kökenli hatlardan.',uyum:84,likes:false},
+    {ad:'Fındık',cins:'Cocker Spaniel',yas:'4 yaş',cinsiyet:'Dişi',km:'1.9 km',e:'🐶',bg:'linear-gradient(135deg,#E9C9A8,#CE9E6B)',bio:'Uysal ve sevecen. Kulak sağlığı düzenli kontrol altında, aşıları tam.',uyum:87,likes:true}
+  ]
+};
+let matchPool=[],matchIdx=0,matches=[];
+function updateMatchPromo(){
+  const p=petData[curPet];
+  const pool=MATCH_POOL[p.tur]||[];
+  const strong=pool.filter(c=>c.uyum>=85).length;
+  pID('mpPetAd',p.ad);
+  pID('mpBadge','💘 '+strong+' yeni aday');
+  pID('mpBadge2','💘 '+strong+' yeni aday');
+  pID('chipDot',strong);
+}
+function openMatch(){
+  const p=petData[curPet];
+  matchPool=(MATCH_POOL[p.tur]||[]).filter(c=>c.cinsiyet!==p.cinsiyet);
+  if(!matchPool.length)matchPool=MATCH_POOL[p.tur]||[];
+  matchIdx=0;
+  pID('matchSub',p.ad+' için '+(p.tur==='kedi'?'kedi 🐱':'köpek 🐶')+' adayları');
+  renderMatchCard();renderMatchStrip();
+}
+function renderMatchCard(){
+  const host=document.getElementById('mStack');if(!host)return;
+  if(matchIdx>=matchPool.length){
+    host.innerHTML='<div class="m-empty">Şimdilik aday kalmadı! 🐾<br><span style="font-size:12px;font-weight:600">Yeni profiller eklendikçe haber veririz.</span><a onclick="openMatch()">↻ Baştan göster</a></div>';
+    return;
+  }
+  const c=matchPool[matchIdx];
+  host.innerHTML='<div class="m-card" id="mCard">'+
+    '<div class="m-img" style="background:'+c.bg+'">'+c.e+'<span class="m-uyum">💘 Uyum %'+c.uyum+'</span></div>'+
+    '<div class="m-info"><b>'+c.ad+', '+c.yas+'</b>'+
+    '<span class="m-meta">'+c.cins+' · '+c.cinsiyet+' · 📍 '+c.km+'</span>'+
+    '<p>'+c.bio+'</p>'+
+    '<div class="m-tags"><span class="badge" style="background:var(--green-soft);color:var(--green)">💉 Aşılar tam</span><span class="badge" style="background:var(--blue-soft);color:var(--blue)">🧬 Sağlık testi ✓</span><span class="badge" style="background:var(--amber-soft);color:var(--amber)">🪪 Çipli</span></div>'+
+    '</div></div>';
+}
+function animOut(dir){
+  const card=document.getElementById('mCard');if(!card)return;
+  card.style.animation='swipe'+dir+' .4s ease forwards';
+  setTimeout(()=>{matchIdx++;renderMatchCard()},390);
+}
+function matchPass(){animOut('L')}
+function matchLike(){
+  if(matchIdx>=matchPool.length)return;
+  const c=matchPool[matchIdx];
+  if(c.likes)setTimeout(()=>showMatchPop(c),430);
+  animOut('R');
+}
+function showMatchPop(c){
+  if(!matches.find(m=>m.ad===c.ad))matches.push(c);
+  renderMatchStrip();
+  pID('mpName',c.ad);pID('mpEmoji',c.e);pID('mpMine',petEmoji());
+  document.getElementById('matchPop').classList.add('open');
+}
+function renderMatchStrip(){
+  const s=document.getElementById('matchStrip');if(!s)return;
+  s.innerHTML=matches.length
+    ?'<span style="font-size:11px;color:var(--gray);font-weight:700;align-self:center;flex-shrink:0">Eşleşmeler:</span>'+matches.map(c=>'<div class="chip on" style="pointer-events:none">'+c.e+' '+c.ad+'</div>').join('')
+    :'<span style="font-size:11.5px;color:var(--gray)">Henüz eşleşme yok — beğenmeye başla! 💘</span>';
+}
+function scrollHome(){document.getElementById('scr-home').scrollTo({top:420,behavior:'smooth'})}
+document.getElementById('scr-home').addEventListener('scroll',function(){
+  const b=document.getElementById('homeBelow');
+  if(b)b.classList.toggle('reveal',this.scrollTop>40);
+});
+/* --- ana ekran AI asistanı --- */
+function escHtml(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function temiz(s){return s.replace(/<[^>]+>/g,'')}
+function aiBrain(qRaw){
+  const q=qRaw.toLowerCase(),p=petData[curPet];
+  /* 1) davranış veritabanı (AI sohbetle aynı bilgi) */
+  for(const [keys,a] of answers){
+    if(keys.some(k=>q.includes(k)))
+      return {text:a,acts:[['🤖 AI sohbetinde devam',function(){go('ai');ask(qRaw)}],['🩺 Sağlık',function(){go('saglik')}]]};
+  }
+  /* 2) eğitim kademeleri */
+  const EGT=[[['ismini','isim öğren','adını'],'k1'],[['dikkat','göz temas'],'k3'],[['otur'],'k4'],[['bekle'],'k5'],[['yat'],'k6'],[['pati'],'k7'],[['bırak','birak'],'k8'],[['hayır','olmaz','yaramaz'],'k9'],[['tuvalet','çiş','kum kabı eğit'],'k10'],[['tasma','çekiştir','yürüyüş eğit'],'k11'],[['dikkat dağıt','parkta gel'],'k12'],[['gel komutu','gelmeyi','çağır'],'k2']];
+  for(const [keys,id] of EGT){
+    if(keys.some(k=>q.includes(k))){
+      const L=LESSONS[id];
+      return {text:'<b>'+L.t+'</b> tam sana göre! '+L.desc+'<br><b>İlk adım:</b> '+temiz(L.steps[0]),
+        acts:[['🎓 Dersi aç',function(){openLesson(id)}],['Tüm program',function(){go('egitim')}]]};
+    }
+  }
+  /* 3) sağlık */
+  if(/(\başı|\bası takvim|parazit|\bilaç|\bilac)/.test(q))
+    return {text:p.ad+"'un aşı takvimi Sağlık bölümünde: Karma ve parazit uygulamaları yapıldı, <b>Kuduz aşısı 12 Temmuz'da</b>. İlaç hatırlatıcılarını da oradan yönetebilirsin.",acts:[['🩺 Sağlığı aç',function(){go('saglik')}]]};
+  if(/(kilo|beslenme|mama miktar|kaç gram|su iç)/.test(q))
+    return {text:p.ad+' şu an <b>'+p.kilo+' kg</b> ve ideal aralıkta. Günlük beslenme planı: 2 öğün, ödül maması günlük kalorinin en fazla %10\'u. Detaylar Sağlık > Beslenme Planında.',acts:[['🍽️ Beslenme planı',function(){go('saglik')}]]};
+  if(/(hasta|kus|ishal|belirti|ağrı|agri)/.test(q))
+    return {text:'Belirtileri önemsiyorum. Sana ilk değerlendirme için AI Sağlık Rehberini önereyim — ama unutma, ciddi/süren belirtilerde en doğru adres veterinerdir. 🩺',acts:[['🤖 AI Sağlık Rehberi',function(){go('ai');ask(qRaw)}],['🧑‍⚕️ Veteriner bul',function(){go('hizmet');filtSrvKey('vet')}]]};
+  /* 4) hizmetler */
+  if(/(veteriner|klinik)/.test(q))return {text:'Çevrende 3 veteriner buldum. En yakını <b>Pati Veteriner Kliniği</b> (850 m, ★4.9, 7/24 acil).',acts:[['🧑‍⚕️ Listeyi gör',function(){go('hizmet');filtSrvKey('vet')}]]};
+  if(/(kuaför|kuafor|tıraş|tiras|yıkama|bakım)/.test(q))return {text:'İki pet kuaförü var: <b>Tüylü Dostlar</b> (evden alma servisli, ★4.9) ve <b>Pati SPA</b> (kedi dostu sessiz salon).',acts:[['✂️ Kuaförleri gör',function(){go('hizmet');filtSrvKey('kuafor')}]]};
+  if(/(otel|pansiyon|tatil)/.test(q))return {text:'<b>Mutlu Patiler Pet Oteli</b> kameralı odalarıyla 2.1 km uzakta (★4.8). Tatile gönül rahatlığıyla çık!',acts:[['🏨 Otelleri gör',function(){go('hizmet');filtSrvKey('otel')}]]};
+  if(/(gezdirici|yürüteç|yürüyüşe çıkar)/.test(q))return {text:'Köpek gezdiricileri listeliyorum — Mert K. hafta içi her gün 45 dk tur yapıyor (★4.7).',acts:[['🦮 Gezdiricileri gör',function(){go('hizmet');filtSrvKey('gez')}]]};
+  if(/(sahiplen|yuva)/.test(q))return {text:'Yuva arayan 4 can dostu var: Minnoş, Karabaş, Gece ve Pamuk. 🏡',acts:[['❤️ Sahiplendirme',function(){go('hizmet')}]]};
+  if(/(eş bul|eşleş|çiftleş|match|tinder)/.test(q))return {text:'PatiMatch ile '+p.ad+' için uyumlu adaylar bulabiliriz — kediler kedilerle, köpekler köpeklerle eşleşir. 💘',acts:[['💘 PatiMatch aç',function(){go('match');openMatch()}]]};
+  /* 5) uygulama içi */
+  if(/(oyun|pixel)/.test(q))return {text:'Pixel '+p.ad+' seni bekliyor! Besle, oyna, Pati Uçuşu ile 🪙 kazan ve mağazadan aksesuar al. 🎮',acts:[['🎮 Oyunu aç',function(){go('oyun')}]]};
+  if(/(eğitim|egitim|ders|komut|program)/.test(q))return {text:'Eğitim bölümünde 12 kademelik PETID Temel Eğitim müfredatı, kedi programı, zeka oyunları ve antrenman planı var. Nereden başlamak istersin?',acts:[['🎓 Eğitimi aç',function(){go('egitim')}],['1. Kademeden başla',function(){openLesson('k1')}]]};
+  if(/(merhaba|selam|naber|nasılsın)/.test(q))return {text:'Merhaba Leo! 👋 Ben PETID AI. '+p.ad+' hakkında her şeyi sorabilirsin: davranışlar, eğitim, sağlık, çevrendeki hizmetler...',acts:[['Örnek: patisini yalıyor',function(){el('homeQ').value='Patisini yalıyor';homeSearch()}]]};
+  if(/(teşekkür|tesekkur|sağol|sagol)/.test(q))return {text:'Rica ederim! '+p.ad+' adına pati sallıyorum 🐾 Başka bir şey olursa buradayım.',acts:[]};
+  /* 6) genel fallback */
+  return {text:'Bunu tam çözemedim ama AI sohbetinde detaylı konuşabiliriz. 💭 Şunları da deneyebilirsin: "otur komutu nasıl öğretilir", "aşı takvimi", "yakında kuaför var mı", "sürekli miyavlıyor".',
+    acts:[['🤖 AI sohbetinde sor',function(){go('ai');ask(qRaw)}]]};
+}
+let _haActs=[];
+function haAct(i){if(_haActs[i])_haActs[i][1]()}
+function haClose(){el('homeAns').style.display='none'}
+function homeSearch(ev){
+  if(ev)ev.preventDefault();
+  const q=el('homeQ').value.trim();if(!q)return;
+  el('homeQ').value='';
+  const box=el('homeAns');
+  box.style.display='block';
+  box.innerHTML='<div class="ha-head">🤖 PETID AI</div><div class="ha-body ha-dots">Düşünüyorum...</div>';
+  const b=el('hBub');if(b){b.textContent='Hemen bakıyorum! 🔍';b.style.left=Math.max(4,Math.min(hX-40,240))+'px';b.style.right='auto';b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(function(){b.classList.remove('show')},1800)}
+  setTimeout(function(){
+    const r=aiBrain(q);_haActs=r.acts||[];
+    box.innerHTML='<div class="ha-head">🤖 PETID AI <a onclick="haClose()">✕</a></div>'+
+      '<div class="ha-q">“'+escHtml(q)+'”</div>'+
+      '<div class="ha-body">'+r.text+'</div>'+
+      (_haActs.length?'<div class="ha-acts">'+_haActs.map(function(a,i){return '<button class="chip" onclick="haAct('+i+')">'+a[0]+'</button>'}).join('')+'</div>':'');
+  },700);
+}
+/* --- Pati Uçuşu (flappy) --- */
+const FW=340,FH=430,FPW=54,FGAP=142,FPX=70,FPS=2.6;
+let fTimer=null,fState='ready',fY=0,fVY=0,fScore=0,fTickN=0,fPipes=[];
+function openFlap(){
+  if(mode==='sleep'){gBubble('Şşşt... uyuyor, uçuşa çıkamaz 💤');return}
+  resetGameScene();
+  fState='ready';fScore=0;fY=FH/2-30;fVY=0;fPipes=[];fTickN=0;
+  pID('fBest',gState().flappyBest||0);
+  document.getElementById('flapModal').classList.add('open');
+  if(!fTimer)fTimer=setInterval(fTick,30);
+  fDraw();
+}
+function closeFlap(){closeM('flapModal');clearInterval(fTimer);fTimer=null;fState='ready'}
+function fTap(){
+  if(fState==='ready')fState='play';
+  if(fState==='play')fVY=-5.8;
+  else if(fState==='over'){fState='ready';fScore=0;fY=FH/2-30;fVY=0;fPipes=[];fTickN=0}
+  fDraw();
+}
+function fTick(){
+  if(fState==='play'){
+    fTickN++;fVY+=.42;fY+=fVY;
+    if(fTickN%52===1){
+      const son=fPipes.length?fPipes[fPipes.length-1].gy:FH/2-FGAP/2;
+      const min=Math.max(60,son-110),max=Math.min(FH-FGAP-110,son+110);
+      fPipes.push({x:FW+10,gy:min+Math.random()*(max-min),passed:false});
+    }
+    fPipes.forEach(p=>p.x-=2.6);
+    fPipes=fPipes.filter(p=>p.x>-FPW-6);
+    const bs=16*FPS;
+    for(const p of fPipes){
+      if(!p.passed&&p.x+FPW<FPX){p.passed=true;fScore++}
+      if(FPX+bs-7>p.x&&FPX+7<p.x+FPW&&(fY+7<p.gy||fY+bs-7>p.gy+FGAP)){fOver();break}
+    }
+    if(fY<-10||fY+bs>FH-44)fOver();
+  }
+  fDraw();
+}
+function fOver(){
+  if(fState!=='play')return;
+  fState='over';
+  const g=gState();
+  g.coin+=fScore;g.xp+=fScore*2;
+  if(fScore>(g.flappyBest||0)){g.flappyBest=fScore;pID('fBest',fScore)}
+  saveAll();renderGame();
+}
+function fDraw(){
+  const cv=el('fCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const grd=ctx.createLinearGradient(0,0,0,FH);
+  grd.addColorStop(0,'#BEE3F8');grd.addColorStop(1,'#DFF3E4');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,FW,FH);
+  ctx.fillStyle='rgba(255,255,255,.7)';
+  ctx.fillRect((300-fTickN*.8%420),60,52,14);ctx.fillRect((140-fTickN*.5%420),120,64,16);
+  fPipes.forEach(p=>{
+    ctx.fillStyle='#3FA97C';
+    ctx.fillRect(p.x,0,FPW,p.gy);ctx.fillRect(p.x,p.gy+FGAP,FPW,FH-p.gy-FGAP-44);
+    ctx.fillStyle='#2E8A63';
+    ctx.fillRect(p.x-3,p.gy-14,FPW+6,14);ctx.fillRect(p.x-3,p.gy+FGAP,FPW+6,14);
+  });
+  ctx.fillStyle='#8ED0A5';ctx.fillRect(0,FH-44,FW,44);
+  ctx.fillStyle='#6DBA8B';
+  for(let i=-24;i<FW+24;i+=24)ctx.fillRect(i-(fTickN*2.6)%24,FH-44,12,6);
+  const p=petData[curPet],pal=PALS[p.renk]||PALS.gri;
+  ctx.save();
+  ctx.translate(FPX+8*FPS,fY+8*FPS);
+  ctx.rotate(Math.max(-.4,Math.min(.6,fVY*.06)));
+  ctx.translate(-8*FPS,-8*FPS);
+  drawSpr(ctx,p.tur==='kedi'?CAT:DOG,pal,FPS,0,0,false,false);
+  ctx.restore();
+  ctx.fillStyle='#1F3A2E';ctx.textAlign='center';
+  ctx.font='bold 28px monospace';ctx.fillText(fScore,FW/2,46);
+  if(fState==='ready'){
+    ctx.font='bold 15px sans-serif';
+    ctx.fillText('Başlamak için dokun 🐾',FW/2,FH/2-64);
+    ctx.font='12px sans-serif';
+    ctx.fillText('Her dokunuşta '+p.ad+' zıplar — engellere çarpma!',FW/2,FH/2-42);
+  }
+  if(fState==='over'){
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    ctx.fillRect(38,FH/2-74,FW-76,128);
+    ctx.fillStyle='#1F3A2E';
+    ctx.font='bold 17px sans-serif';ctx.fillText('Uçuş bitti! 🪶',FW/2,FH/2-44);
+    ctx.font='bold 15px sans-serif';ctx.fillText('Skor: '+fScore+'  ·  Kazanç: +'+fScore+' 🪙',FW/2,FH/2-16);
+    ctx.font='bold 12px sans-serif';
+    ctx.fillText('Rekor: '+(gState().flappyBest||0),FW/2,FH/2+8);
+    ctx.fillText('Tekrar uçmak için dokun',FW/2,FH/2+32);
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&document.getElementById('flapModal').classList.contains('open')){e.preventDefault();fTap()}
+});
+/* --- ana oyun döngüsü (60ms) --- */
+setInterval(()=>{
+  const room=el('gRoom');if(!room)return;
+  tickN++;
+  const w=room.clientWidth,pw=petW(),g=gState();
+  /* top fiziği */
+  if(ballFly){
+    ballX+=ballVX;ballY+=ballVY;ballVY-=.35;
+    if(ballX>w-26){ballX=w-26;ballVX*=-.5}
+    if(ballY<=0){ballY=0;ballFly=false;mode='fetch'}
+    posBall();
+  }
+  /* lazer */
+  if(mode==='laser'){
+    laserT--;dotT--;
+    pID('gTimer','🔴 '+Math.max(0,Math.ceil(laserT*0.06))+' sn · '+combo+' ✨');
+    if(dotT<=0){dotX=20+Math.random()*(w-44);dotT=25;posDot()}
+    if(laserT<=0){endLaser();return}
+  }
+  /* hedef belirleme */
+  if(mode==='idle'&&Math.random()<.012)tgtX=8+Math.random()*(w-pw-16);
+  if(mode==='laser')tgtX=dotX-pw/2;
+  if(mode==='fetch')tgtX=ballX-pw/2+6;
+  if(mode==='food')tgtX=foodX-pw/2+8;
+  if(mode==='return')tgtX=Math.round(w*.15);
+  /* yürüme */
+  if(mode!=='sleep'&&mode!=='wait'&&eatT<=0){
+    const d=tgtX-petX;
+    if(Math.abs(d)>4){petX+=Math.sign(d)*(mode==='idle'?1.1:3.1);dir=Math.sign(d)||dir;walk=true}else walk=false;
+  } else walk=false;
+  petX=Math.max(4,Math.min(w-pw-4,petX));
+  /* varışlar */
+  if(mode==='laser'&&Math.abs(petX+pw/2-dotX)<15){
+    combo++;spawnPart('✨',dotX,72);g.mut=Math.min(100,g.mut+2);
+    dotX=20+Math.random()*(w-44);dotT=25;posDot();renderStats();
+  }
+  if(mode==='fetch'&&!ballFly&&Math.abs(petX+pw/2-ballX)<15){mode='return';el('gBall').style.display='none'}
+  if(mode==='return'&&Math.abs(tgtX-petX)<=5){
+    rounds++;spawnPart('🎾',petX+pw,60);gEarn(5,4,1);
+    if(rounds<3)throwBall();else endFetch();
+  }
+  if(mode==='food'&&eatT<=0&&Math.abs(petX+pw/2-foodX)<16)eatT=22;
+  /* yeme */
+  if(eatT>0){
+    eatT--;
+    if(tickN%6===0)spawnPart('✨',foodX+Math.random()*14-7,46);
+    if(eatT===0){
+      el('gFood').style.opacity=0;g.tok=Math.min(100,g.tok+20);
+      gBubble(petData[curPet].tur==='kedi'?'Mmm, mırr! Eline sağlık 😋':'Hav! Dünyanın en iyi maması! 😋');
+      showEmote('😋');gEarn(2,4,1);mode='idle';renderStats();
+    }
+  }
+  /* uyku */
+  if(mode==='sleep'){
+    g.enj=Math.min(100,g.enj+.5);
+    if(tickN%20===0){spawnPart('💤',petX+pw-6,42+pw);renderStats()}
+    if(g.enj>=100)wakeUp(false);
+  }
+  /* boş zaman duyguları */
+  if(--idleEmoteT<=0){
+    idleEmoteT=140+Math.random()*160;
+    if(mode==='idle'){
+      const e=g.tok<35?'🍖':g.enj<30?'😪':g.mut>85?'❤️':['🎵','🐾','💭','✨'][Math.floor(Math.random()*4)];
+      showEmote(e);
+    }
+  }
+  /* çizim */
+  if(tickN%(walk?3:9)===0){bob=1-bob;blink=Math.random()<.1&&mode!=='sleep';drawPet()}
+  const wr=el('gWrap');if(wr)wr.style.left=petX+'px';
+},60);
+/* stat azalması */
+setInterval(()=>{
+  const g=gState();
+  g.tok=Math.max(0,g.tok-1);g.mut=Math.max(0,g.mut-.5);
+  if(mode!=='sleep')g.enj=Math.max(0,g.enj-.3);
+  renderStats();saveAll();
+},8000);
+renderAll();
+
+/* ---------- görev listesi ---------- */
+function toggleTask(t){
+  t.classList.toggle('done');
+  const done=document.querySelectorAll('#taskList .task.done').length,
+        total=document.querySelectorAll('#taskList .task').length;
+  pID('taskCount',done+'/'+total);
+  pID('homeTaskTitle',done+' / '+total+' görev tamamlandı');
+  const hp=document.getElementById('homeProg');if(hp)hp.style.width=(done/total*100)+'%';
+}
+
+/* ---------- AI sohbet (bağlam hafızalı) ---------- */
+/* her konu: [anahtarlar, ilk cevap, takip/derinleşme cevabı] */
+const answers=[
+  [['miyav','susm','bağır','vokal','ses çıkar'],
+   'Sürekli miyavlama genelde bir istek bildirir: acıkmış olabilir, ilgi istiyor olabilir ya da kapı/mama kabı gibi bir şeye erişmek istiyordur. 🐱 Kısırlaştırılmamış kedilerde çiftleşme çağrısı da olabilir. Miyavlama aniden arttıysa ve huzursuzluk eşlik ediyorsa ağrı ihtimaline karşı veteriner kontrolü öneririm.',
+   'Susmuyorsa sistematik gidelim: 1) İhtiyaç turu — mama, taze su, temiz kum kabı, kapalı kalan kapı var mı? 2) Karşılık vermeyi tamamen kes: talep miyavlaması tepki aldıkça güçlenir; sustuğu ANDA ilgi/ödül ver. 3) Akşam 10-15 dk yoğun av oyunu + ardından mama. Buna rağmen 3-4 gün içinde azalmıyorsa, özellikle gece de sürüyorsa ve yaşlıysa tiroid/tansiyon/ağrı için veteriner kontrolü şart. 🩺'],
+  [['havl','uluyor'],
+   'Havlamanın dilini çözelim: kapıda/sese karşı havlama nöbetçilik, sana dönük havlama talep, tek başınayken havlama ayrılık kaygısı olabilir. 🐶 İlki için "teşekkür et ve çağır" tekniği işler: bir kez havlayınca "tamam gördüm" deyip yanına çağır ve sakinliği ödüllendir.',
+   'Devam ediyorsa: havlamayı susturmaya değil <ihtiyaca> odaklan. Nöbetçi havlamada pencere önü erişimini kısıtla + tetikleyici sesi düşük seste çalıp ödülle eşleştir (duyarsızlaştırma). Talep havlamasında havlarken asla ödül/ilgi yok, sessizken bol ödül. Yalnızken oluyorsa kamera ile kaydet — ayrılık kaygısıysa PETID eğitmen listesinden profesyonel destek öneririm.'],
+  [['pati','yalıyor','yalama'],
+   'Patisini ara sıra yalamak normal bir bakım davranışıdır. 🐾 Ama sürekli aynı patiyi yalıyorsa: küçük bir yara, tırnak sorunu, alerji ya da stres kaynaklı olabilir. Patiyi nazikçe kontrol et — kızarıklık veya şişlik varsa veterinere görünmekte fayda var.',
+   'Geçmediyse 48 saatlik gözlem yap: bölgeyi günde 2 kez fotoğrafla (kızarıklık artıyor mu?), parmak aralarını ve tırnak dibini kontrol et. Kışın kuruma, yazın ot dikeni sık sebep. Bölge ıslak/kırmızıysa veya topallama eklendiyse artık ev takibi yeterli değil — veteriner muayenesi gerekli. Stres kaynaklıysa (yeni ev/hayvan) çevre zenginleştirme + oyun rutini kur.'],
+  [['kuyruk','kabarık'],
+   'Kabarık kuyruk korku veya ani irkilme işaretidir — vücudunu büyük göstermeye çalışıyor. 😾 Ortamda onu ürküten bir ses, koku veya başka bir hayvan olabilir. Sakinleşene kadar zorla temas kurma, güvenli bir alan bırak.',
+   'Sık tekrarlıyorsa tetikleyiciyi bul: hangi odada, hangi saatte, öncesinde ne oluyor? Not al. Pencere dışındaki sokak kedisi en klasik sebeptir — camı buzlu film ile kapatmak bile çözebilir. Güvenli yüksek alan (kedi rafı) ve feromon difüzörü genel gerginliği azaltır.'],
+  [['gece','uyum','uyku'],
+   'Kediler alacakaranlık avcısıdır, gece aktifliği doğaldır. 🌙 Yatmadan önce 10-15 dk yoğun oyun + ardından mama vermek "avlan-ye-uyu" döngüsünü taklit eder ve gece uykusunu ciddi şekilde iyileştirir. Eğitim sekmesindeki "Akşam zeka oyunu" görevi tam bunun için!',
+   'Hâlâ uyanıksa protokolü sıkılaştır: gece taleplerine SIFIR tepki (ışık açmak bile ödüldür), gündüz uyku saatini oyunla böl, akşam öğününü yatmadan hemen önceye al ve otomatik mama kabıyla sabah 05:00 öğünü ekle — sabah miyavlamasının 1 numaralı çözümüdür. 1-2 hafta tutarlılık ister, pes etme!'],
+  [['mama','yemiyor','iştah'],
+   'İştah kaybı 24 saatten uzun sürerse önemsenmeli. ⚠️ Önce basit nedenleri ele: mama değişikliği, kabın yeri, sıcak hava, stres. Su içiyor mu kontrol et. 24-48 saatten uzun süren iştahsızlıkta mutlaka veterinere başvur — kedilerde uzun açlık karaciğer için risklidir.',
+   'Hâlâ yemiyorsa bu artık davranış değil sağlık konusu olabilir. Şunu dene: mamayı hafif ısıt (koku artar), elinden birkaç parça sun, farklı dokuda (yaş/kuru) dene. Diş eti kızarıklığı, ağız kokusu, kusma veya halsizlik varsa bekleme — bugün veteriner. 48 saati geçen iştahsızlık kedilerde acildir. 🚨'],
+  [['kulak','geriye','yatır'],
+   'Kulakların geriye yatması rahatsızlık, korku veya savunma sinyalidir. 😿 O anda onu neyin tedirgin ettiğine bak — yeni bir ses, yabancı biri ya da istemediği bir temas olabilir. Bu sinyali gördüğünde geri çekilmek güvenini artırır.',
+   'Sürekli oluyorsa kulağın kendisini kontrol et: içinde kahverengi akıntı, koku veya kaşınma varsa kulak akarı/enfeksiyon olabilir — bu durumda davranış değil tıbbi bir konu, veterinere göster. Belirti yoksa hangi durumlarda yatırdığının günlüğünü tut; deseni bulunca tetikleyiciyi yönetiriz.'],
+  [['tırmal','tırmık'],
+   'Tırmalama doğal bir ihtiyaçtır: tırnak bakımı + koku bırakma. 🐈 Mobilyaları koruma yolu yasaklamak değil, alternatif sunmak: tırmalama tahtasını en çok tırmaladığı yerin yanına koy ve kullandığında ödüllendir.',
+   'Tahta işe yaramadıysa üç ayar var: 1) Malzeme — kimi kedi sisal ister, kimi karton, kimi halı; farklısını dene. 2) Yön — dikey tırmalayan kediye yatay tahta işe yaramaz. 3) Konum — tahta mobilyanın DİBİNDE olmalı, oda köşesinde değil. Mobilyaya çift taraflı bant (kediler yapışkan sevmez) + tahtaya kedi otu kombinasyonu genelde 1 haftada çözer.'],
+  [['kum kabı dışına','kum dışına','halıya','yatağa yap'],
+   'Kum kabı dışına yapmak neredeyse her zaman bir mesaj taşır. 📋 Kontrol listesi: kum yeterince temiz mi, kap sayısı yeterli mi (kedi sayısı +1), kum tipi yeni mi değişti, kap gürültülü bir yerde mi? Bunlar normalse idrar yolu enfeksiyonu ihtimaline karşı veteriner kontrolü şart — kediler ağrıyı kum kabıyla ilişkilendirip kaçınabilir.',
+   'Devam ediyorsa öncelik netleşti: idrar tahlili için veteriner randevusu al — tekrarlayan kaka/çiş kazalarının en sık tıbbi sebebi idrar yolu iltihabı ve kristallerdir, davranış eğitimiyle çözülmez. Bu arada kazalı bölgeyi enzimli temizleyiciyle yıka (amonyaklı ürün ASLA — çiş kokusunu taklit eder) ve oraya geçici olarak mama kabı koy; kediler yemek yediği yere tuvalet yapmaz.'],
+  [['düşür','itiyor','deviriyor'],
+   'Eşyaları masadan itmek kediler için birleşik bir davranıştır: av içgüdüsü testi + dikkat çekme. 😼 En etkili çözüm tepki vermemek (evet, zor!) ve enerjisini gün içinde av oyunlarıyla boşaltmak. Düşen eşyaya büyük tepki verirsen "bu tuş çalışıyor" diye öğrenir.',
+   'Sürüyorsa can sıkıntısı sinyali olarak oku: günde en az 2×10 dk tüy oltası seansı, yemeğin bir kısmını puzzle kaba taşı ve masaya çıkmasını istemediğin yüzeye geçici alüminyum folyo ser (dokusundan hoşlanmazlar). Kırılacakları kaldır, dayanıklıları bırak — seyirci yoksa oyun sıkıcıdır.'],
+  [['hırl','diş göster'],
+   'Hırlama bir uyarıdır ve aslında iyi bir şeydir: ısırmadan önce haber veriyor. ⚠️ Asla hırladığı için cezalandırma — uyarıyı bastırırsan direkt ısırmaya geçebilir. Bunun yerine neyi savunduğuna bak (mama, oyuncak, alan) ve o kaynağa yaklaşımı ödülle olumlu hale getir. Tekrarlıyorsa pozitif eğitmen desteği öneririm.',
+   'Devam eden hırlama kendi başına çözülecek bir şey değil — kaynak koruma davranışı yanlış müdahaleyle kötüleşir. İki acil kural: 1) Hırlarken elini uzatma ve nesneyi zorla alma. 2) "Yaklaşınca güzel şey olur" ilkesi: uzaktan geçerken ödül at, mesafeyi günler içinde azalt. Ciddi durumlarda (aile bireyine diş gösterme) Hizmetler bölümündeki davranış uzmanına danışmanı önemle öneririm. 🧑‍⚕️'],
+  [['tüy dök','tüyleri dök'],
+   'Mevsim geçişlerinde (ilkbahar/sonbahar) yoğun tüy dökümü normaldir. 🍂 Haftada 2-3 tımar + kaliteli omega-3 içeren beslenme dökümü azaltır. Ama bölgesel kellik, kızarıklık veya kaşıntı eşlik ediyorsa alerji ya da parazit olabilir — veterinere göster.',
+   'Azalmadıysa ayırıcı soru şu: döküm HER YERDEN eşit mi, yoksa belli bölgelerde açıklık mı var? Eşit ve deri sağlıklıysa beslenme + tımar devam; omega-3 takviyesinin etkisi 4-6 haftada görülür, sabret. Bölgesel kellik, kepek, siyah noktalar veya aşırı yalanma varsa pire alerjisi/mantar ihtimali için deri kazıntısı testi gerekir — bu evde çözülmez.'],
+  [['çok su içiyor','su içiyor','sürekli su'],
+   'Su tüketiminin belirgin artışı önemli bir sinyaldir. 💧 Sıcak hava ve kuru mamaya geçiş masum sebepler; ama sürekli artış böbrek, diyabet veya tiroid sorunlarının erken habercisi olabilir — özellikle 7 yaş üstünde. Günlük su miktarını 2-3 gün ölçüp veterinerle paylaşmanı öneririm.',
+   'Hâlâ fazlaysa artık ölçüm zamanı: sabah kaba ölçekli su koy, 24 saat sonra kalanı ölç. Kedide kg başına 100 ml, köpekte 90 ml üzeri "polidipsi" sayılır ve kan+idrar tahlili gerektirir. Bunu birkaç günlük tabloyla veterinere götür — erken yakalanan böbrek/diyabet çok daha iyi yönetilir. Randevu için Hizmetler > Veteriner. 🩺'],
+  [['ısır','dişliyor'],
+   'Oyun sırasında ısırma yavrularda normaldir ama sınır öğretilmelidir. 🐾 Dişler tene değdiği anda oyunu tamamen durdur ve 10 saniye ilgisiz kal — "ısırık = eğlence biter" bağlantısı kurulur. Elle asla oyun oynama; her zaman oyuncak kullan.',
+   'Sürüyorsa tutarlılığı kontrol et: evdeki HERKES aynı kuralı uyguluyor mu? Bir kişi bile elle boğuşuyorsa öğrenme sıfırlanır. Isırma anında "ah!" deyip odayı 30 saniye terk etmek en güçlü sinyaldir. Yavruysa diş değişimi (3-6 ay) kaşıntısı olabilir: dondurulmuş çiğneme oyuncağı ver. Yetişkinde aniden başladıysa ağrı ihtimalini veterinerle ele.']
+];
+let lastTopic=-1;
+const FOLLOW=/(susmuyor|geçmedi|gecmedi|devam ediyor|hâlâ|hala |azalmadı|azalmadi|durmuyor|kesilmedi|\byine\b|\bgene\b|işe yaramadı|ise yaramadi|olmadı|olmadi|değişmedi|degismedi|daha kötü|kötüleşti|hep aynı|bırakmıyor|birakmiyor|vazgeçmiyor)/;
+function ask(q){
+  const inp=document.getElementById('aiInput');
+  const text=(q||inp.value).trim();
+  if(!text)return;
+  inp.value='';
+  const chat=document.getElementById('chat');
+  chat.insertAdjacentHTML('beforeend','<div class="bub me"></div>');
+  chat.lastElementChild.textContent=text;
+  const low=text.toLowerCase();
+  const isFollow=FOLLOW.test(low)||(low.length<28&&/(evet|denedim|yaptım|yaptim|olmuyor|yapamadım|yapamadim)/.test(low));
+  let idx=answers.findIndex(p=>p[0].some(k=>low.includes(k)));
+  let ans;
+  if(idx<0&&isFollow&&lastTopic>=0)idx=lastTopic;
+  if(idx>=0){
+    if((isFollow||idx===lastTopic)&&answers[idx][2])ans=answers[idx][2];
+    else ans=answers[idx][1];
+    lastTopic=idx;
+  }else{
+    ans='Bunu birlikte çözelim. 🧠 Bana üç şey söyler misin: ne zamandır oluyor, günün hangi saatinde ve öncesinde ne değişti (yeni mama, ev, misafir)? Bu arada şu konularda detaylı bilgim var: miyavlama/havlama, patisini yalama, iştahsızlık, kum kabı sorunları, hırlama, ısırma, tüy dökümü, çok su içme, gece uyumama, tırmalama, eşya devirme.';
+    lastTopic=-1;
+  }
+  setTimeout(()=>{
+    chat.insertAdjacentHTML('beforeend','<div class="bub ai"></div>');
+    chat.lastElementChild.textContent=ans;
+    chat.scrollTop=chat.scrollHeight;
+    chat.lastElementChild.scrollIntoView({behavior:'smooth',block:'end'});
+  },550);
+}
+
+/* ---------- hizmet filtresi ---------- */
+function filtSrv(t,el){
+  document.querySelectorAll('#srvChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('#srvList .srv').forEach(s=>{
+    s.style.display=(t==='hepsi'||s.dataset.t===t)?'flex':'none';
+  });
+}
+</script>
+<!-- PatiDost v2 -->
+</body>
+</html>

@@ -1,0 +1,49 @@
+/* ---------- eğitim ---------- */
+.ring-wrap{display:flex;align-items:center;gap:16px}
+.ring{width:86px;height:86px;flex-shrink:0}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .bgc{stroke:var(--green-soft)}
+.ring .fgc{stroke:var(--green);stroke-dasharray:226;stroke-dashoffset:72;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .5s}
+.ring text{font-size:17px;font-weight:800;fill:var(--ink)}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.task:last-child{border-bottom:none}
+.task .cb{width:24px;height:24px;border-radius:8px;border:2px solid #CBDAD3;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-shrink:0;transition:.15s}
+.task.done .cb{background:var(--green);border-color:var(--green)}
+.task b{font-size:13.5px;color:var(--ink);display:block;font-weight:600}
+.task.done b{text-decoration:line-through;color:var(--gray)}
+.task span{font-size:11px;color:var(--gray)}
+.task .pts{margin-left:auto;font-size:11px;font-weight:700;color:var(--amber);flex-shrink:0}
+.lesson{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow)}
+.lesson .thumb{width:74px;height:58px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;flex-shrink:0}
+.lesson .thumb::after{content:"▶";position:absolute;right:5px;bottom:4px;font-size:9px;background:rgba(0,0,0,.5);color:#fff;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding-left:1.5px}
+.lesson b{font-size:13.5px;color:var(--ink);display:block;margin-bottom:2px}
+.lesson span{font-size:11px;color:var(--gray);display:block}
+.lesson .lv{margin-top:5px;display:inline-block}
+.streak{display:flex;justify-content:space-between;margin-top:4px}
+.day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10.5px;color:var(--gray);font-weight:600}
+.day .dot{width:32px;height:32px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:14px}
+.day.hit .dot{background:var(--green);color:#fff}
+
+/* ---------- eğitim sekmeleri (minimal) ---------- */
+.eg-tab{animation:fade .25s}
+.prog-head{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 2px 10px}
+.prog-head b{font-size:16.5px;color:var(--ink);display:block;letter-spacing:-.2px}
+.prog-head span{font-size:11.5px;color:var(--gray)}
+.prog-head .pct{font-size:23px;font-weight:800;color:var(--green)}
+.thinbar{height:5px;border-radius:99px;background:var(--green-soft);overflow:hidden;margin-bottom:6px}
+.thinbar i{display:block;height:100%;background:var(--green);border-radius:99px}
+.mini-label{font-size:10.5px;font-weight:800;letter-spacing:1.3px;color:var(--gray);margin:22px 2px 4px;display:flex;justify-content:space-between;align-items:center}
+.mini-tasks .task{padding:11px 2px}
+.syl-row{display:flex;align-items:center;gap:12px;padding:12.5px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.syl-row:last-child{border-bottom:none}
+.syl-no{width:29px;height:29px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--gray);flex-shrink:0;background:var(--card)}
+.syl-no.done{background:var(--green);border-color:var(--green);color:#fff}
+.syl-no.next{border-color:var(--green);color:var(--green)}
+.syl-row b{font-size:13.5px;color:var(--ink);display:block;font-weight:600}
+.syl-row .sub2{font-size:11px;color:var(--gray)}
+.syl-row .chev{margin-left:auto;color:#B9C7C0;font-size:19px;flex-shrink:0}
+.mini-streak{display:flex;gap:13px;padding:6px 2px 10px}
+.mstreak{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:9.5px;color:var(--gray);font-weight:700}
+.mstreak i{width:11px;height:11px;border-radius:50%;background:var(--line)}
+.mstreak.on i{background:var(--green)}
+.mini-note{font-size:11.5px;color:var(--gray);line-height:1.6;margin-top:16px;padding:0 2px}

@@ -1,0 +1,23 @@
+/* ---------- profil ---------- */
+.idcard{background:linear-gradient(135deg,#123C30,#0EA574);border-radius:22px;padding:18px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+.idcard::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);top:-60px;right:-40px}
+.idcard .id-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.idcard .id-top .brand{font-size:11px;font-weight:700;letter-spacing:1.5px;opacity:.8}
+.idcard .who{display:flex;gap:13px;align-items:center;margin-bottom:14px}
+.idcard .who .pa{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid rgba(255,255,255,.4)}
+.idcard .who b{font-size:19px;display:block}
+.idcard .who span{font-size:12px;opacity:.85}
+.idrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px}
+.idrow div span{opacity:.7;display:block;font-size:10px}
+.idrow div b{font-size:12px}
+.qr{position:absolute;right:16px;bottom:16px;background:#fff;border-radius:10px;padding:5px}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;background:var(--green-soft)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--green-mid)}
+.tl-item{position:relative;padding-bottom:16px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--green);border:3px solid var(--green-soft)}
+.tl-item b{font-size:13px;color:var(--ink);display:block}
+.tl-item span{font-size:11px;color:var(--gray)}

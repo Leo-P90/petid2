@@ -1,0 +1,14 @@
+/* PatiDost — stil giriş noktası. Her dosya bir ekran/bileşen ailesine karşılık gelir. */
+@import './base.css';
+@import './home.css';
+@import './auth.css';
+@import './training.css';
+@import './health.css';
+@import './ai-chat.css';
+@import './profile.css';
+@import './services.css';
+@import './match.css';
+@import './messages.css';
+@import './modal.css';
+@import './game.css';
+@import './dark-theme.css';

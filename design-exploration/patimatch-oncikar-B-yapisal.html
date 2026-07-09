@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatiDost — PatiMatch Öne Çıkarma (B: Yapısal — Ana Sayfa Üstü)</title>
+<style>
+  :root{
+    --green:#0EA574; --green-dark:#0B8560; --green-soft:#E6F6F0; --green-mid:#B9E8D8;
+    --ink:#122B24; --gray:#6B7B75; --line:#E7EEEB; --bg:#F6FAF8; --card:#FFFFFF;
+    --amber:#F5A623; --amber-soft:#FEF3DF; --blue:#3B82F6; --blue-soft:#EAF2FE;
+    --red:#E5484D; --red-soft:#FDEBEC; --purple:#7C6BF0; --purple-soft:#EFEDFD;
+    --radius:20px; --shadow:0 4px 18px rgba(18,43,36,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:#E9F0ED;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 12px}
+  .phone{width:396px;max-width:100%;height:830px;background:var(--bg);border-radius:42px;box-shadow:0 24px 60px rgba(18,43,36,.22);overflow:hidden;position:relative;border:8px solid #12211C}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:18px 18px 96px;display:none;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+  .screen.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- ortak ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .topbar h1{font-size:20px;color:var(--ink);letter-spacing:-.3px}
+  .topbar .sub{font-size:12.5px;color:var(--gray);margin-top:2px}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid var(--green-mid)}
+  .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--line)}
+  .sec-title{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px}
+  .sec-title h2{font-size:15px;color:var(--ink)}
+  .sec-title a{font-size:12px;color:var(--green);text-decoration:none;font-weight:600;cursor:pointer}
+  .chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .chip-row::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:12.5px;color:var(--gray);cursor:pointer;font-weight:600;transition:.15s}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .btn{display:block;width:100%;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer}
+  .btn:active{background:var(--green-dark)}
+  .btn.ghost{background:var(--card);color:var(--green);border:1.5px solid var(--green)}
+
+  /* ---------- alt nav (DEĞİŞTİRİLMEDİ — hâlâ 5 slot) ---------- */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;padding:8px 6px 16px;z-index:50}
+  .nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#9AA8A2;cursor:pointer;width:62px;font-weight:600}
+  .nav button .ic{font-size:21px;filter:grayscale(1);opacity:.55}
+  .nav button.on{color:var(--green)}
+  .nav button.on .ic{filter:none;opacity:1}
+  .nav .ai-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#0EA574,#0B8560);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 8px 20px rgba(14,165,116,.4);border:4px solid var(--bg)}
+
+  /* ---------- ana sayfa ---------- */
+  .landing{min-height:645px;display:flex;flex-direction:column}
+  .mini-pet{width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;transition:.15s}
+  .mini-pet.on{border-color:var(--green);background:var(--green-soft)}
+  .theme-btn{width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;transition:.2s}
+  .theme-btn:active{transform:rotate(40deg)}
+  .hero-search{position:relative;margin:46px 0 14px}
+  .hb-pet{position:absolute;right:16px;top:-46px;font-size:60px;line-height:1;animation:begTilt 4.5s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.18))}
+  @keyframes begTilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  .search.big{display:flex;align-items:center;gap:9px;margin-bottom:0;padding:14px 15px;border-radius:18px;box-shadow:var(--shadow);border:1.5px solid var(--green-mid);background:var(--card)}
+  .search.big input{border:none;outline:none;flex:1;font-size:13.5px;background:none;color:var(--ink)}
+  .go-btn{border:none;background:var(--green);color:#fff;width:34px;height:34px;border-radius:11px;font-size:15px;cursor:pointer;flex-shrink:0;font-weight:800}
+
+  /* ---------- YENİ: PatiMatch üst-düzey tanıtım kartı (yapısal değişikliğin kalbi) ---------- */
+  .match-promo{background:linear-gradient(135deg,#F472B6,#E11D48);border:none;cursor:pointer;color:#fff;position:relative;overflow:hidden;padding:18px;margin-bottom:14px}
+  .match-promo::after{content:"💕";position:absolute;right:-10px;bottom:-20px;font-size:96px;opacity:.16;transform:rotate(-14deg)}
+  .match-promo .mp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative;z-index:1}
+  .match-promo .mp-tag{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;background:rgba(255,255,255,.24);padding:4px 10px;border-radius:999px}
+  .match-promo .mp-count{font-size:11px;font-weight:800;background:#fff;color:#C2295B;padding:4px 10px;border-radius:999px}
+  .match-promo .mp-body{display:flex;gap:12px;align-items:center;position:relative;z-index:1}
+  .match-promo .mp-emoji{font-size:30px;flex-shrink:0;background:rgba(255,255,255,.2);width:54px;height:54px;border-radius:15px;display:flex;align-items:center;justify-content:center}
+  .match-promo b{font-size:15px;display:block;margin-bottom:3px;letter-spacing:-.2px}
+  .match-promo span{font-size:11.5px;opacity:.92;line-height:1.45;display:block}
+  .match-promo .mp-cta{margin-top:13px;font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:5px;position:relative;z-index:1}
+  .match-promo:active{transform:scale(.985)}
+
+  .chip-row.home-row{margin-bottom:16px}
+  .scroll-hint{text-align:center;font-size:11px;color:var(--gray);font-weight:700;padding-bottom:8px;cursor:pointer;animation:hintBob 1.7s ease-in-out infinite}
+  @keyframes hintBob{0%,100%{transform:none;opacity:.65}50%{transform:translateY(6px);opacity:1}}
+  .below{opacity:.22;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease,filter .55s;filter:saturate(.5)}
+  .below.reveal{opacity:1;transform:none;filter:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mod-card{border-radius:var(--radius);padding:18px 15px;cursor:pointer;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);transition:.15s}
+  .mod-card:active{transform:scale(.97)}
+  .mod-card .mi{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px}
+  .mod-card b{font-size:14.5px;color:var(--ink);display:block;margin-bottom:3px}
+  .mod-card span{font-size:11px;color:var(--gray);line-height:1.45;display:block}
+  .auth{display:flex;gap:10px;margin-top:18px}
+
+  /* ---------- hizmetler (basitleştirilmiş) ---------- */
+  .search{display:flex;align-items:center;gap:9px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .search input{border:none;outline:none;flex:1;font-size:13px;background:none;color:var(--ink)}
+  .srv{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .srv .si{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .srv b{font-size:13.5px;color:var(--ink);display:block}
+  .srv .meta{font-size:11px;color:var(--gray);display:block;margin-top:2px}
+  .srv .star{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:3px;display:block}
+  .srv .go{margin-left:auto;color:var(--green);font-weight:800;font-size:18px;flex-shrink:0}
+
+  /* ---------- PatiMatch ekranı ---------- */
+  .m-stack{position:relative;height:428px;margin-bottom:14px}
+  .m-card{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .m-img{height:55%;display:flex;align-items:center;justify-content:center;font-size:100px;position:relative}
+  .m-uyum{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.92);color:#C2295B;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px}
+  .m-info{padding:13px 16px;flex:1}
+  .m-info b{font-size:17px;color:var(--ink)}
+  .m-meta{font-size:12px;color:var(--gray);display:block;margin:3px 0 7px}
+  .m-info p{font-size:12.5px;color:#3E524B;line-height:1.5;margin-bottom:9px}
+  .m-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .m-actions{display:flex;justify-content:center;gap:28px;margin-bottom:12px}
+  .m-btn{width:60px;height:60px;border-radius:50%;border:none;font-size:24px;cursor:pointer;box-shadow:var(--shadow)}
+  .m-btn.no{background:var(--card);border:1.5px solid var(--line)}
+  .m-btn.yes{background:linear-gradient(135deg,#F472B6,#E11D48);color:#fff}
+  .m-btn:active{transform:scale(.9)}
+  @keyframes swipeR{to{transform:translateX(130%) rotate(14deg);opacity:0}}
+  @keyframes swipeL{to{transform:translateX(-130%) rotate(-14deg);opacity:0}}
+  .m-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gray);font-size:14px;font-weight:700;text-align:center;background:var(--card);border:1.5px dashed var(--line);border-radius:24px}
+  .m-empty a{color:var(--green);cursor:pointer}
+  .overlay{position:absolute;inset:0;background:rgba(10,25,20,.45);z-index:70;display:none}
+  .overlay.center{align-items:center;justify-content:center;padding:24px}
+  .overlay.open{display:flex;animation:fade .2s}
+  .match-pop{background:var(--card);border-radius:26px;padding:24px 22px;text-align:center;max-width:300px;box-shadow:var(--shadow);animation:fade .3s}
+  .match-pop .mp-heads{display:flex;justify-content:center;align-items:center;gap:6px;font-size:48px;margin:8px 0}
+
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:98px;background:#123C30;color:#fff;font-size:12px;font-weight:700;padding:10px 16px;border-radius:99px;opacity:0;transition:.3s;z-index:90;box-shadow:var(--shadow);max-width:86%;text-align:center;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* ---------- karanlık tema ---------- */
+  .phone.dark{
+    --bg:#0F1714; --card:#1A2420; --ink:#E9F1ED; --gray:#96A69F; --line:#27382F;
+    --green-soft:#173629; --green-mid:#20503C;
+    --amber-soft:#3A2E12; --blue-soft:#152A42; --red-soft:#3B181C; --purple-soft:#262047;
+    --shadow:0 4px 18px rgba(0,0,0,.4);
+    background:var(--bg);
+  }
+  .phone.dark .m-info p{color:#B9C9C2}
+  .phone.dark .toast{background:#E9F1ED;color:#12211C}
+  .note{font-size:11px;color:var(--gray);line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- ================= ANA SAYFA ================= -->
+  <section class="screen active" id="scr-home">
+    <div class="landing">
+      <div class="topbar">
+        <div>
+          <h1>🐾 PET<span style="color:var(--green)">ID</span></h1>
+          <div class="sub">Merhaba — can dostunun dijital dünyası</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="mini-pet on" id="mp0" onclick="setPet(0,this)">🐱</div>
+          <div class="mini-pet" id="mp1" onclick="setPet(1,this)">🐶</div>
+          <div class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
+        </div>
+      </div>
+
+      <div class="hero-search">
+        <div class="hb-pet" id="heroPetEmoji">🐱</div>
+        <div class="search big">🔍<input placeholder="Bugün nasıl yardımcı olabilirim?"><button type="button" class="go-btn" onclick="toast('🔍 Arama bu prototipte temsilidir')">→</button></div>
+      </div>
+
+      <!-- YAPISAL DEĞİŞİKLİK: PatiMatch artık hero alanının hemen altında, ana sayfanın
+           en görünür bölgesinde, kendine ait üst-düzey bir kart olarak yer alıyor.
+           Eskiden: chip satırında 9 chip'ten biri + Hizmetler'e gömülü promo kart.
+           Şimdi: uygulama açılır açılmaz ilk ekranda görülüyor, ama alt navigasyona
+           dokunulmadı (bkz. analiz dosyası — nav slotu eklemek/değiştirmek reddedildi). -->
+      <div class="card match-promo" onclick="go('match');openMatch()">
+        <div class="mp-top">
+          <span class="mp-tag">💘 Yeni · PatiMatch</span>
+          <span class="mp-count" id="mpCount">5 aday</span>
+        </div>
+        <div class="mp-body">
+          <div class="mp-emoji" id="mpEmojiIcon">🐱💘</div>
+          <div>
+            <b id="mpTitle">PatiMatch — Leo'ya eş bul</b>
+            <span>Sorumlu ve kontrollü çiftleşme eşleşmesi · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
+          </div>
+        </div>
+        <div class="mp-cta">Adayları keşfet →</div>
+      </div>
+
+      <div class="chip-row home-row">
+        <div class="chip" onclick="go('egitim')">🎓 Eğitim</div>
+        <div class="chip" onclick="go('saglik')">🩺 Sağlık</div>
+        <div class="chip" onclick="go('ai')">🐾 Davranış</div>
+        <div class="chip" onclick="go('hizmet')">🧑‍⚕️ Veteriner</div>
+        <div class="chip" onclick="go('hizmet')">🏨 Pet Oteli</div>
+        <div class="chip" onclick="go('hizmet')">❤️ Hizmetler</div>
+        <div class="chip" onclick="go('saglik')">💉 Aşı Takvimi</div>
+        <div class="chip" onclick="toast('🪪 Profil bu demoda yok')">🪪 Profil</div>
+        <div class="chip" onclick="toast('🎮 Oyun bu demoda yok')">🎮 Pixel Oyun</div>
+      </div>
+
+      <div style="flex:1"></div>
+      <div class="scroll-hint" onclick="scrollHome()">Keşfetmek için kaydır ⌄</div>
+    </div><!-- /landing -->
+
+    <div class="below" id="homeBelow">
+      <div class="grid2">
+        <div class="mod-card" onclick="go('egitim')">
+          <div class="mi" style="background:var(--green-soft)">🎓</div>
+          <b>Eğitim</b><span>Kişiselleştirilmiş dersler, animasyonlar ve günlük görevler</span>
+        </div>
+        <div class="mod-card" onclick="go('saglik')">
+          <div class="mi" style="background:var(--red-soft)">🩺</div>
+          <b>Sağlık</b><span>Aşı takibi, ilaçlar ve AI sağlık rehberi</span>
+        </div>
+        <div class="mod-card" onclick="go('ai')">
+          <div class="mi" style="background:var(--purple-soft)">🤖</div>
+          <b>AI Yardım</b><span>"Can dostum bana ne anlatmak istiyor?"</span>
+        </div>
+        <div class="mod-card" onclick="go('hizmet')">
+          <div class="mi" style="background:var(--blue-soft)">❤️</div>
+          <b>Hizmetler &amp; Topluluk</b><span>Veteriner, otel, eğitmen ve sahiplendirme</span>
+        </div>
+      </div>
+
+      <div class="auth">
+        <button class="btn" onclick="toast('🎉 Kayıt akışı bu demoda yok')">Ücretsiz Başla</button>
+        <button class="btn ghost" onclick="toast('👋 Giriş akışı bu demoda yok')">Giriş Yap</button>
+      </div>
+      <div style="text-align:center;font-size:10.5px;color:var(--gray);margin-top:10px">Kaydolmadan da tüm özellikleri keşfedebilirsin 🐾</div>
+    </div><!-- /below -->
+  </section>
+
+  <!-- ================= BASİTLEŞTİRİLMİŞ EKRANLAR (nav akışını kırmamak için) ================= -->
+  <section class="screen" id="scr-egitim">
+    <div class="topbar"><div><h1>Eğitim 🎓</h1><div class="sub">12 kademelik program</div></div><div class="avatar" onclick="go('home')">🐱</div></div>
+    <div class="card"><b style="color:var(--ink);font-size:14px;display:block;margin-bottom:6px">Bu ekran bu demoda basitleştirildi</b><span class="note">Bu prototipin odağı ana sayfadaki PatiMatch yapısal öne çıkarmasıdır. Eğitim ekranının tam içeriği orijinal dosyada mevcuttur.</span></div>
+    <button class="btn ghost" onclick="go('home')">← Ana Sayfaya Dön</button>
+  </section>
+
+  <section class="screen" id="scr-saglik">
+    <div class="topbar"><div><h1>Sağlık 🩺</h1><div class="sub">Aşılar, ilaçlar, AI rehber</div></div><div class="avatar" onclick="go('home')">🐱</div></div>
+    <div class="card"><b style="color:var(--ink);font-size:14px;display:block;margin-bottom:6px">Bu ekran bu demoda basitleştirildi</b><span class="note">Bu prototipin odağı ana sayfadaki PatiMatch yapısal öne çıkarmasıdır. Sağlık ekranının tam içeriği orijinal dosyada mevcuttur.</span></div>
+    <button class="btn ghost" onclick="go('home')">← Ana Sayfaya Dön</button>
+  </section>
+
+  <section class="screen" id="scr-ai">
+    <div class="topbar"><div><h1>AI Davranış 🤖</h1><div class="sub">Sohbet ve öneriler</div></div><div class="avatar" onclick="go('home')">🐱</div></div>
+    <div class="card"><b style="color:var(--ink);font-size:14px;display:block;margin-bottom:6px">Bu ekran bu demoda basitleştirildi</b><span class="note">Ortadaki AI butonu bu yapısal öneride mevcut tek işlevini koruyor (bkz. analiz — ikili işlev fikri reddedildi).</span></div>
+    <button class="btn ghost" onclick="go('home')">← Ana Sayfaya Dön</button>
+  </section>
+
+  <!-- ================= HİZMETLER (PatiMatch'in ikincil erişim noktası — hâlâ burada) ================= -->
+  <section class="screen" id="scr-hizmet">
+    <div class="topbar"><div><h1>Hizmetler ❤️</h1><div class="sub">Çevrende &amp; toplulukta</div></div><div class="avatar" onclick="go('home')">🐱</div></div>
+    <div class="search">🔍<input type="text" placeholder="Veteriner, otel, eğitmen ara..."></div>
+
+    <div class="card" style="background:linear-gradient(135deg,#F472B6,#E11D48);border:none;cursor:pointer" onclick="go('match');openMatch()">
+      <div style="display:flex;gap:12px;align-items:center;color:#fff">
+        <div style="font-size:26px">💘</div>
+        <div style="flex:1">
+          <b style="font-size:14px">PatiMatch — Can dostuna eş bul</b>
+          <span style="font-size:11.5px;opacity:.9;display:block;margin-top:2px">Çiftleşme için güvenli eşleşme · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
+        </div><span style="font-weight:800">→</span>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:var(--gray);margin:-6px 0 14px;padding:0 2px">↑ PatiMatch bu kartla Hizmetler'de de erişilebilir kalıyor — ana sayfadaki yeni konum birincil, bu ikincil giriş noktası.</div>
+
+    <div class="srv"><div class="si" style="background:var(--red-soft)">🩺</div><div><b>Pati Veteriner Kliniği</b><span class="meta">7/24 acil · 850 m · Açık</span><span class="star">★ 4.9 (312 değerlendirme)</span></div><div class="go">→</div></div>
+    <div class="srv"><div class="si" style="background:var(--blue-soft)">🏨</div><div><b>Mutlu Patiler Pet Oteli</b><span class="meta">Kameralı odalar · 2.1 km</span><span class="star">★ 4.8 (198 değerlendirme)</span></div><div class="go">→</div></div>
+  </section>
+
+  <!-- ================= PATİMATCH ================= -->
+  <section class="screen" id="scr-match">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="avatar" style="font-size:16px" onclick="go('hizmet')">←</button>
+        <div><h1>PatiMatch 💘</h1><div class="sub" id="matchSub">Adaylar yükleniyor...</div></div>
+      </div>
+      <div class="avatar" onclick="go('home')">🐱</div>
+    </div>
+
+    <div class="chip-row" id="matchStrip" style="margin-bottom:12px"></div>
+    <div class="m-stack" id="mStack"></div>
+    <div class="m-actions">
+      <button class="m-btn no" onclick="matchPass()">✖️</button>
+      <button class="m-btn yes" onclick="matchLike()">💘</button>
+    </div>
+    <div class="note">🧬 Sorumlu üretim: eşleşme öncesi veteriner kontrolü, genetik ve sağlık testleri önerilir.<br>Kediler kedilerle 🐱 · Köpekler köpeklerle 🐶 eşleşir.</div>
+  </section>
+
+  <!-- ================= EŞLEŞME POP-UP ================= -->
+  <div class="overlay center" id="matchPop">
+    <div class="match-pop">
+      <div style="font-size:30px">💘</div>
+      <b style="font-size:18px;color:var(--ink)">Eşleşme!</b>
+      <div class="mp-heads"><span id="mpMine">🐱</span><span style="font-size:26px">💞</span><span id="mpEmoji">🐱</span></div>
+      <p style="font-size:12.5px;color:var(--gray);line-height:1.55;margin-bottom:14px"><b id="mpName" style="color:var(--ink)">Duman</b>'ın sahibi de seni beğendi! Sorumlu eşleştirme için önce veteriner kontrolü ve sağlık testlerini konuşmayı unutma 🩺</p>
+      <button class="btn" onclick="closeM('matchPop');toast('💬 Mesajlaşma prototipte temsilidir')">Mesaj Gönder</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="closeM('matchPop')">Keşfetmeye Devam</button>
+    </div>
+  </div>
+
+  <div class="toast" id="appToast"></div>
+
+  <!-- ================= ALT NAVİGASYON — DEĞİŞTİRİLMEDİ (bilinçli karar, analiz dosyasına bakın) ================= -->
+  <nav class="nav">
+    <button class="on" data-s="home" onclick="go('home')"><span class="ic">🏠</span>Ana Sayfa</button>
+    <button data-s="egitim" onclick="go('egitim')"><span class="ic">🎓</span>Eğitim</button>
+    <button class="ai-btn" onclick="go('ai')">🐾</button>
+    <button data-s="saglik" onclick="go('saglik')"><span class="ic">🩺</span>Sağlık</button>
+    <button data-s="hizmet" onclick="go('hizmet')"><span class="ic">❤️</span>Hizmetler</button>
+  </nav>
+</div>
+
+<script>
+/* ---------- ekran geçişi ---------- */
+function go(s){
+  document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+  document.getElementById('scr-'+s).classList.add('active');
+  document.querySelectorAll('.nav button[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  document.getElementById('scr-'+s).scrollTop=0;
+}
+function toast(msg){
+  const t=document.getElementById('appToast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(window._tTimer);
+  window._tTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function toggleTheme(){
+  const p=document.getElementById('phone');
+  p.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = p.classList.contains('dark')?'☀️':'🌙';
+}
+function scrollHome(){document.getElementById('scr-home').scrollTo({top:420,behavior:'smooth'})}
+document.getElementById('scr-home').addEventListener('scroll',function(){
+  const b=document.getElementById('homeBelow');
+  if(b)b.classList.toggle('reveal',this.scrollTop>40);
+});
+
+/* ---------- evcil hayvan verisi ---------- */
+const petData=[
+  {ad:'Leo',tur:'kedi',cinsiyet:'Dişi',e:'🐱'},
+  {ad:'Karabaş',tur:'kopek',cinsiyet:'Erkek',e:'🐶'}
+];
+let curPet=0;
+function setPet(i,el){
+  curPet=i;
+  document.querySelectorAll('.mini-pet').forEach((m,idx)=>m.classList.toggle('on',idx===i));
+  renderPromo();
+}
+
+/* ---------- YENİ: ana sayfa PatiMatch tanıtım kartını güncelle ---------- */
+function renderPromo(){
+  const p=petData[curPet];
+  let pool=(MATCH_POOL[p.tur]||[]).filter(c=>c.cinsiyet!==p.cinsiyet);
+  if(!pool.length)pool=MATCH_POOL[p.tur]||[];
+  document.getElementById('mpTitle').textContent="PatiMatch — "+p.ad+"'a eş bul";
+  document.getElementById('mpCount').textContent=pool.length+' aday';
+  document.getElementById('mpEmojiIcon').textContent = p.tur==='kedi' ? '🐱💘' : '🐶💘';
+  document.getElementById('heroPetEmoji').textContent = p.e;
+}
+
+/* ---------- PatiMatch (orijinal dosyayla aynı mantık) ---------- */
+const MATCH_POOL={
+  kedi:[
+    {ad:'Duman',cins:'British Shorthair',yas:'3 yaş',cinsiyet:'Erkek',km:'2.4 km',e:'🐱',bg:'linear-gradient(135deg,#B8C6D9,#8FA3BF)',bio:'Sakin, mırıltısı bol bir beyefendi. Soy kütüğü belgeli, sağlık testleri eksiksiz.',uyum:92,likes:true},
+    {ad:'Zeus',cins:'Tekir',yas:'4 yaş',cinsiyet:'Erkek',km:'1.2 km',e:'🐈‍⬛',bg:'linear-gradient(135deg,#CDE3D2,#A8CBB2)',bio:'Mahallenin en yakışıklısı. Deneyimli sahip, ilk görüşme evde yapılabilir.',uyum:78,likes:true},
+    {ad:'Pamuk',cins:'Van Kedisi',yas:'2 yaş',cinsiyet:'Erkek',km:'5.1 km',e:'🐈',bg:'linear-gradient(135deg,#F6EFE6,#E4D5C0)',bio:'Enerjik ve oyuncu — suyla arası şaşırtıcı derecede iyi! Aşı karnesi güncel.',uyum:85,likes:false},
+    {ad:'Leo 2',cins:'Scottish Fold',yas:'2.5 yaş',cinsiyet:'Erkek',km:'7.8 km',e:'😺',bg:'linear-gradient(135deg,#F3DCC8,#E1B894)',bio:'Katlanmış kulaklar, kocaman gözler. Genetik taraması yapıldı, sonuçlar paylaşılır.',uyum:88,likes:true},
+    {ad:'Gölge',cins:'Ankara Kedisi',yas:'3 yaş',cinsiyet:'Erkek',km:'4.5 km',e:'🐱',bg:'linear-gradient(135deg,#EFEFEF,#D5D5DC)',bio:'Uzun tüylü, zarif ve sakin. Ev ortamında büyüdü, çocuklarla arası iyi.',uyum:81,likes:false}
+  ],
+  kopek:[
+    {ad:'Luna',cins:'Golden Retriever',yas:'2 yaş',cinsiyet:'Dişi',km:'3.3 km',e:'🐕',bg:'linear-gradient(135deg,#F3DCA8,#DDB05F)',bio:'Kalça displazisi taraması temiz. Neşeli, itaat eğitimi tamamlanmış.',uyum:95,likes:true},
+    {ad:'Maya',cins:'Labrador',yas:'3 yaş',cinsiyet:'Dişi',km:'2.1 km',e:'🦮',bg:'linear-gradient(135deg,#E8D3B8,#C9A876)',bio:'Su ve apport delisi. Daha önce sağlıklı bir doğum yaptı, veteriner referanslı.',uyum:89,likes:true},
+    {ad:'Bella',cins:'Border Collie',yas:'2.5 yaş',cinsiyet:'Dişi',km:'6.7 km',e:'🐕‍🦺',bg:'linear-gradient(135deg,#D8D8E0,#A9A9BC)',bio:'Zeka küpü — 40+ komut biliyor. Aktif bir eş arıyor, çoban kökenli hatlardan.',uyum:84,likes:false},
+    {ad:'Fındık',cins:'Cocker Spaniel',yas:'4 yaş',cinsiyet:'Dişi',km:'1.9 km',e:'🐶',bg:'linear-gradient(135deg,#E9C9A8,#CE9E6B)',bio:'Uysal ve sevecen. Kulak sağlığı düzenli kontrol altında, aşıları tam.',uyum:87,likes:true}
+  ]
+};
+let matchPool=[],matchIdx=0,matches=[];
+function openMatch(){
+  const p=petData[curPet];
+  matchPool=(MATCH_POOL[p.tur]||[]).filter(c=>c.cinsiyet!==p.cinsiyet);
+  if(!matchPool.length)matchPool=MATCH_POOL[p.tur]||[];
+  matchIdx=0;
+  document.getElementById('matchSub').textContent = p.ad+' için '+(p.tur==='kedi'?'kedi 🐱':'köpek 🐶')+' adayları';
+  renderMatchCard();renderMatchStrip();
+}
+function renderMatchCard(){
+  const host=document.getElementById('mStack');if(!host)return;
+  if(matchIdx>=matchPool.length){
+    host.innerHTML='<div class="m-empty">Şimdilik aday kalmadı! 🐾<br><span style="font-size:12px;font-weight:600">Yeni profiller eklendikçe haber veririz.</span><a onclick="openMatch()">↻ Baştan göster</a></div>';
+    return;
+  }
+  const c=matchPool[matchIdx];
+  host.innerHTML='<div class="m-card" id="mCard">'+
+    '<div class="m-img" style="background:'+c.bg+'">'+c.e+'<span class="m-uyum">💘 Uyum %'+c.uyum+'</span></div>'+
+    '<div class="m-info"><b>'+c.ad+', '+c.yas+'</b>'+
+    '<span class="m-meta">'+c.cins+' · '+c.cinsiyet+' · 📍 '+c.km+'</span>'+
+    '<p>'+c.bio+'</p>'+
+    '<div class="m-tags"><span class="badge" style="background:var(--green-soft);color:var(--green)">💉 Aşılar tam</span><span class="badge" style="background:var(--blue-soft);color:var(--blue)">🧬 Sağlık testi ✓</span><span class="badge" style="background:var(--amber-soft);color:var(--amber)">🪪 Çipli</span></div>'+
+    '</div></div>';
+}
+function animOut(dir){
+  const card=document.getElementById('mCard');if(!card)return;
+  card.style.animation='swipe'+dir+' .4s ease forwards';
+  setTimeout(()=>{matchIdx++;renderMatchCard()},390);
+}
+function matchPass(){animOut('L')}
+function matchLike(){
+  if(matchIdx>=matchPool.length)return;
+  const c=matchPool[matchIdx];
+  if(c.likes)setTimeout(()=>showMatchPop(c),430);
+  animOut('R');
+}
+function showMatchPop(c){
+  if(!matches.find(m=>m.ad===c.ad))matches.push(c);
+  renderMatchStrip();
+  document.getElementById('mpName').textContent=c.ad;
+  document.getElementById('mpEmoji').textContent=c.e;
+  document.getElementById('mpMine').textContent=petData[curPet].e;
+  document.getElementById('matchPop').classList.add('open');
+}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+function renderMatchStrip(){
+  const s=document.getElementById('matchStrip');if(!s)return;
+  s.innerHTML=matches.length
+    ?'<span style="font-size:11px;color:var(--gray);font-weight:700;align-self:center;flex-shrink:0">Eşleşmeler:</span>'+matches.map(c=>'<div class="chip on" style="pointer-events:none">'+c.e+' '+c.ad+'</div>').join('')
+    :'<span style="font-size:11.5px;color:var(--gray)">Henüz eşleşme yok — beğenmeye başla! 💘</span>';
+}
+
+/* ---------- başlangıç ---------- */
+renderPromo();
+</script>
+</body>
+</html>
