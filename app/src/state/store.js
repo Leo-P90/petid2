@@ -24,7 +24,8 @@ export const gameStates = store.game || [
 gameStates.forEach(g => {
   if (g.coin === undefined) g.coin = 15;
   if (!g.items) g.items = [];
-  if (g.worn === undefined) g.worn = '';
+  if (!g.worn || typeof g.worn !== 'object') g.worn = {};
+  if (!g.claimedGoals) g.claimedGoals = [];
 });
 
 export const appState = { curPet: 0, session: null };
@@ -38,9 +39,16 @@ function mapDbPetToLocal(row) {
   };
 }
 function mapDbStateToLocal(row) {
+  /* worn kolonu artık aksesuar slotları + hedef sayaçlarını JSON olarak taşıyor
+   * (yeni bir Supabase kolonu eklemeden genişletebilmek için — bkz. persistToSupabase). */
+  let extra = {};
+  try { extra = row?.worn ? JSON.parse(row.worn) : {}; } catch (e) { extra = {}; }
   return {
     tok: row?.tok ?? 80, mut: row?.mut ?? 70, enj: row?.enj ?? 90, xp: row?.xp ?? 0,
-    coin: row?.coin ?? 15, items: row?.items || [], worn: row?.worn || '', flappyBest: row?.flappy_best || 0
+    coin: row?.coin ?? 15, items: row?.items || [],
+    worn: { head: extra.head || '', face: extra.face || '', neck: extra.neck || '', bg: extra.bg || '' },
+    claimedGoals: extra.claimedGoals || [],
+    flappyBest: row?.flappy_best || 0
   };
 }
 
@@ -77,6 +85,33 @@ export const authReady = (async () => {
   }
 })();
 
+/* Yeni bir hayvan profili ekler (misafir modunda sadece localStorage, oturum
+ * açıksa Supabase'e de satır ekler) ve onu aktif pet yapar. */
+export async function addPet(fields) {
+  const pet = {
+    ad: (fields.ad || '').trim() || 'Dostum', tur: fields.tur || 'kedi', cins: fields.cins || '',
+    cinsiyet: fields.cinsiyet || 'Dişi', dogum: fields.dogum || '', kilo: fields.kilo || '',
+    cip: fields.cip || '', kan: fields.kan || '', kisir: fields.kisir || 'Hayır',
+    alerji: fields.alerji || '', renk: fields.renk || 'gri', foto: fields.foto || ''
+  };
+  const state = { tok: 80, mut: 70, enj: 90, xp: 0, coin: 15, items: [], worn: {}, claimedGoals: [], flappyBest: 0 };
+  if (supabase && appState.session) {
+    try {
+      const { data: row, error } = await supabase.from('pets').insert({
+        owner_id: appState.session.user.id, ad: pet.ad, tur: pet.tur, cins: pet.cins, cinsiyet: pet.cinsiyet,
+        dogum: pet.dogum || null, kilo: pet.kilo ? Number(pet.kilo) : null, cip: pet.cip, kan: pet.kan,
+        kisir: pet.kisir, alerji: pet.alerji, renk: pet.renk, foto_url: pet.foto || null
+      }).select().single();
+      if (error) throw error;
+      pet.id = row.id;
+      await supabase.from('game_states').insert({ pet_id: pet.id, worn: JSON.stringify({ claimedGoals: [] }) });
+    } catch (e) { console.warn('PatiDost: yeni hayvan Supabase\'e eklenemedi', e); }
+  }
+  petData.push(pet); gameStates.push(state);
+  appState.curPet = petData.length - 1;
+  await saveAll();
+}
+
 async function persistToSupabase() {
   if (!supabase || !appState.session) return;
   const p = petData[appState.curPet];
@@ -90,7 +125,9 @@ async function persistToSupabase() {
     }).eq('id', p.id);
     await supabase.from('game_states').upsert({
       pet_id: p.id, tok: g.tok, mut: g.mut, enj: g.enj, xp: g.xp, coin: g.coin,
-      items: g.items, worn: g.worn, flappy_best: g.flappyBest || 0
+      items: g.items,
+      worn: JSON.stringify({ ...g.worn, claimedGoals: g.claimedGoals || [] }),
+      flappy_best: g.flappyBest || 0
     });
   } catch (e) { console.warn('PatiDost: Supabase kayıt hatası', e); }
 }
@@ -110,6 +147,7 @@ export function petEmoji(i) {
 }
 
 export function yas(d) {
+  if (!d) return 'yaş bilinmiyor';
   const y = (Date.now() - new Date(d).getTime()) / 31557600000;
   return y < 1 ? Math.max(1, Math.round(y * 12)) + ' aylık' : Math.floor(y) + ' yaş';
 }

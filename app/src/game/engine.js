@@ -1,11 +1,22 @@
 import { petData, appState, gState, saveAll, el, pID } from '../state/store.js';
 import { CAT, DOG, CAT_WALK, DOG_WALK, PALS, STAGE_NAMES } from '../data/sprites.js';
 import { SHOP } from '../data/shop.js';
+import { GOALS } from '../data/goals.js';
 import { drawSpr } from './draw.js';
 
 let bob = 0, blink = false, walk = false, dir = 1, tickN = 0, petX = 130, tgtX = 130, mode = 'idle',
     eatT = 0, foodX = 0, laserT = 0, dotT = 0, dotX = 100, combo = 0,
     ballX = 0, ballY = 0, ballVX = 0, ballVY = 0, ballFly = false, rounds = 0, idleEmoteT = 100;
+
+/* 'oyna' butonunda dönen mini oyunlar — laser/kelebek/kovalamaca aynı "hedefi yakala"
+ * mekaniğini paylaşır, sadece görünüm ve mesaj değişir. 'getir' ayrı bir fizik akışı (top). */
+const TARGET_KIND = {
+  laser: { dotT: 25, msg: 'Kırmızı nokta!! 🔴 Odaya dokunup noktayı sen de kaçırabilirsin!', emoji: '🔴' },
+  kelebek: { dotT: 32, msg: 'Bir kelebek uçuyor! 🦋 Yakalamaya çalış!', emoji: '🦋' },
+  kovalamaca: { dotT: 40, msg: 'Kovalamaca zamanı! 🐾 Arkadaşını yakala!', emoji: '🐾' }
+};
+const CAT_GAMES = ['laser', 'kelebek', 'kovalamaca'];
+const DOG_GAMES = ['getir', 'kelebek', 'kovalamaca'];
 
 export function gLvl() { return Math.min(5, Math.floor(gState().xp / 60) + 1); }
 export function petW() { return 16 * (5 + Math.min(3, gLvl() - 1)); }
@@ -19,26 +30,55 @@ function petSprite() {
 function drawPet() {
   const cv = el('gCanvas'); if (!cv) return;
   const p = petData[appState.curPet], pal = PALS[p.renk] || PALS.gri;
-  const px = 5 + Math.min(3, gLvl() - 1);
+  const px = 5 + Math.min(3, gLvl() - 1), cell = px / 2;
   cv.width = 16 * px; cv.height = 17 * px;
   const ctx = cv.getContext('2d'), oy = (!walk && bob) ? px : 0;
-  drawSpr(ctx, petSprite(), pal, px, 0, oy, walk && dir < 0, blink || mode === 'sleep');
+  drawSpr(ctx, petSprite(), pal, cell, 0, oy, walk && dir < 0, blink || mode === 'sleep');
+  /* yürüyüş karesinde kafa yandan görünüp kaydığı için aksesuarların
+   * ortalandığı nokta buna göre kayıyor — bkz. .g-wrap.pose-walk (game.css) */
+  const wr = el('gWrap');
+  if (wr) { wr.classList.toggle('pose-walk', walk); wr.classList.toggle('pose-flip', walk && dir < 0); }
 }
 
 export function renderAcc() {
-  const g = gState(), it = SHOP.find(s => s.id === g.worn), a = el('gAcc'); if (!a) return;
-  if (!it) { a.textContent = ''; return; }
-  a.textContent = it.e; a.className = 'g-acc pos-' + it.pos;
-  a.style.fontSize = (14 + 4 * Math.min(3, gLvl() - 1)) + 'px';
+  const g = gState(), size = (14 + 4 * Math.min(3, gLvl() - 1)) + 'px';
+  ['head', 'face', 'neck'].forEach(pos => {
+    const span = el('gAcc' + pos.charAt(0).toUpperCase() + pos.slice(1)); if (!span) return;
+    const id = g.worn && g.worn[pos], it = id && SHOP.find(s => s.id === id);
+    span.textContent = it ? it.e : '';
+    span.style.fontSize = size;
+  });
+}
+
+function applyRoomTheme() {
+  const room = el('gRoom'); if (!room) return;
+  room.classList.remove('theme-plaj', 'theme-kar');
+  const g = gState(), bgId = g.worn && g.worn.bg, it = bgId && SHOP.find(s => s.id === bgId);
+  if (it && it.theme) room.classList.add('theme-' + it.theme);
+}
+
+function checkGoals() {
+  const g = gState(); if (!g.claimedGoals) g.claimedGoals = [];
+  let awarded = false;
+  GOALS.forEach(goal => {
+    if (g.claimedGoals.includes(goal.id)) return;
+    if (goal.check(g, gLvl())) {
+      g.claimedGoals.push(goal.id); g.coin += goal.reward; awarded = true;
+      setTimeout(() => gBubble('🏅 Hedef tamamlandı: ' + goal.ad + '! +' + goal.reward + ' 🪙', 3600), 400);
+    }
+  });
+  if (awarded) saveAll();
 }
 
 export function renderGame() {
+  checkGoals();
   const p = petData[appState.curPet];
   pID('gTitle', 'Pixel ' + p.ad + ' 🎮'); pID('gName', p.ad);
   pID('gLvlNo', gLvl()); pID('gStageName', STAGE_NAMES[gLvl() - 1]);
   pID('gStageSub', STAGE_NAMES[gLvl() - 1] + ' · Seviye ' + gLvl());
   pID('gCoin', gState().coin);
   const xp = el('gXp'); if (xp) xp.style.width = (gLvl() >= 5 ? 100 : (gState().xp % 60) / 60 * 100) + '%';
+  applyRoomTheme();
   renderStats(); renderAcc(); drawPet();
 }
 
@@ -69,7 +109,15 @@ export function gEarn(mut, xp, coin) {
   pID('gCoin', g.coin); addXp(xp);
 }
 
-export function jump() { const c = el('gWrap'); if (!c) return; c.classList.remove('jump'); void c.offsetWidth; c.classList.add('jump'); }
+export function jump() { petAnim('jump', 1000); }
+
+function petAnim(cls, ms) {
+  const c = el('gWrap'); if (!c) return;
+  c.classList.remove('jump', 'wag', 'lie', 'roll');
+  void c.offsetWidth;
+  c.classList.add(cls);
+  setTimeout(() => c.classList.remove(cls), ms);
+}
 
 export function spawnPart(e, x, y) {
   const r = el('gRoom'); if (!r) return;
@@ -91,7 +139,7 @@ export function resetGameScene() {
 }
 
 function uykuda() { if (mode === 'sleep') { gBubble('Şşşt... 💤 Uyandırmak için 💤 butonuna tekrar bas'); return true; } return false; }
-function mesgul() { return mode === 'laser' || mode === 'fetch' || mode === 'return' || mode === 'wait' || ballFly; }
+function mesgul() { return !!TARGET_KIND[mode] || mode === 'fetch' || mode === 'return' || mode === 'wait' || ballFly; }
 
 /* --- aksiyonlar --- */
 export function gFeed() {
@@ -107,30 +155,42 @@ export function gFeed() {
 export function gPlay() {
   if (uykuda() || mesgul()) return;
   if (gState().enj < 15) { gBubble('Çok yorgunum... önce biraz uyusam? 😴'); showEmote('😪'); return; }
-  if (petData[appState.curPet].tur === 'kedi') startLaser(); else startFetch();
+  const pool = petData[appState.curPet].tur === 'kedi' ? CAT_GAMES : DOG_GAMES;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  if (pick === 'getir') startFetch(); else startTarget(pick);
 }
 
-function startLaser() {
-  mode = 'laser'; combo = 0; laserT = 250;
-  const w = el('gRoom').clientWidth;
-  dotX = 30 + Math.random() * (w - 60); dotT = 25;
-  el('gDot').style.display = 'block'; posDot();
+function startTarget(kind) {
+  mode = kind; combo = 0; laserT = 250;
+  const w = el('gRoom').clientWidth, conf = TARGET_KIND[kind];
+  dotX = 30 + Math.random() * (w - 60); dotT = conf.dotT;
+  const d = el('gDot');
+  d.className = 'g-dot' + (kind !== 'laser' ? ' g-dot-emoji' : '');
+  d.textContent = kind === 'kovalamaca' ? (petData[appState.curPet].tur === 'kedi' ? '🐶' : '🐱') : conf.emoji;
+  d.style.display = 'block'; posDot();
   el('gTimer').style.display = 'inline-block';
-  gBubble('Kırmızı nokta!! 🔴 Odaya dokunup noktayı sen de kaçırabilirsin!', 3400);
+  gBubble(conf.msg, 3400);
 }
 function posDot() { const d = el('gDot'); d.style.left = dotX + 'px'; d.style.bottom = (42 + Math.random() * 46) + 'px'; }
-function endLaser() {
+function endTarget() {
+  const kind = mode;
   mode = 'idle'; el('gDot').style.display = 'none'; el('gTimer').style.display = 'none';
-  const g = gState(); g.enj = Math.max(0, g.enj - 10);
+  const g = gState();
+  g.enj = Math.max(0, g.enj - 10);
   gEarn(Math.min(20, combo * 3), combo * 2 + 4, combo);
-  gBubble(combo > 0 ? ('Miyav! ' + combo + ' kez yakaladım! ✨ +' + combo + ' 🪙') : 'Bu nokta çok hızlıydı... 😾 Bir daha!');
+  const msgs = {
+    laser: combo > 0 ? ('Miyav! ' + combo + ' kez yakaladım! ✨ +' + combo + ' 🪙') : 'Bu nokta çok hızlıydı... 😾 Bir daha!',
+    kelebek: combo > 0 ? ('Kelebeği ' + combo + ' kez yakaladım! 🦋✨ +' + combo + ' 🪙') : 'Kelebek çok çevikmiş... 😅 Bir daha!',
+    kovalamaca: combo > 0 ? ('Kovalamacada ' + combo + ' kez yetiştim! 🐾 +' + combo + ' 🪙') : 'Yakalayamadım ama çok eğlendim! 🐾'
+  };
+  gBubble(msgs[kind] || msgs.laser);
 }
 
-function startFetch() { rounds = 0; throwBall(); gBubble('Top oyunu! 🎾 Hazır... AT!'); }
+function startFetch() { rounds = 0; throwBall(); gBubble('⚽ Top oyunu! Hazır... AT!'); }
 function throwBall() {
   ballX = 18; ballY = 130; ballVX = 3.5 + Math.random() * 2.5; ballVY = 2; ballFly = true; mode = 'wait';
   el('gBall').style.display = 'block'; posBall();
-  el('gTimer').style.display = 'inline-block'; pID('gTimer', '🎾 ' + (rounds + 1) + '/3 tur');
+  el('gTimer').style.display = 'inline-block'; pID('gTimer', '⚽ ' + (rounds + 1) + '/3 tur');
 }
 function posBall() { const b = el('gBall'); b.style.left = ballX + 'px'; b.style.bottom = (36 + ballY) + 'px'; }
 function endFetch() {
@@ -139,12 +199,24 @@ function endFetch() {
   gBubble('Hav hav! 3 tur getirdim, şampiyon benim! 🏆');
 }
 
+const SEV_ANIMS = [
+  { cls: 'wag', ms: 1300 }, { cls: 'wag', ms: 1300 },
+  { cls: 'lie', ms: 750 }, { cls: 'roll', ms: 800 }, { cls: 'jump', ms: 1000 }
+];
 export function gPet2() {
   if (uykuda()) return;
   const g = gState(); g.mut = Math.min(100, g.mut + 8);
   for (let i = 0; i < 3; i++) setTimeout(() => spawnPart('❤️', petX + petW() / 2 - 12 + Math.random() * 24, 44 + petW()), i * 180);
-  gBubble(petData[appState.curPet].tur === 'kedi' ? 'Mırrrrr... ❤️' : 'Kuyruk sallama modu: AÇIK ❤️');
-  jump(); gEarn(0, 2, 0); renderStats();
+  const pick = SEV_ANIMS[Math.floor(Math.random() * SEV_ANIMS.length)];
+  const msgs = {
+    wag: petData[appState.curPet].tur === 'kedi' ? 'Mırrrrr... kuyruğum kıvrılıyor ❤️' : 'Kuyruk sallama modu: AÇIK ❤️',
+    lie: 'Rahatladım, biraz uzanayım... 😌❤️',
+    roll: 'Mutluluktan yuvarlandım! 🤸❤️',
+    jump: 'Heyecandan zıpladım! ❤️'
+  };
+  gBubble(msgs[pick.cls]);
+  petAnim(pick.cls, pick.ms);
+  gEarn(0, 2, 0); renderStats();
 }
 
 export function gSleep() {
@@ -164,7 +236,7 @@ function wakeUp(erken) {
 /* --- oda etkileşimi --- */
 el('gRoom').addEventListener('click', ev => {
   const r = el('gRoom').getBoundingClientRect(), x = ev.clientX - r.left;
-  if (mode === 'laser') { dotX = Math.max(14, Math.min(r.width - 24, x)); dotT = 32; posDot(); return; }
+  if (TARGET_KIND[mode]) { dotX = Math.max(14, Math.min(r.width - 24, x)); dotT = 32; posDot(); return; }
   if (mode === 'idle') { tgtX = Math.max(4, Math.min(r.width - petW() - 4, x - petW() / 2)); showEmote('❗'); }
 });
 
@@ -180,11 +252,11 @@ export function gTalk(q) {
   else if (low.includes('seviyorum') || low.includes('❤')) r = 'Ben de seni çok seviyorum! ❤️';
   else if (low.includes('nasılsın')) r = g.mut > 60 ? 'Bugün harikayım! Sen nasılsın? ✨' : 'Biraz keyifsizim... benimle oynar mısın? 🥺';
   else if (low.includes('aç')) r = g.tok > 60 ? 'Tokum, sağ ol! Ama ödül mamasına hayır demem 😏' : 'Evet! Mama! MAMA! 🍖';
-  else if (low.includes('oyun') || low.includes('oyna')) r = 'Oyun mu dedin?! Hadi hadi hadi! 🎾';
+  else if (low.includes('oyun') || low.includes('oyna')) r = 'Oyun mu dedin?! Hadi hadi hadi! 🎮';
   else if (low.includes('uyu')) r = 'Söz, kısa bir şekerleme... 💤';
   else if (low.includes(p.ad.toLowerCase())) r = 'Evet? Beni mi çağırdın? 👀';
   else if (low.includes('aferin') || low.includes('akıllı')) r = 'Hihi, biliyorum! 😊';
-  else if (low.includes('güzel') || low.includes('tatlı')) r = 'Kızarıyorum... 😊 ' + (gState().worn ? 'Aksesuarım da yakışmış, değil mi?' : '');
+  else if (low.includes('güzel') || low.includes('tatlı')) r = 'Kızarıyorum... 😊 ' + ((gState().worn && (gState().worn.head || gState().worn.face || gState().worn.neck)) ? 'Aksesuarım da yakışmış, değil mi?' : '');
   else r = [p.tur === 'kedi' ? 'Miyav miyav! 🐾' : 'Hav hav! 🐾', 'Seni dinliyorum, devam et! 👂', 'Bunu duyunca kuyruğum sallandı! 😄', 'Sen yanımdayken her şey güzel ✨'][Math.floor(Math.random() * 4)];
   gBubble(r, 3200); showEmote('💬'); addXp(2);
 }
@@ -201,16 +273,16 @@ setInterval(() => {
     if (ballY <= 0) { ballY = 0; ballFly = false; mode = 'fetch'; }
     posBall();
   }
-  /* lazer */
-  if (mode === 'laser') {
+  /* hedef yakalama oyunları (laser/kelebek/kovalamaca) */
+  if (TARGET_KIND[mode]) {
     laserT--; dotT--;
-    pID('gTimer', '🔴 ' + Math.max(0, Math.ceil(laserT * 0.06)) + ' sn · ' + combo + ' ✨');
-    if (dotT <= 0) { dotX = 20 + Math.random() * (w - 44); dotT = 25; posDot(); }
-    if (laserT <= 0) { endLaser(); return; }
+    pID('gTimer', TARGET_KIND[mode].emoji + ' ' + Math.max(0, Math.ceil(laserT * 0.06)) + ' sn · ' + combo + ' ✨');
+    if (dotT <= 0) { dotX = 20 + Math.random() * (w - 44); dotT = TARGET_KIND[mode].dotT; posDot(); }
+    if (laserT <= 0) { endTarget(); return; }
   }
   /* hedef belirleme */
   if (mode === 'idle' && Math.random() < .012) tgtX = 8 + Math.random() * (w - pw - 16);
-  if (mode === 'laser') tgtX = dotX - pw / 2;
+  if (TARGET_KIND[mode]) tgtX = dotX - pw / 2;
   if (mode === 'fetch') tgtX = ballX - pw / 2 + 6;
   if (mode === 'food') tgtX = foodX - pw / 2 + 8;
   if (mode === 'return') tgtX = Math.round(w * .15);
@@ -221,13 +293,13 @@ setInterval(() => {
   } else walk = false;
   petX = Math.max(4, Math.min(w - pw - 4, petX));
   /* varışlar */
-  if (mode === 'laser' && Math.abs(petX + pw / 2 - dotX) < 15) {
-    combo++; spawnPart('✨', dotX, 72); g.mut = Math.min(100, g.mut + 2);
-    dotX = 20 + Math.random() * (w - 44); dotT = 25; posDot(); renderStats();
+  if (TARGET_KIND[mode] && Math.abs(petX + pw / 2 - dotX) < 15) {
+    combo++; spawnPart(TARGET_KIND[mode].emoji, dotX, 72); g.mut = Math.min(100, g.mut + 2);
+    dotX = 20 + Math.random() * (w - 44); dotT = TARGET_KIND[mode].dotT; posDot(); renderStats();
   }
   if (mode === 'fetch' && !ballFly && Math.abs(petX + pw / 2 - ballX) < 15) { mode = 'return'; el('gBall').style.display = 'none'; }
   if (mode === 'return' && Math.abs(tgtX - petX) <= 5) {
-    rounds++; spawnPart('🎾', petX + pw, 60); gEarn(5, 4, 1);
+    rounds++; spawnPart('⚽', petX + pw, 60); gEarn(5, 4, 1);
     if (rounds < 3) throwBall(); else endFetch();
   }
   if (mode === 'food' && eatT <= 0 && Math.abs(petX + pw / 2 - foodX) < 16) eatT = 22;

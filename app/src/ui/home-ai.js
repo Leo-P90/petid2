@@ -4,7 +4,7 @@ import { LESSONS } from '../data/lessons.js';
 import { go } from './navigation.js';
 import { ask } from './chat.js';
 import { openLesson } from './training.js';
-import { filtSrvKey } from './services.js';
+import { openSrvCategory } from './services.js';
 import { openMatch } from './match.js';
 
 export function escHtml(s) { return s.replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -34,12 +34,12 @@ function aiBrain(qRaw) {
   if (/(kilo|beslenme|mama miktar|kaç gram|su iç)/.test(q))
     return { text: p.ad + ' şu an <b>' + p.kilo + ' kg</b> ve ideal aralıkta. Günlük beslenme planı: 2 öğün, ödül maması günlük kalorinin en fazla %10\'u. Detaylar Sağlık > Beslenme Planında.', acts: [['🍽️ Beslenme planı', function () { go('saglik'); }]] };
   if (/(hasta|kus|ishal|belirti|ağrı|agri)/.test(q))
-    return { text: 'Belirtileri önemsiyorum. Sana ilk değerlendirme için AI Sağlık Rehberini önereyim — ama unutma, ciddi/süren belirtilerde en doğru adres veterinerdir. 🩺', acts: [['🤖 AI Sağlık Rehberi', function () { go('ai'); ask(qRaw); }], ['🧑‍⚕️ Veteriner bul', function () { go('hizmet'); filtSrvKey('vet'); }]] };
+    return { text: 'Belirtileri önemsiyorum. Sana ilk değerlendirme için AI Sağlık Rehberini önereyim — ama unutma, ciddi/süren belirtilerde en doğru adres veterinerdir. 🩺', acts: [['🤖 AI Sağlık Rehberi', function () { go('ai'); ask(qRaw); }], ['🧑‍⚕️ Veteriner bul', function () { openSrvCategory('vet'); }]] };
   /* 4) hizmetler */
-  if (/(veteriner|klinik)/.test(q)) return { text: 'Çevrende 3 veteriner buldum. En yakını <b>Pati Veteriner Kliniği</b> (850 m, ★4.9, 7/24 acil).', acts: [['🧑‍⚕️ Listeyi gör', function () { go('hizmet'); filtSrvKey('vet'); }]] };
-  if (/(kuaför|kuafor|tıraş|tiras|yıkama|bakım)/.test(q)) return { text: 'İki pet kuaförü var: <b>Tüylü Dostlar</b> (evden alma servisli, ★4.9) ve <b>Pati SPA</b> (kedi dostu sessiz salon).', acts: [['✂️ Kuaförleri gör', function () { go('hizmet'); filtSrvKey('kuafor'); }]] };
-  if (/(otel|pansiyon|tatil)/.test(q)) return { text: '<b>Mutlu Patiler Pet Oteli</b> kameralı odalarıyla 2.1 km uzakta (★4.8). Tatile gönül rahatlığıyla çık!', acts: [['🏨 Otelleri gör', function () { go('hizmet'); filtSrvKey('otel'); }]] };
-  if (/(gezdirici|yürüteç|yürüyüşe çıkar)/.test(q)) return { text: 'Köpek gezdiricileri listeliyorum — Mert K. hafta içi her gün 45 dk tur yapıyor (★4.7).', acts: [['🦮 Gezdiricileri gör', function () { go('hizmet'); filtSrvKey('gez'); }]] };
+  if (/(veteriner|klinik)/.test(q)) return { text: 'Çevrende 3 veteriner buldum. En yakını <b>Pati Veteriner Kliniği</b> (850 m, ★4.9, 7/24 acil).', acts: [['🧑‍⚕️ Listeyi gör', function () { openSrvCategory('vet'); }]] };
+  if (/(kuaför|kuafor|tıraş|tiras|yıkama|bakım)/.test(q)) return { text: 'İki pet kuaförü var: <b>Tüylü Dostlar</b> (evden alma servisli, ★4.9) ve <b>Pati SPA</b> (kedi dostu sessiz salon).', acts: [['✂️ Kuaförleri gör', function () { openSrvCategory('kuafor'); }]] };
+  if (/(otel|pansiyon|tatil)/.test(q)) return { text: '<b>Mutlu Patiler Pet Oteli</b> kameralı odalarıyla 2.1 km uzakta (★4.8). Tatile gönül rahatlığıyla çık!', acts: [['🏨 Otelleri gör', function () { openSrvCategory('otel'); }]] };
+  if (/(gezdirici|yürüteç|yürüyüşe çıkar)/.test(q)) return { text: 'Köpek gezdiricileri listeliyorum — Mert K. hafta içi her gün 45 dk tur yapıyor (★4.7).', acts: [['🦮 Gezdiricileri gör', function () { openSrvCategory('gez'); }]] };
   if (/(sahiplen|yuva)/.test(q)) return { text: 'Yuva arayan 4 can dostu var: Minnoş, Karabaş, Gece ve Pamuk. 🏡', acts: [['❤️ Sahiplendirme', function () { go('hizmet'); }]] };
   if (/(eş bul|eşleş|çiftleş|match|tinder)/.test(q)) return { text: 'PatiMatch ile ' + p.ad + ' için uyumlu adaylar bulabiliriz — kediler kedilerle, köpekler köpeklerle eşleşir. 💘', acts: [['💘 PatiMatch aç', function () { go('match'); openMatch(); }]] };
   /* 5) uygulama içi */

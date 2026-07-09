@@ -1,7 +1,8 @@
 /* ---------- ana sayfa ---------- */
-.pet-switch{display:flex;gap:10px;margin-bottom:16px}
-.pet-pill{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer;transition:.15s}
+.pet-switch{display:flex;gap:10px;margin-bottom:16px;overflow-x:auto}
+.pet-pill{flex:0 0 auto;min-width:96px;display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer;transition:.15s}
 .pet-pill.on{border-color:var(--green);background:var(--green-soft)}
+.pet-pill.add{border-style:dashed;color:var(--green);min-width:auto}
 .pet-pill .pp-emoji{font-size:26px}
 .pet-pill b{font-size:13.5px;color:var(--ink);display:block}
 .pet-pill span{font-size:11px;color:var(--gray)}
@@ -15,6 +16,7 @@
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mod-card{border-radius:var(--radius);padding:16px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);transition:.15s}
 .mod-card:active{transform:scale(.97)}
+.mod-card.on{border-color:var(--green);box-shadow:0 0 0 2px var(--green) inset}
 .mod-card .mi{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:10px}
 .mod-card b{font-size:13.5px;color:var(--ink);display:block;margin-bottom:3px}
 .mod-card span{font-size:11px;color:var(--gray);line-height:1.45;display:block}

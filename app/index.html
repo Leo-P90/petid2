@@ -18,8 +18,7 @@
         <div class="sub">Merhaba Leo — can dostunun dijital dünyası</div>
       </div>
       <div style="display:flex;gap:8px">
-        <div class="mini-pet on" id="mp0" onclick="setPet(0,this)">🐱</div>
-        <div class="mini-pet" id="mp1" onclick="setPet(1,this)">🐶</div>
+        <div class="mini-pet on" id="mp0" onclick="go('profil')">🐱</div>
         <div class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
       </div>
     </div>
@@ -43,9 +42,9 @@
       <div class="chip" onclick="go('egitim')">🎓 Eğitim</div>
       <div class="chip" onclick="go('saglik')">🩺 Sağlık</div>
       <div class="chip" onclick="go('ai')">🐾 Davranış</div>
-      <div class="chip" onclick="go('hizmet');filtSrvKey('vet')">🧑‍⚕️ Veteriner</div>
-      <div class="chip" onclick="go('hizmet');filtSrvKey('otel')">🏨 Pet Oteli</div>
-      <div class="chip" onclick="go('hizmet');filtSrvKey('hepsi')">❤️ Hizmetler</div>
+      <div class="chip" onclick="openSrvCategory('vet')">🧑‍⚕️ Veteriner</div>
+      <div class="chip" onclick="openSrvCategory('otel')">🏨 Pet Oteli</div>
+      <div class="chip" onclick="go('hizmet')">❤️ Hizmetler</div>
       <div class="chip" onclick="go('saglik')">💉 Aşı Takvimi</div>
       <div class="chip" onclick="go('profil')">🪪 Profil</div>
       <div class="chip" onclick="go('match');openMatch()">💘 PatiMatch</div>
@@ -389,6 +388,8 @@
       <div class="avatar">🐱</div>
     </div>
 
+    <div class="pet-switch" id="petSwitch"></div>
+
     <div class="idcard">
       <div class="id-top"><span class="brand">PATİDOST · DİJİTAL KİMLİK</span><span style="font-size:16px">🐾</span></div>
       <div class="who">
@@ -446,84 +447,38 @@
   <section class="screen" id="scr-hizmet">
     <div class="topbar">
       <div><h1>Hizmetler ❤️</h1><div class="sub">Çevrende &amp; toplulukta</div></div>
-      <div class="avatar" onclick="go('profil')">🐱</div>
-    </div>
-
-    <div class="card" id="hizMatchCard" style="background:linear-gradient(135deg,#F472B6,#E11D48);border:none;cursor:pointer;padding:18px;margin-bottom:16px" onclick="go('match');openMatch()">
-      <div style="display:flex;gap:14px;align-items:center;color:#fff">
-        <div style="font-size:34px">💘</div>
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <b style="font-size:15.5px">PatiMatch — Can dostuna eş bul</b>
-            <span id="hizMatchBadge" class="badge" style="background:rgba(255,255,255,.25);color:#fff">💘 Adaylara göz at</span>
-          </div>
-          <span style="font-size:12px;opacity:.92;display:block;margin-top:4px">Çiftleşme için güvenli eşleşme · Kediler kedilerle 🐱 köpekler köpeklerle 🐶</span>
-        </div><span style="font-weight:800;font-size:18px">→</span>
+      <div style="display:flex;gap:9px;align-items:center">
+        <div class="msg-icon-btn" id="hizCartBtn" onclick="openCart()" style="display:none">🛒<span class="msg-badge cart-badge" style="display:none">0</span></div>
+        <div class="avatar" onclick="go('profil')">🐱</div>
       </div>
     </div>
-
-    <div class="sec-title" style="margin-top:0"><h2>Pati Market 🛒</h2><a>Tümü</a></div>
-    <div class="chip-row" style="margin-bottom:12px" id="marketChips">
-      <div class="chip on" onclick="filtMarket('hepsi',this)">Hepsi</div>
-      <div class="chip" onclick="filtMarket('mama',this)">🍖 Mama</div>
-      <div class="chip" onclick="filtMarket('oyuncak',this)">🧸 Oyuncak</div>
-    </div>
-    <div class="mkt-grid" id="marketGrid" style="margin-bottom:18px"></div>
 
     <div class="search">🔍<input type="text" placeholder="Veteriner, otel, eğitmen ara..."></div>
 
-    <div class="chip-row" style="margin-bottom:14px" id="srvChips">
-      <div class="chip on" onclick="filtSrv('hepsi',this)">Hepsi</div>
-      <div class="chip" onclick="filtSrv('vet',this)">🩺 Veteriner</div>
-      <div class="chip" onclick="filtSrv('otel',this)">🏨 Pet Oteli</div>
-      <div class="chip" onclick="filtSrv('egt',this)">🎓 Eğitmen</div>
-      <div class="chip" onclick="filtSrv('gez',this)">🦮 Gezdirici</div>
-      <div class="chip" onclick="filtSrv('kuafor',this)">✂️ Kuaför</div>
+    <div class="grid2" style="margin-bottom:18px" id="srvChips">
+      <div class="mod-card" onclick="go('match');openMatch()"><div class="mi" style="background:linear-gradient(135deg,#F472B6,#E11D48)">💘</div><b>PatiMatch</b></div>
+      <div class="mod-card" onclick="openSrvCategory('vet')"><div class="mi" style="background:var(--red-soft)">🩺</div><b>Veteriner</b></div>
+      <div class="mod-card" onclick="openSrvCategory('otel')"><div class="mi" style="background:var(--blue-soft)">🏨</div><b>Pet Oteli</b></div>
+      <div class="mod-card" onclick="openSrvCategory('egt')"><div class="mi" style="background:var(--green-soft)">🎓</div><b>Eğitmen</b></div>
+      <div class="mod-card" onclick="openSrvCategory('gez')"><div class="mi" style="background:var(--amber-soft)">🦮</div><b>Gezdirici</b></div>
+      <div class="mod-card" onclick="openSrvCategory('kuafor')"><div class="mi" style="background:var(--purple-soft)">✂️</div><b>Kuaför</b></div>
+      <div class="mod-card" onclick="openMarketScreen()"><div class="mi" style="background:var(--green-soft)">🛒</div><b>Pati Market</b></div>
+      <div class="mod-card" onclick="go('topluluk')"><div class="mi" style="background:var(--amber-soft)">🤝</div><b>Topluluk</b></div>
     </div>
 
-    <div id="srvList">
-      <div class="srv-item" data-t="vet" id="srvItem-vet1">
-        <div class="srv" onclick="toggleSrv('vet1')"><div class="si" style="background:var(--red-soft)">🩺</div><div><b>Pati Veteriner Kliniği</b><span class="meta">7/24 acil · 850 m · Açık</span><span class="star">★ 4.9 (312 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-vet1"></div>
-      </div>
-      <div class="srv-item" data-t="otel" id="srvItem-otel1">
-        <div class="srv" onclick="toggleSrv('otel1')"><div class="si" style="background:var(--blue-soft)">🏨</div><div><b>Mutlu Patiler Pet Oteli</b><span class="meta">Kameralı odalar · 2.1 km</span><span class="star">★ 4.8 (198 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-otel1"></div>
-      </div>
-      <div class="srv-item" data-t="egt" id="srvItem-egt1">
-        <div class="srv" onclick="toggleSrv('egt1')"><div class="si" style="background:var(--green-soft)">🎓</div><div><b>Deniz Yılmaz — Köpek Eğitmeni</b><span class="meta">Pozitif pekiştirme · Evde ders</span><span class="star">★ 5.0 (87 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-egt1"></div>
-      </div>
-      <div class="srv-item" data-t="gez" id="srvItem-gez1">
-        <div class="srv" onclick="toggleSrv('gez1')"><div class="si" style="background:var(--amber-soft)">🦮</div><div><b>Mert K. — Köpek Gezdirici</b><span class="meta">Hafta içi her gün · 45 dk tur</span><span class="star">★ 4.7 (64 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-gez1"></div>
-      </div>
-      <div class="srv-item" data-t="vet" id="srvItem-vet2">
-        <div class="srv" onclick="toggleSrv('vet2')"><div class="si" style="background:var(--red-soft)">🐾</div><div><b>VetPlus Hayvan Hastanesi</b><span class="meta">Görüntüleme + cerrahi · 3.4 km</span><span class="star">★ 4.6 (521 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-vet2"></div>
-      </div>
-      <div class="srv-item" data-t="egt" id="srvItem-egt2">
-        <div class="srv" onclick="toggleSrv('egt2')"><div class="si" style="background:var(--green-soft)">🐱</div><div><b>Elif Aydın — Kedi Davranış Uzmanı</b><span class="meta">Online seans · Saldırganlık &amp; stres</span><span class="star">★ 4.9 (142 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-egt2"></div>
-      </div>
-      <div class="srv-item" data-t="gez" id="srvItem-gez2">
-        <div class="srv" onclick="toggleSrv('gez2')"><div class="si" style="background:var(--amber-soft)">🐕</div><div><b>PatiRun — Grup Yürüyüşü</b><span class="meta">Hafta sonu park buluşması · Sosyalleşme</span><span class="star">★ 4.8 (53 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-gez2"></div>
-      </div>
-      <div class="srv-item" data-t="kuafor" id="srvItem-kuafor1">
-        <div class="srv" onclick="toggleSrv('kuafor1')"><div class="si" style="background:var(--purple-soft)">✂️</div><div><b>Tüylü Dostlar Pet Kuaförü</b><span class="meta">Yıkama + tıraş + tırnak · Evden alma servisi</span><span class="star">★ 4.9 (231 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-kuafor1"></div>
-      </div>
-      <div class="srv-item" data-t="kuafor" id="srvItem-kuafor2">
-        <div class="srv" onclick="toggleSrv('kuafor2')"><div class="si" style="background:var(--purple-soft)">🛁</div><div><b>Pati SPA &amp; Bakım</b><span class="meta">Kedi dostu sessiz salon · Tüy açma uzmanı</span><span class="star">★ 4.7 (96 değerlendirme)</span></div><div class="go chev">›</div></div>
-        <div class="srv-detail" id="srvDetail-kuafor2"></div>
-      </div>
-    </div>
-
-    <div class="sec-title"><h2>Sahiplendirme 🏡</h2><a>Tümü</a></div>
+    <div class="sec-title" style="margin-top:0"><h2>Sahiplendirme 🏡</h2><a>Tümü</a></div>
     <div class="adopt" id="adoptList"></div>
+  </section>
 
-    <div class="sec-title"><h2>Yardımlaşma Topluluğu 🤝</h2><a>+ Gönderi</a></div>
+  <!-- ================= YARDIMLAŞMA TOPLULUĞU ================= -->
+  <section class="screen" id="scr-topluluk">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="goBack()">←</button>
+        <div><h1>Topluluk 🤝</h1><div class="sub">Yardımlaşma &amp; paylaşımlar</div></div>
+      </div>
+    </div>
+    <div class="sec-title" style="margin-top:0"><h2>Yardımlaşma Topluluğu 🤝</h2><a>+ Gönderi</a></div>
     <div class="card">
       <div class="feed">
         <div class="fh"><div class="fa">👩</div><b>Ayşe D.</b><span>2 sa önce</span></div>
@@ -546,6 +501,69 @@
         <div class="facts">❤️ 154 &nbsp; 💬 27 &nbsp; ↗ Paylaş</div>
       </div>
     </div>
+  </section>
+
+  <!-- ================= HİZMET KATEGORİSİ ================= -->
+  <section class="screen" id="scr-hizmet-kategori">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="goBack()">←</button>
+        <div><h1 id="srvKatTitle">Veteriner</h1><div class="sub">Çevrende &amp; toplulukta</div></div>
+      </div>
+    </div>
+    <div id="srvKatList"></div>
+  </section>
+
+  <!-- ================= PATİ MARKET (TAM) ================= -->
+  <section class="screen" id="scr-market">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="goBack()">←</button>
+        <div><h1>Pati Market 🛒</h1><div class="sub">Mama, oyuncak &amp; aksesuar</div></div>
+      </div>
+      <div class="msg-icon-btn" onclick="openCart()">🛒<span class="msg-badge cart-badge" style="display:none">0</span></div>
+    </div>
+    <div class="chip-row" style="margin-bottom:12px" id="marketChipsFull">
+      <div class="chip on" onclick="filtMarketFull('hepsi',this)">Hepsi</div>
+      <div class="chip" onclick="filtMarketFull('mama',this)">🍖 Mama</div>
+      <div class="chip" onclick="filtMarketFull('oyuncak',this)">🧸 Oyuncak</div>
+      <div class="chip" onclick="filtMarketFull('aksesuar',this)">🕶️ Aksesuar</div>
+    </div>
+    <div class="mkt-grid" id="marketGridFull"></div>
+  </section>
+
+  <!-- ================= ÜRÜN DETAYI ================= -->
+  <section class="screen" id="scr-urun">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="goBack()">←</button>
+        <div><h1>Ürün Detayı</h1></div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center;padding:26px 16px">
+      <div id="urunIcon" style="width:72px;height:72px;font-size:36px;border-radius:22px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center"></div>
+      <b id="urunAd" style="font-size:17px;color:var(--ink);display:block;margin-bottom:6px"></b>
+      <span class="mkt-tag" id="urunTag"></span>
+      <div style="font-size:22px;font-weight:800;color:var(--green);margin:14px 0" id="urunFiyat"></div>
+      <p id="urunAciklama" style="font-size:13px;color:var(--gray);line-height:1.6;text-align:left;margin-bottom:18px"></p>
+      <button class="btn" id="urunBuyBtn">Sepete Ekle</button>
+    </div>
+  </section>
+
+  <!-- ================= SEPET ================= -->
+  <section class="screen" id="scr-sepet">
+    <div class="topbar">
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="x" onclick="goBack()">←</button>
+        <div><h1>Sepetim 🛒</h1></div>
+      </div>
+    </div>
+    <div id="sepetList"></div>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+      <span style="font-size:13px;color:var(--gray);font-weight:700">Toplam</span>
+      <b id="sepetTotal" style="font-size:18px;color:var(--ink)">₺0</b>
+    </div>
+    <button class="btn" onclick="checkout()">Sepeti Onayla</button>
   </section>
 
   <!-- ================= PATİMATCH ================= -->
@@ -623,6 +641,10 @@
     </div>
 
     <div class="g-room" id="gRoom">
+      <div class="g-cloud c1">☁️</div>
+      <div class="g-cloud c2">☁️</div>
+      <div class="g-tree">🌳</div>
+      <div class="g-bush">🌿</div>
       <div class="g-sun">☀️</div>
       <div class="g-moon">🌙</div>
       <div class="g-stars">✦ ✦ ✦ ✦</div>
@@ -633,10 +655,12 @@
       <div class="g-bub" id="gBub"></div>
       <div class="g-dot" id="gDot"></div>
       <div class="g-item" id="gFood">🍖</div>
-      <div class="g-ball" id="gBall">🎾</div>
+      <div class="g-ball" id="gBall">⚽</div>
       <div class="g-wrap" id="gWrap">
         <canvas id="gCanvas"></canvas>
-        <span class="g-acc" id="gAcc"></span>
+        <span class="g-acc pos-head" id="gAccHead"></span>
+        <span class="g-acc pos-face" id="gAccFace"></span>
+        <span class="g-acc pos-neck" id="gAccNeck"></span>
         <span class="g-emote" id="gEmote"></span>
       </div>
       <div class="g-name" id="gName">Boncuk</div>
@@ -650,7 +674,7 @@
 
     <div class="g-actions">
       <div class="g-act" onclick="gFeed()"><span>🍖</span>Besle</div>
-      <div class="g-act" onclick="gPlay()" id="gPlayBtn"><span>🎾</span>Oyna</div>
+      <div class="g-act" onclick="gPlay()" id="gPlayBtn"><span>🎮</span>Oyna</div>
       <div class="g-act" onclick="gPet2()"><span>🤗</span>Sev</div>
       <div class="g-act" onclick="gSleep()"><span>💤</span>Uyut</div>
       <div class="g-act" onclick="openFlap()"><span>🪶</span>Pati Uçuşu</div>
@@ -658,12 +682,13 @@
     </div>
 
     <div class="card g-lvl">
-      <div style="font-size:26px">🏆</div>
+      <div style="font-size:22px">🏆</div>
       <div style="flex:1">
-        <b style="font-size:13px;color:var(--ink)">Seviye <span id="gLvlNo">1</span> — <span id="gStageName">Yavru</span></b>
-        <div class="g-track" style="margin:8px 0 6px"><div class="g-fill" id="gXp" style="background:var(--purple)"></div></div>
-        <span style="font-size:10.5px;color:var(--gray)">XP kazan → dostun büyüsün · 🪙 kazan → mağazadan aksesuar al · Odaya dokun → yanına koşsun!</span>
+        <b style="font-size:12.5px;color:var(--ink)">Seviye <span id="gLvlNo">1</span> — <span id="gStageName">Yavru</span></b>
+        <div class="g-track" style="margin:6px 0"><div class="g-fill" id="gXp" style="background:var(--purple)"></div></div>
+        <span style="font-size:10px;color:var(--gray)">XP kazan → büyüsün · 🪙 kazan → mağazadan al</span>
       </div>
+      <div style="font-size:19px;cursor:pointer" onclick="openGoals()">🎯</div>
     </div>
 
     <div class="qrow">
@@ -701,7 +726,7 @@
   <!-- ================= PROFİL DÜZENLEME MODALI ================= -->
   <div class="overlay" id="editModal">
     <div class="sheet">
-      <div class="sheet-head"><h3>Profili Düzenle ✏️</h3><button class="x" onclick="closeM('editModal')">✕</button></div>
+      <div class="sheet-head"><h3 id="editTitle">Profili Düzenle ✏️</h3><button class="x" onclick="closeM('editModal')">✕</button></div>
       <div class="f-grid">
         <div class="f-item"><label>İsim</label><input id="f_ad"></div>
         <div class="f-item"><label>Tür</label><select id="f_tur"><option value="kedi">Kedi 🐱</option><option value="kopek">Köpek 🐶</option></select></div>
@@ -712,7 +737,7 @@
         <div class="f-item"><label>Çip No</label><input id="f_cip"></div>
         <div class="f-item"><label>Kan Grubu</label><input id="f_kan"></div>
         <div class="f-item"><label>Kısırlaştırma</label><select id="f_kisir"><option>Evet</option><option>Hayır</option></select></div>
-        <div class="f-item"><label>Pixel Rengi 🎨</label><select id="f_renk"><option value="gri">Gri</option><option value="turuncu">Turuncu</option><option value="siyah">Siyah</option><option value="beyaz">Beyaz</option><option value="altin">Altın</option><option value="kahve">Kahve</option></select></div>
+        <div class="f-item"><label>Pixel Rengi 🎨 <span style="font-weight:400;color:var(--gray)">(fotoğraftan otomatik)</span></label><select id="f_renk"><option value="gri">Gri</option><option value="turuncu">Turuncu</option><option value="siyah">Siyah</option><option value="beyaz">Beyaz</option><option value="altin">Altın</option><option value="kahve">Kahve</option></select></div>
         <div class="f-item full"><label>Alerjiler / Notlar</label><input id="f_alerji" placeholder="örn: tavuk proteini alerjisi"></div>
         <div class="f-item full"><label>Fotoğraf 📷 (ana ekranda silik görünür)</label>
           <input type="file" id="f_foto" accept="image/*" onchange="fotoSec(this)">
@@ -720,7 +745,7 @@
         </div>
       </div>
       <div style="font-size:10.5px;color:var(--gray);margin-top:10px">🎮 Tür ve pixel rengi seçimin, oyundaki pixel dostunun görünümünü belirler.</div>
-      <button class="btn" style="margin-top:12px" onclick="saveEdit()">Kaydet</button>
+      <button class="btn" id="editSaveBtn" style="margin-top:12px" onclick="saveEdit()">Kaydet</button>
     </div>
   </div>
 
@@ -730,6 +755,15 @@
       <div class="sheet-head"><h3>Pati Mağazası 🛍️</h3><button class="x" onclick="closeM('shopModal')">✕</button></div>
       <div style="font-size:12px;color:var(--gray);margin-bottom:12px">Paran: <b id="shopCoin" style="color:var(--amber)">🪙 15</b> · Besleyerek, oynayarak ve Pati Uçuşu'nda uçarak kazanırsın.</div>
       <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </div>
+
+  <!-- ================= HEDEFLER MODALI ================= -->
+  <div class="overlay" id="goalsModal">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Hedefler 🎯</h3><button class="x" onclick="closeM('goalsModal')">✕</button></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:12px">Hedefi tamamlayınca ödül otomatik hesabına geçer.</div>
+      <div id="goalsList"></div>
     </div>
   </div>
 

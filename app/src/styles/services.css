@@ -24,7 +24,7 @@
 .ad-card b{font-size:12.5px;color:var(--ink);display:block}
 .ad-card span{font-size:10.5px;color:var(--gray)}
 .mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
-.mkt-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.mkt-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .mkt-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px}
 .mkt-card b{font-size:12px;color:var(--ink);line-height:1.3;min-height:2.6em}
 .mkt-tag{font-size:10px;color:var(--gray);font-weight:600}
@@ -32,6 +32,13 @@
 .mkt-price{font-size:13.5px;font-weight:800;color:var(--green)}
 .mkt-btn{border:none;background:var(--green);color:#fff;font-size:10.5px;font-weight:700;padding:7px 10px;border-radius:10px;cursor:pointer}
 .mkt-btn:active{background:var(--green-dark)}
+.cart-row{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px;margin-bottom:10px;box-shadow:var(--shadow)}
+.cart-body{flex:1;min-width:0}
+.cart-body b{font-size:13px;color:var(--ink);display:block}
+.cart-body span{font-size:12px;color:var(--green);font-weight:700}
+.qty-ctrl{display:flex;align-items:center;gap:8px}
+.qty-ctrl button{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:800;cursor:pointer}
+.qty-ctrl span{font-size:13px;font-weight:700;color:var(--ink);min-width:14px;text-align:center}
 .feed{padding:12px 0;border-bottom:1px solid var(--line)}
 .feed:last-child{border-bottom:none}
 .feed .fh{display:flex;gap:9px;align-items:center;margin-bottom:6px}

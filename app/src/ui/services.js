@@ -1,19 +1,20 @@
 import { SERVICE_INFO } from '../data/service-info.js';
+import { SERVICES, SERVICE_TYPE_LABEL } from '../data/services.js';
 import { ADOPTIONS } from '../data/adoptions.js';
+import { go } from './navigation.js';
 
-/* ---------- hizmet filtresi ---------- */
-export function filtSrv(t, el) {
-  document.querySelectorAll('#srvChips .chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  document.querySelectorAll('#srvList .srv-item').forEach(s => {
-    s.style.display = (t === 'hepsi' || s.dataset.t === t) ? 'block' : 'none';
-  });
+function srvItemHtml(s) {
+  return '<div class="srv-item" id="srvItem-' + s.id + '">' +
+    '<div class="srv" onclick="toggleSrv(\'' + s.id + '\')"><div class="si" style="background:' + s.bg + '">' + s.e + '</div><div><b>' + s.ad + '</b><span class="meta">' + s.meta + '</span><span class="star">★ ' + s.star + ' (' + s.reviews + ' değerlendirme)</span></div><div class="go chev">›</div></div>' +
+    '<div class="srv-detail" id="srvDetail-' + s.id + '"></div>' +
+    '</div>';
 }
 
-export function filtSrvKey(t) {
-  const map = { hepsi: 0, vet: 1, otel: 2, egt: 3, gez: 4, kuafor: 5 };
-  const chips = document.querySelectorAll('#srvChips .chip');
-  if (chips[map[t]]) filtSrv(t, chips[map[t]]);
+/* ---------- kategori ekranı (hizmetler kutucuklarından açılır) ---------- */
+export function openSrvCategory(t) {
+  go('hizmet-kategori');
+  document.getElementById('srvKatTitle').textContent = SERVICE_TYPE_LABEL[t] || 'Hizmetler';
+  document.getElementById('srvKatList').innerHTML = SERVICES.filter(s => s.t === t).map(srvItemHtml).join('');
 }
 
 /* ---------- fiyat/mesafe akordeonu ---------- */

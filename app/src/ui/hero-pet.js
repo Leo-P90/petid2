@@ -11,7 +11,7 @@ export function drawHeroPet() {
   cv.width = 48; cv.height = 51;
   const yuru = (hMode === 'walk');
   const spr = yuru ? (p.tur === 'kedi' ? CAT_WALK : DOG_WALK)[hBob ? 1 : 0] : (p.tur === 'kedi' ? CAT : DOG);
-  drawSpr(cv.getContext('2d'), spr, pal, 3, 0, (!yuru && hBob) ? 3 : 0, yuru && hDir < 0, hBlink);
+  drawSpr(cv.getContext('2d'), spr, pal, 1.5, 0, (!yuru && hBob) ? 3 : 0, yuru && hDir < 0, hBlink);
 }
 
 /* büyük silik "yardım ister ama mutlu" pixel dost */
@@ -20,7 +20,7 @@ export function drawBigPet() {
   const p = petData[appState.curPet], pal = PALS[p.renk] || PALS.gri, S = 11;
   cv.width = 16 * S; cv.height = 17 * S;
   const ctx = cv.getContext('2d'), oy = bWave ? S : 0;
-  drawSpr(ctx, p.tur === 'kedi' ? CAT : DOG, pal, S, 0, oy, false, bBlink);
+  drawSpr(ctx, p.tur === 'kedi' ? CAT : DOG, pal, S / 2, 0, oy, false, bBlink);
   const ey = p.tur === 'kedi' ? 5 : 4;
   if (!bBlink) { /* kocaman yalvaran gözler + ışıltı */
     ctx.fillStyle = '#20242B';

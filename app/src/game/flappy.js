@@ -7,6 +7,11 @@ import { closeM } from '../ui/profile.js';
 const FW = 340, FH = 430, FPW = 54, FGAP = 142, FPX = 70, FPS = 2.6;
 let fTimer = null, fState = 'ready', fY = 0, fVY = 0, fScore = 0, fTickN = 0, fPipes = [];
 
+/* zorluk: skor arttıkça borular hızlanır ve aralık daralır, üst sınırlarla oynanabilir kalır */
+function fSpeed() { return Math.min(4.6, 2.6 + fScore * 0.07); }
+function fGap() { return Math.max(96, FGAP - fScore * 2); }
+function fSpawnEvery() { return Math.max(34, 52 - Math.floor(fScore * 0.8)); }
+
 export function openFlap() {
   if (isSleeping()) { gBubble('Şşşt... uyuyor, uçuşa çıkamaz 💤'); return; }
   resetGameScene();
@@ -29,17 +34,18 @@ export function fTap() {
 function fTick() {
   if (fState === 'play') {
     fTickN++; fVY += .42; fY += fVY;
-    if (fTickN % 52 === 1) {
-      const son = fPipes.length ? fPipes[fPipes.length - 1].gy : FH / 2 - FGAP / 2;
-      const min = Math.max(60, son - 110), max = Math.min(FH - FGAP - 110, son + 110);
-      fPipes.push({ x: FW + 10, gy: min + Math.random() * (max - min), passed: false });
+    const gap = fGap(), speed = fSpeed();
+    if (fTickN % fSpawnEvery() === 1) {
+      const son = fPipes.length ? fPipes[fPipes.length - 1].gy : FH / 2 - gap / 2;
+      const min = Math.max(60, son - 110), max = Math.min(FH - gap - 110, son + 110);
+      fPipes.push({ x: FW + 10, gy: min + Math.random() * Math.max(1, max - min), gap, passed: false });
     }
-    fPipes.forEach(p => p.x -= 2.6);
+    fPipes.forEach(p => p.x -= speed);
     fPipes = fPipes.filter(p => p.x > -FPW - 6);
     const bs = 16 * FPS;
     for (const p of fPipes) {
       if (!p.passed && p.x + FPW < FPX) { p.passed = true; fScore++; }
-      if (FPX + bs - 7 > p.x && FPX + 7 < p.x + FPW && (fY + 7 < p.gy || fY + bs - 7 > p.gy + FGAP)) { fOver(); break; }
+      if (FPX + bs - 7 > p.x && FPX + 7 < p.x + FPW && (fY + 7 < p.gy || fY + bs - 7 > p.gy + p.gap)) { fOver(); break; }
     }
     if (fY < -10 || fY + bs > FH - 44) fOver();
   }
@@ -64,10 +70,11 @@ function fDraw() {
   ctx.fillStyle = 'rgba(255,255,255,.7)';
   ctx.fillRect((300 - fTickN * .8 % 420), 60, 52, 14); ctx.fillRect((140 - fTickN * .5 % 420), 120, 64, 16);
   fPipes.forEach(p => {
+    const gap = p.gap || FGAP;
     ctx.fillStyle = '#3FA97C';
-    ctx.fillRect(p.x, 0, FPW, p.gy); ctx.fillRect(p.x, p.gy + FGAP, FPW, FH - p.gy - FGAP - 44);
+    ctx.fillRect(p.x, 0, FPW, p.gy); ctx.fillRect(p.x, p.gy + gap, FPW, FH - p.gy - gap - 44);
     ctx.fillStyle = '#2E8A63';
-    ctx.fillRect(p.x - 3, p.gy - 14, FPW + 6, 14); ctx.fillRect(p.x - 3, p.gy + FGAP, FPW + 6, 14);
+    ctx.fillRect(p.x - 3, p.gy - 14, FPW + 6, 14); ctx.fillRect(p.x - 3, p.gy + gap, FPW + 6, 14);
   });
   ctx.fillStyle = '#8ED0A5'; ctx.fillRect(0, FH - 44, FW, 44);
   ctx.fillStyle = '#6DBA8B';
@@ -77,7 +84,7 @@ function fDraw() {
   ctx.translate(FPX + 8 * FPS, fY + 8 * FPS);
   ctx.rotate(Math.max(-.4, Math.min(.6, fVY * .06)));
   ctx.translate(-8 * FPS, -8 * FPS);
-  drawSpr(ctx, p.tur === 'kedi' ? CAT : DOG, pal, FPS, 0, 0, false, false);
+  drawSpr(ctx, p.tur === 'kedi' ? CAT : DOG, pal, FPS / 2, 0, 0, false, false);
   ctx.restore();
   ctx.fillStyle = '#1F3A2E'; ctx.textAlign = 'center';
   ctx.font = 'bold 28px monospace'; ctx.fillText(fScore, FW / 2, 46);

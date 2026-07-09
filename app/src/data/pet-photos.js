@@ -20,6 +20,19 @@ export const GALLERY_PHOTOS = {
   ]
 };
 
+/* Profildeki her hayvan kendi galerisini görsün diye: sahiplenilen gerçek
+ * fotoğraf (varsa) ilk sırada, geri kalanı türe göre havuzdan hayvana özel
+ * (isim/id'den türetilen) bir döngüsel seçimle dolduruluyor — böylece aynı
+ * türden iki hayvan aynı sırada aynı görselleri görmüyor. */
+export function petGalleryPhotos(pet) {
+  const pool = GALLERY_PHOTOS[pet.tur] || GALLERY_PHOTOS.kedi;
+  const key = String(pet.id || pet.ad || '');
+  let h = 0; for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  const offset = pool.length ? h % pool.length : 0;
+  const rotated = pool.map((_, i) => pool[(i + offset) % pool.length]);
+  return pet.foto ? [pet.foto, ...rotated.slice(0, pool.length - 1)] : rotated;
+}
+
 export const ADOPTION_PHOTOS = {
   Minnoş: U('1596854407944-bf87f6fdd49e'),
   Karabaş: U('1633722715463-d30f4f325e24'),

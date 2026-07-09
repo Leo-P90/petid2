@@ -1,5 +1,6 @@
 import { petData, appState } from '../state/store.js';
 import { DEFAULT_FOTO } from '../data/default-photos.js';
+import { detectPetColor } from './color-match.js';
 
 /* profil düzenleme modalında seçilen ama henüz kaydedilmemiş fotoğraf */
 export const photoState = { temp: undefined };
@@ -29,9 +30,13 @@ export function fotoSec(inp) {
       const mx = 520, k = Math.min(1, mx / Math.max(im.width, im.height));
       const c = document.createElement('canvas');
       c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      const ctx = c.getContext('2d');
+      ctx.drawImage(im, 0, 0, c.width, c.height);
       photoState.temp = c.toDataURL('image/jpeg', .82);
       fotoPrevGoster(photoState.temp);
+      /* pixel rengini fotoğraftan otomatik tespit et — kullanıcı isterse yine değiştirebilir */
+      const renkSel = document.getElementById('f_renk');
+      if (renkSel) renkSel.value = detectPetColor(ctx, c.width, c.height);
     };
     im.src = rd.result;
   };
