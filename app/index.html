@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PatiDost — Pet Uygulaması</title>
+<title>PETID — Can Dostunun Dijital Sağlık ve Yaşam Alanı</title>
 <script>
 /* Pixel kedi ana ekranda görünsün. Bundle, g().pixelCreated false ise #hCanvas'ı
    gizliyor; bayrağı bundle okumadan önce açıyoruz (klasik script, module'dan önce çalışır).
@@ -211,8 +211,8 @@ try {
     <div class="landing">
     <div class="topbar">
       <div>
-        <h1>🐾 PET<span style="color:var(--green)">ID</span></h1>
-        <div class="sub">Merhaba Leo — can dostunun dijital dünyası</div>
+        <div class="brand-wordmark">PET<span>ID</span></div>
+        <div class="sub">Merhaba Leo — Boncuk için bugün ne yapalım?</div>
       </div>
       <div style="display:flex;gap:8px">
         <div class="mini-pet on" id="mp0" onclick="go('profil')">🐱</div>
@@ -220,8 +220,7 @@ try {
       </div>
     </div>
 
-    <div style="flex:.85"></div>
-
+    <div class="home-center-stack">
     <div class="bigpet-wrap">
       <img id="bigFoto" alt="" onerror="fotoYok(this)">
       <canvas id="bigPet" width="176" height="187" style="display:none"></canvas>
@@ -230,7 +229,7 @@ try {
     <div class="hero-search">
       <div class="h-bub" id="hBub"></div>
       <canvas id="hCanvas" width="48" height="51" onclick="heroPetTap()"></canvas>
-      <form class="search big" onsubmit="homeSearch(event)">🔍<input id="homeQ" placeholder="Bugün nasıl yardımcı olabilirim?"><button type="submit" class="go-btn">→</button></form>
+      <form class="search big" onsubmit="homeSearch(event)"><span aria-hidden="true">⌕</span><input id="homeQ" placeholder="PETID AI'a sor..."><button type="submit" class="go-btn" aria-label="Soruyu gönder">→</button></form>
     </div>
 
     <button class="acil-btn" onclick="acilAc()">🚨 Acil Veteriner Çağır<span>Konumuna en yakın 7/24 yardım</span></button>
@@ -238,10 +237,9 @@ try {
     <button class="acil-btn match-btn" onclick="go('match');openMatch()">💘 PatiMatch<span>Can dostuna eş bul</span></button>
 
     <div class="home-ans" id="homeAns" style="display:none"></div>
+    </div>
 
-    <div style="flex:1"></div>
-
-    <div class="playzone">
+    <div class="playzone" aria-hidden="true">
       <svg class="dreamscene" viewBox="0 0 240 112" role="img" aria-label="Kedi ve köpek topun peşinde koşuyor">
         <defs>
           <radialGradient id="dsGlow" cx="50%" cy="52%" r="62%">
@@ -338,7 +336,7 @@ try {
 
       <div class="auth-logo">
         <div class="mark">🐾</div>
-        <h1>PatiDost'a Katıl</h1>
+        <h1>PETID'e Katıl</h1>
         <p id="authSub">Can dostunun dijital dünyasına ilk adım</p>
       </div>
 
@@ -399,7 +397,7 @@ try {
   <!-- ================= EĞİTİM ================= -->
   <section class="screen" id="scr-egitim">
     <div class="topbar">
-      <div><h1>Eğitim 🎓</h1><div class="sub">Kişiselleştirilmiş program</div></div>
+      <div><h1>Eğitim</h1><div class="sub">Türüne ve ihtiyaçlarına özel program</div></div>
       <div class="avatar" onclick="go('profil')">🐱</div>
     </div>
     <div class="training-pet-head">
@@ -409,13 +407,12 @@ try {
 
     <div class="training-home" id="trainingHome">
       <details class="training-card tasks-card" data-training-pet="kedi">
-        <summary><div><b>Bugünün Görevleri ✅</b><span>5 görev · aç/kapa için dokun</span></div><strong>3/5</strong></summary>
+        <summary><div><b>Bugünün Kedi Planı</b><span>4 kısa çalışma · güven ve gönüllü katılım</span></div><strong>2/4</strong></summary>
         <div class="mini-tasks">
-          <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Sabah oyun seansı</b><span>10 dk · Enerji atma</span></div><div class="pts">+10 🏆</div></div>
-          <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Hedefe oturma tekrarı</b><span>5 dk · Ödüllü pekiştirme</span></div><div class="pts">+15 🏆</div></div>
-          <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Tımar &amp; tüy bakımı</b><span>5 dk · Alışkanlık</span></div><div class="pts">+5 🏆</div></div>
-          <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>"Bekle" komutu</b><span>10 dk · Animasyonlu anlatım</span></div><div class="pts">+20 🏆</div></div>
-          <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Akşam zeka oyunu</b><span>8 dk · Ödül avı</span></div><div class="pts">+10 🏆</div></div>
+          <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>İsme gönüllü yönelme</b><span>2 dk · Yumuşak ses ve ödül</span></div><div class="pts">Bitti</div></div>
+          <div class="task done" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Taşıma çantası keşfi</b><span>3 dk · Kapı açık, seçim özgür</span></div><div class="pts">Bitti</div></div>
+          <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Tırmalama alanını düzenle</b><span>3 dk · Doğru yüzeyi cazip kıl</span></div><div class="pts">Sırada</div></div>
+          <div class="task" onclick="toggleTask(this)"><div class="cb">✓</div><div><b>Akşam av-oyun rutini</b><span>8 dk · Gece aktivitesi yönetimi</span></div><div class="pts">Akşam</div></div>
         </div>
       </details>
 
@@ -430,14 +427,17 @@ try {
       </details>
 
       <details class="training-card curriculum-card" data-training-pet="kedi">
-        <summary><div><b>PETID v1 — Kedi Dersleri</b><span>6 ders · 1 tamamlandı · aç/kapa için dokun</span></div><strong>%16</strong></summary>
+        <summary><div><b>PETID Kedi Bilgi Tabanı</b><span>8 ders · güven, çevre ve stres azaltma</span></div><strong>8</strong></summary>
+        <div class="cat-philosophy"><b>Komut değil iş birliği</b>Kedilerde hedef itaat değildir. Her çalışma kısa, gönüllü, pozitif ve kedinin ayrılma hakkını koruyacak şekilde tasarlanır.</div>
         <div class="syllabus">
-          <div class="syl-row" onclick="openLesson('otur')"><span class="syl-no done">✓</span><div><b>Hedefe Oturma</b><span class="sub2">3 dk · Başlangıç · Tamamlandı</span></div><span class="chev">›</span></div>
-          <div class="syl-row" onclick="openLesson('bekle')"><span class="syl-no next">2</span><div><b>"Bekle" Komutu</b><span class="sub2">4 dk · Sıradaki ders</span></div><span class="chev">›</span></div>
-          <div class="syl-row" onclick="openLesson('gel')"><span class="syl-no">3</span><div><b>İsme Tepki</b><span class="sub2">5 dk · Orta seviye</span></div><span class="chev">›</span></div>
-          <div class="syl-row" onclick="openLesson('pati')"><span class="syl-no">4</span><div><b>Pati Verme</b><span class="sub2">4 dk · Eğlence</span></div><span class="chev">›</span></div>
-          <div class="syl-row" onclick="openLesson('tuvalet')"><span class="syl-no">5</span><div><b>Kum Kabı Alışkanlığı</b><span class="sub2">6 dk · Başlangıç</span></div><span class="chev">›</span></div>
-          <div class="syl-row" onclick="openLesson('yatak')"><span class="syl-no">6</span><div><b>Güvenli Alanına Git</b><span class="sub2">4 dk · Sakinleşme</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat1')"><span class="syl-no done">✓</span><div><b>İsmini Öğrenme</b><span class="sub2">Olumlu dikkat sinyali · Tamamlandı</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat2')"><span class="syl-no next">2</span><div><b>Taşıma Çantasına Alışma</b><span class="sub2">Gönüllü keşif · Sıradaki ders</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat3')"><span class="syl-no">3</span><div><b>Kum Kabı Düzeni</b><span class="sub2">Doğru çevre ve temizlik</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat4')"><span class="syl-no">4</span><div><b>Tırmalama Tahtası Kullanma</b><span class="sub2">Doğal davranışı doğru yere yönlendirme</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat5')"><span class="syl-no">5</span><div><b>Tırnak Kesimine Alışma</b><span class="sub2">Kooperatif bakım ve kısa temas</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat6')"><span class="syl-no">6</span><div><b>Eve / Yeni İnsana Alışma</b><span class="sub2">Mesafe, seçim ve güven</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat7')"><span class="syl-no">7</span><div><b>Gece Aktivitesi Yönetimi</b><span class="sub2">Av-oyun-yemek-dinlenme rutini</span></div><span class="chev">›</span></div>
+          <div class="syl-row" onclick="openLesson('cat8')"><span class="syl-no">8</span><div><b>Stres Azaltma</b><span class="sub2">Tetikleyici yönetimi ve güvenli alan</span></div><span class="chev">›</span></div>
         </div>
       </details>
 
@@ -496,90 +496,78 @@ try {
 
   <!-- ================= SAĞLIK ================= -->
   <section class="screen" id="scr-saglik">
-    <div class="topbar">
-      <div><h1>Sağlık 🩺</h1><div class="sub" id="subSag">Boncuk'un sağlık takibi</div></div>
-      <div style="display:flex;gap:9px;align-items:center">
-        <div class="score-pill" title="Sağlık Skoru — Çok İyi (▲ +3)">92<span>SKOR</span></div>
-        <div class="avatar" onclick="go('profil')">🐱</div>
+    <div class="health-header">
+      <div><h1>Sağlık</h1><div class="sub" id="subSag">Boncuk'un bakım ve kayıt alanı</div></div>
+    </div>
+
+    <div class="health-intro">
+      <div class="health-intro-top">
+        <div><span class="eyebrow">BAKIM TAKİP DURUMU</span><h2>Kayıtların düzenli ve güncel</h2></div>
+        <div class="care-completion" title="Bu oran teşhis değil, bakım kayıtlarının tamamlanma durumudur"><b>%92</b><span>TAMAMLANDI</span></div>
       </div>
+      <p>Bu alan bir sağlık skoru değildir. Aşı, ilaç, parazit, kilo ve beslenme kayıtlarının ne kadar düzenli tutulduğunu gösterir.</p>
+      <div class="progress-track"><i></i></div>
     </div>
 
-    <div class="chip-row" style="margin-bottom:14px" id="sagChips">
-      <div class="chip on" onclick="sagJump('sagAsi',this)">💉 Aşılar</div>
-      <div class="chip" onclick="sagJump('sagGecmis',this)">📋 Geçmiş</div>
-      <div class="chip" onclick="sagJump('sagIlac',this)">💊 İlaçlar</div>
-      <div class="chip" onclick="sagJump('sagKilo',this)">⚖️ Kilo</div>
-      <div class="chip" onclick="sagJump('sagBesin',this)">🍽️ Beslenme</div>
-      <div class="chip" onclick="go('ai')">🤖 AI Rehber</div>
+    <div class="chip-row health-tabs" id="sagChips" role="tablist" aria-label="Sağlık bölümleri">
+      <button type="button" class="chip on" role="tab" aria-selected="true" aria-controls="careTracking" onclick="sagJump('careTracking',this)">Bakım</button>
+      <button type="button" class="chip" role="tab" aria-selected="false" aria-controls="vetRecords" onclick="sagJump('vetRecords',this)">Veteriner</button>
+      <button type="button" class="chip" role="tab" aria-selected="false" aria-controls="labImaging" onclick="sagJump('labImaging',this)">Laboratuvar</button>
+      <button type="button" class="chip" role="tab" aria-selected="false" aria-controls="aiHealthSummary" onclick="sagJump('aiHealthSummary',this)">AI Özeti</button>
+      <button type="button" class="chip" role="tab" aria-selected="false" aria-controls="prescriptionSection" onclick="sagJump('prescriptionSection',this)">Reçete</button>
+      <button type="button" class="chip" role="tab" aria-selected="false" aria-controls="healthHistory" onclick="sagJump('healthHistory',this)">Geçmiş</button>
     </div>
 
-    <details class="sag-sec" name="sag" id="sagAsi" open>
-      <summary class="sec-title"><h2>Aşı Takvimi</h2><a>Takvime ekle</a></summary>
-    <div class="card">
-      <div class="vac-item" id="vacItem-karma">
-        <div class="vac" onclick="toggleVac('karma')"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>Karma Aşı (5'li)</b><span>14 Mart 2026 · Pati Veteriner</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span><span class="chev">›</span></div>
-        <div class="vac-detail" id="vacDetail-karma"></div>
+    <section class="health-section" id="careTracking" data-health-panel role="tabpanel">
+      <div class="health-section-head"><div><span class="section-index">A · BAKIM TAKİBİ</span><h2>Günlük ve periyodik bakım</h2><p>Teşhis değil, kullanıcı tarafından tutulan bakım kayıtları.</p></div></div>
+      <div class="care-grid">
+        <div class="care-item"><span>AŞI</span><b>Güncel · Son 18 Tem</b><div class="mini-progress"><i style="width:100%"></i></div></div>
+        <div class="care-item"><span>İLAÇ</span><b>2 aktif hatırlatıcı</b><div class="mini-progress"><i style="width:88%"></i></div></div>
+        <div class="care-item"><span>PARAZİT</span><b>Sıradaki 1 Ağustos</b><div class="mini-progress"><i style="width:82%"></i></div></div>
+        <div class="care-item"><span>KİLO</span><b>4.2 kg · Kayıt güncel</b><div class="mini-progress"><i style="width:95%"></i></div></div>
+        <div class="care-item full"><span>BESLENME</span><b>65 g kuru + 1 poşet yaş mama · 08:00 / 19:00</b><div class="mini-progress"><i style="width:92%"></i></div></div>
       </div>
-      <div class="vac-item" id="vacItem-kuduz">
-        <div class="vac" onclick="toggleVac('kuduz')"><div class="vdot" style="background:var(--amber-soft)">💉</div><div><b>Kuduz Aşısı</b><span>12 Temmuz 2026 · Randevu alındı</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber)">6 GÜN</span><span class="chev">›</span></div>
-        <div class="vac-detail" id="vacDetail-kuduz"></div>
+    </section>
+
+    <section class="health-section" id="vetRecords" data-health-panel role="tabpanel" hidden>
+      <div class="health-section-head">
+        <div><span class="section-index">B · VETERİNER KAYITLARI</span><h2>Onaylı klinik kayıtları</h2><p>Veteriner yalnızca kullanıcının izin verdiği profile kayıt ekleyebilir.</p></div>
+        <button class="text-button" onclick="openVetPanel()">Veteriner Paneli</button>
       </div>
-      <div class="vac-item" id="vacItem-losemi">
-        <div class="vac" onclick="toggleVac('losemi')"><div class="vdot" style="background:var(--blue-soft)">🗓️</div><div><b>Lösemi (FeLV)</b><span>Eylül 2026 · Planlandı</span></div><span class="badge" style="background:var(--blue-soft);color:var(--blue)">PLANLI</span><span class="chev">›</span></div>
-        <div class="vac-detail" id="vacDetail-losemi"></div>
+      <div class="record-type-grid">
+        <span>Muayene</span><span>Reçete</span><span>Rapor</span><span>Operasyon</span><span>Kontrol notu</span><span>Taburcu notu</span>
       </div>
-      <div class="vac-item" id="vacItem-parazit">
-        <div class="vac" onclick="toggleVac('parazit')"><div class="vdot" style="background:var(--green-soft)">✓</div><div><b>İç-Dış Parazit</b><span>1 Haziran 2026 · Uygulandı</span></div><span class="badge" style="background:var(--green-soft);color:var(--green)">YAPILDI</span><span class="chev">›</span></div>
-        <div class="vac-detail" id="vacDetail-parazit"></div>
+    </section>
+
+    <section class="health-section" id="labImaging" data-health-panel role="tabpanel" hidden>
+      <div class="health-section-head"><div><span class="section-index">C · LABORATUVAR &amp; GÖRÜNTÜLEME</span><h2>Sonuçlar ve medikal dosyalar</h2><p>Kan, idrar, hormon, röntgen, USG, MR / CT ve operasyon görüntüleri.</p></div></div>
+      <div id="labAssetList"></div>
+    </section>
+
+    <section class="health-section" id="aiHealthSummary" data-health-panel role="tabpanel" hidden>
+      <div class="health-section-head"><div><span class="section-index">D · AI SAĞLIK ÖZETİ</span><h2>Veteriner görüşmesine hazırlık</h2><p>AI teşhis koymaz; kayıtları sadeleştirir ve konuşulacak başlıkları çıkarır.</p></div></div>
+      <div class="ai-health-card">
+        <div class="classification"><span class="class-chip calm">Acil değildir</span><span class="class-chip watch">Takip edilmeli</span><span class="class-chip consult">Veterinere danışılmalı</span></div>
+        <h3>Son 6 ayda dikkat çekenler</h3>
+        <ul><li>Bakım kayıtlarının %92'si güncel.</li><li>Yaklaşan parazit uygulaması için hatırlatıcı oluşturulmuş.</li></ul>
+        <h3>Veterinere sorman gerekenler</h3>
+        <ul><li>Mart ayındaki laboratuvar raporunda işaretlenen satırların klinik anlamı nedir?</li><li>Bir sonraki rutin kontrol için önerilen tarih nedir?</li></ul>
+        <p class="medical-guardrail">Bu özet tıbbi teşhis, reçete veya doz önerisi içermez. Ani kötüleşme ya da kırmızı bayrak belirtilerinde veterinere başvur.</p>
       </div>
-    </div>
+    </section>
 
-    </details>
+    <section class="health-section" id="prescriptionSection" data-health-panel role="tabpanel" hidden>
+      <div class="health-section-head"><div><span class="section-index">DİJİTAL REÇETE</span><h2>Veterinerin yazdığı kullanım planı</h2><p>PETID yalnızca kayıtlı metni anlaşılır hale getirir.</p></div></div>
+      <div class="rx-card" id="prescriptionModule"></div>
+    </section>
 
-    <details class="sag-sec" name="sag" id="sagGecmis">
-      <summary class="sec-title"><h2>Sağlık Geçmişi</h2><a>+ Kayıt ekle</a></summary>
-    <div class="card">
-      <div class="hist"><div class="hi">🏥</div><div><b>Genel kontrol muayenesi</b><span>1 Haziran 2026 · Dr. Elif Kaya — sonuç: normal</span></div></div>
-      <div class="hist"><div class="hi">🔬</div><div><b>Kan tahlili</b><span>14 Mart 2026 · Tüm değerler referans aralığında</span></div></div>
-      <div class="hist"><div class="hi">✂️</div><div><b>Kısırlaştırma operasyonu</b><span>10 Ekim 2025 · Sorunsuz iyileşme</span></div></div>
-      <div class="hist"><div class="hi">📄</div><div><b>Tüm kayıtları görüntüle / dışa aktar</b><span>PDF olarak paylaşılabilir</span></div><span style="margin-left:auto;color:var(--green);font-weight:800">→</span></div>
-    </div>
-
-    </details>
-
-    <details class="sag-sec" name="sag" id="sagIlac">
-      <summary class="sec-title"><h2>İlaç &amp; Takviyeler</h2><a>+ Ekle</a></summary>
-    <div class="card">
-      <div class="med"><div class="mi2" style="background:var(--red-soft)">💧</div><div><b>Parazit damlası</b><span>Ayda 1 · Sıradaki: 1 Ağustos</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🦴</div><div><b>Eklem takviyesi</b><span>Her gün · Akşam maması ile</span></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💊</div><div><b>Tüy yumağı macunu</b><span>Haftada 3 · Hatırlatıcı kapalı</span></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
-    </div>
-
-    </details>
-
-    <details class="sag-sec" name="sag" id="sagKilo">
-      <summary class="sec-title"><h2>Kilo Takibi</h2><a>4.2 kg · İdeal</a></summary>
-    <div class="card">
-      <div class="bars">
-        <div class="bar"><i style="height:58%"></i><span>Şub</span></div>
-        <div class="bar"><i style="height:64%"></i><span>Mar</span></div>
-        <div class="bar"><i style="height:70%"></i><span>Nis</span></div>
-        <div class="bar"><i style="height:74%"></i><span>May</span></div>
-        <div class="bar"><i style="height:72%"></i><span>Haz</span></div>
-        <div class="bar cur"><i style="height:75%"></i><span>Tem</span></div>
+    <section class="health-section" id="healthHistory" data-health-panel role="tabpanel" hidden>
+      <div class="health-section-head">
+        <div><span class="section-index">SAĞLIK GEÇMİŞİ</span><h2>Zaman çizelgesi</h2><p id="healthRecordCount">Kayıtlar yükleniyor</p></div>
+        <button class="text-button" onclick="openVetPanel()">Kayıt ekle</button>
       </div>
-    </div>
-
-    </details>
-
-    <details class="sag-sec" name="sag" id="sagBesin">
-      <summary class="sec-title"><h2>Beslenme Planı 🍽️</h2><a>Düzenle</a></summary>
-    <div class="card">
-      <div class="med"><div class="mi2" style="background:var(--green-soft)">🥣</div><div><b>Günlük mama: 65 g kuru + 1 poş yaş</b><span>2 öğün · Sabah 08:00 / Akşam 19:00</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">İDEAL</span></div>
-      <div class="med"><div class="mi2" style="background:var(--blue-soft)">💧</div><div><b>Su hedefi: ~220 ml/gün</b><span>Bugün: 160 ml · Çeşme tipi suluk öneriliyor</span></div><span class="badge" style="background:var(--amber-soft);color:var(--amber);margin-left:auto">%73</span></div>
-      <div class="med"><div class="mi2" style="background:var(--amber-soft)">🎁</div><div><b>Ödül maması limiti</b><span>Günlük kalorinin en fazla %10'u · Bugün 2/5</span></div><span class="badge" style="background:var(--green-soft);color:var(--green);margin-left:auto">2/5</span></div>
-    </div>
-    </details>
+      <div class="timeline" id="healthTimeline"></div>
+    </section>
 
   </section>
 
@@ -598,7 +586,7 @@ try {
     </div>
 
     <div class="chat-box" id="chat">
-      <div class="bub ai">Merhaba Leo! 🐾 Ben PatiDost AI. Boncuk'un bir davranışını anlat, ne anlatmak istediğini birlikte çözelim.</div>
+      <div class="bub ai">Merhaba Leo. Ben PETID AI. Boncuk'un davranışını anlat; güvenli gözlem ve sonraki adımları birlikte netleştirelim.</div>
     </div>
 
     <div class="qrow">
@@ -790,7 +778,7 @@ try {
       </div>
       <div class="feed">
         <div class="fh"><div class="fa" style="background:var(--green-soft)">🧕</div><b>Zeynep A.</b><span>1 gün önce</span></div>
-        <p>Tatile çıkarken kedime bakacak birini arıyordum, buradan bulduğum gönüllü sayesinde çok rahat ettim. Teşekkürler PatiDost topluluğu! 💚</p>
+        <p>Tatile çıkarken kedime bakacak birini arıyordum, PETID topluluğunda bulduğum gönüllü sayesinde çok rahat ettim.</p>
         <div class="facts">❤️ 96 &nbsp; 💬 8 &nbsp; ↗ Paylaş</div>
       </div>
       <div class="feed">
@@ -1113,6 +1101,53 @@ try {
     </div>
   </div>
 
+  <!-- ================= VETERİNER PANELİ PROTOTİPİ ================= -->
+  <div class="overlay" id="vetPanelModal">
+    <div class="sheet vet-sheet">
+      <div class="sheet-head"><div><h3>Veteriner Paneli</h3><span class="sub2">Kullanıcı izinli sağlık kaydı girişi</span></div><button class="x" onclick="closeVetPanel()">✕</button></div>
+      <form id="vetRecordForm">
+        <label class="permission-card">
+          <input type="checkbox" id="vetPermission" checked>
+          <span><b><span id="vetAllowedProfile">Boncuk</span> profili için kullanıcı izni aktif</b><span>Bu prototipte izin cihaz üzerinde tutulur. Gerçek sistemde profil erişim belirteci ve klinik kimliğiyle doğrulanacaktır.</span></span>
+        </label>
+        <div class="vet-form-grid">
+          <div class="vet-field"><label for="vetName">Veteriner adı</label><input id="vetName" name="vetName" value="Dr. Elif Kaya" required></div>
+          <div class="vet-field"><label for="vetClinic">Klinik adı</label><input id="vetClinic" name="clinic" value="PETID Veteriner Kliniği" required></div>
+          <div class="vet-field"><label for="vetRecordType">Kayıt türü</label>
+            <select id="vetRecordType" name="recordType" onchange="togglePrescriptionFields()" required>
+              <option value="exam_report">Muayene raporu</option><option value="exam_note">Muayene notu</option>
+              <option value="diagnosis">Tanı / şüpheli tanı</option><option value="prescription">Reçete</option>
+              <option value="vaccine">Aşı kaydı</option><option value="lab">Laboratuvar sonucu</option>
+              <option value="xray">Röntgen</option><option value="ultrasound">USG</option>
+              <option value="mr_ct">MR / CT</option><option value="dental_xray">Diş röntgeni</option>
+              <option value="operation">Operasyon notu</option><option value="operation_image">Operasyon öncesi / sonrası görüntü</option>
+              <option value="discharge">Taburcu notu</option><option value="follow_up">Kontrol randevusu</option>
+              <option value="recommendation">Kontrol önerisi</option>
+            </select>
+          </div>
+          <div class="vet-field"><label for="vetTrust">Güven seviyesi</label>
+            <select id="vetTrust" name="trust"><option value="vet">Veteriner onayladı</option><option value="clinic">Klinik sistemi yükledi</option><option value="urgent">Acil kontrol önerildi</option></select>
+          </div>
+          <div class="vet-field full"><label for="vetTitle">Kayıt başlığı</label><input id="vetTitle" name="title" placeholder="Örn. Genel kontrol muayenesi" required></div>
+          <div class="vet-field full"><label for="vetSummary">AI için sadeleştirme kaynağı</label><textarea id="vetSummary" name="aiSummary" placeholder="Raporun kullanıcıya sade açıklaması; teşhis veya yeni doz üretmeyin."></textarea></div>
+          <div class="vet-field full"><label for="vetFollowUp">Kontrol önerisi</label><input id="vetFollowUp" name="followUp" placeholder="Örn. 2 hafta sonra kontrol önerildi"></div>
+          <div class="vet-field full"><label for="vetAttachment">Dosya eki</label><input id="vetAttachment" type="file" accept=".pdf,image/*,.dcm,.dicom,text/plain,.txt,.doc,.docx,application/octet-stream"></div>
+
+          <div class="prescription-fields" id="vetPrescriptionFields" hidden>
+            <div class="vet-field"><label for="rxMedicine">İlaç adı</label><input id="rxMedicine" name="medicine"></div>
+            <div class="vet-field"><label for="rxDose">Veterinerin yazdığı doz</label><input id="rxDose" name="dose" placeholder="AI bu alanı üretmez"></div>
+            <div class="vet-field"><label for="rxSchedule">Kullanım saati</label><input id="rxSchedule" name="schedule" placeholder="08:00 / 20:00"></div>
+            <div class="vet-field"><label for="rxDuration">Süre</label><input id="rxDuration" name="duration" placeholder="7 gün"></div>
+            <div class="vet-field full"><label for="rxWarning">Uyarı notu</label><input id="rxWarning" name="warning"></div>
+            <label class="permission-card full"><input type="checkbox" name="reminder"><span><b>Hatırlatıcı oluştur</b><span>Veterinerin yazdığı saate göre cihaz içi hatırlatıcı prototipi.</span></span></label>
+          </div>
+        </div>
+        <div class="vet-form-message" id="vetFormMessage"></div>
+        <button class="btn" type="submit">İzinli profile kayıt ekle</button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="appToast"></div>
 
   <!-- ================= ALT NAVİGASYON ================= -->
@@ -1136,10 +1171,6 @@ try {
 </div>
 
 <script type="module">
-  // çipler artık hedef bölümü açıp oraya kaydırıyor
-  const jump = window.sagJump;
-  window.sagJump = (id, chip) => { document.getElementById(id)?.setAttribute('open', ''); jump?.(id, chip); };
-
   // ana ekran arka planı: saat dilimini yaz, gerisini CSS halleder.
   // dakikada bir tekrar kontrol → sayfa açık kalsa da saat geçince sahne değişir.
   const setScene = () => {
@@ -1301,15 +1332,17 @@ try {
   const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
   const geminiHazir = () => GEMINI_KEY && !GEMINI_KEY.includes('BURAYA');
   const SISTEM_TALIMATI =
-    'Sen PatiDost mobil uygulamasının veteriner asistanısın. Türkçe, samimi ve KISA ' +
+    'Sen PETID uygulamasının güvenli evcil hayvan bilgi asistanısın. Türkçe, sakin ve KISA ' +
     '(en fazla 4-6 cümle) yanıt ver, uygun emoji kullan. Evcil hayvan sağlığı ve ' +
     'davranışında ön bilgi verirsin.\n' +
     'KURALLAR:\n' +
     '- Kesin teşhis KOYMA, ilaç adı/doz ÖNERME; "olabilir" dilini kullan.\n' +
+    '- Veteriner raporunu yalnızca sadeleştir; klinik yorumu değiştirme ve reçetedeki dozu yeniden üretme.\n' +
+    '- Eğitim önerilerinde pozitif pekiştirme, kısa seans ve gönüllü katılım kullan; ceza veya korkutma önerme.\n' +
     '- Ciddi belirtilerde (kanlı kusma, nefes darlığı, nöbet, zehirlenme, travma, ' +
     'idrar yapamama) MUTLAKA acil veterinere yönlendir.\n' +
     '- Evcil hayvan dışı sorulara (kod, hava durumu, genel sohbet) kibarca ' +
-    '"Ben PatiDost\'un evcil hayvan asistanıyım, bu konuda yardımcı olamam" de.';
+    '"Ben PETID evcil hayvan asistanıyım, bu konuda yardımcı olamam" de.';
   const petBaglami = () => {
     try {
       const p = (JSON.parse(localStorage.getItem('patidost') || '{}').pets) || [];
@@ -1366,7 +1399,7 @@ try {
     const ans = document.getElementById('homeAns');
     ans.style.display = 'block';
     ans.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
-      '<b style="color:var(--green);font-size:12.5px">🤖 PATİDOST AI</b>' +
+      '<b style="color:var(--green);font-size:12.5px">PETID AI</b>' +
       '<span style="cursor:pointer;color:var(--gray)" onclick="this.closest(\'.home-ans\').style.display=\'none\'">✕</span></div>' +
       '<div style="font-size:12.5px;color:var(--gray);margin-bottom:8px">“' + esc(t) + '”</div>' +
       '<div style="font-size:13px;line-height:1.55;color:var(--ink)" id="homeAnsBody">' + govde + '</div>';
@@ -1397,5 +1430,6 @@ try {
     if (dog) document.getElementById('pzDogName').textContent = dog.ad;
   } catch (e) {}
 </script>
+<script type="module" src="/src/premium-upgrade.js"></script>
 </body>
 </html>
