@@ -56,6 +56,8 @@ npx expo start --dev-client
 
 Debug development client Metro gerektirir. Bağımsız, yalnızca test için preview APK farklıdır:
 
+Windows'ta derin çalışma klasörü CMake/Ninja uzun yol hatası verebilir. Derlemeyi kısa bir **gerçek checkout** yolunda temiz npm ci ve prebuild ile yapın. `subst` alias'ı Node'un canonical yolu ile Gradle'ın sürücü yolunu ayırıp codegen'de “different roots” hatası oluşturabilir; bu ortamda alias yerine kısa gerçek test klasörü kullanıldı. Önceki uzun yolda üretilmiş native proje/CMake önbelleklerini yedekleyip yeniden üretin. Kullanıcı kaynaklarını veya SDK'yı silmeyin.
+
 ```powershell
 # Yetkili kullanıcı EAS hesabı/proje bağlantısını ve test signing seçimini tamamladıktan sonra:
 npx eas-cli build --platform android --profile development

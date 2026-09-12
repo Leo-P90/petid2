@@ -25,9 +25,13 @@ Merkezi app.config.ts, Android/iOS dev-preview-production kimlikleri, ikon/splas
 
 ## Android APK / cihaz kapısı
 
-Yerel debug APK derlemesi henüz tamamlanmadı. NDK 27.1.12297006, SDK 36, Build Tools 36/35 ve CMake 3.22.1 hazırlandı; doğrudan indirilen arşivler resmi repository XML SHA-1 checksum'larıyla doğrulandı. Gradle native modül/bağımlılık derlemesine geçti; APK sonucu ayrıca güncellenecek, başarılı sayılmaz.
+Yerel debug APK **başarılı**: aynı `36e8fdf` commit'i kısa gerçek QA klasöründe temiz npm ci, Android prebuild ve Gradle assembleDebug ile derlendi. `BUILD SUCCESSFUL in 5m 47s`, 672 task. NDK 27.1.12297006, SDK 36, Build Tools 36/35 ve CMake 3.22.1 hazırlandı; doğrudan indirilen arşivler resmi repository XML SHA-1 checksum'larıyla doğrulandı.
 
-Bu ortamda Android Studio/JDK/SDK vardır; WHPX hızlandırması kullanılabilir ama bağlı Android cihaz veya hazır AVD yoktur. Test system-image indirmesi hazırlanıyor. İmajın lisans onayı kullanıcıya bırakıldı; yeni lisanslar otomatik kabul edilmedi. Android açılış, fiziksel geri/klavye/safe-area, native picker izin ver-red-kısıtlı erişim ve dış telefon/WhatsApp uygulamaları **gerçek cihazda doğrulanmadı**. Web ve mock SDK testleri bunların yerine sayılmaz. iOS native derleme/QA Windows'ta yapılmadı. mobile/README.md cihaz kabul listesi açık kalır.
+İlk deneme uzun Windows yolunda CMake object-path/Ninja dirty-manifest hatası verdi. Yalnızca üretilmiş native proje/önbellekler yedeklendi. Geçici P: alias denemesi Node/Gradle “different roots” hatası verdi ve alias kaldırıldı. Kısa gerçek klasörde temiz kurulum bu hataları aştı; son build'de SDK deprecation ve bazı object-path uyarıları kaldı ama derleme geçti.
+
+APK: `petid-v1-slice2-development.apk`, 154239145 byte. AAPT: `com.petid.app.dev`, `PetID Dev`, version 0.1.0/code 1, min SDK 24/target 36, arm64-v8a + x86_64. apksigner verify geçti; v2 imza, `CN=Android Debug`. Production signing anahtarı değildir, git'e eklenmedi. SHA-256: `68a6b59030e4faf0313e93ae10308a5738a403727ecb8e1d11d129a793e8a0f9`. Development client APK Metro gerektirir; bağımsız preview veya production paket değildir.
+
+Bu ortamda Android Studio/JDK/SDK vardır; WHPX hızlandırması kullanılabilir ama son ADB kontrolünde bağlı cihaz/emülatör yoktur. Kullanıcı system-image indirmesini ve emülatör kurulumunu Android Studio'da tamamlıyor. İmajın lisans onayı kullanıcıya bırakıldı; yeni lisanslar otomatik kabul edilmedi. Android açılış, fiziksel geri/klavye/safe-area, native picker izin ver-red-kısıtlı erişim ve dış telefon/WhatsApp uygulamaları **gerçek cihazda doğrulanmadı**. Web ve mock SDK testleri bunların yerine sayılmaz. iOS native derleme/QA Windows'ta yapılmadı. mobile/README.md cihaz kabul listesi açık kalır.
 
 ## Bilinen prototipler ve riskler
 
@@ -40,4 +44,4 @@ Mobil npm audit: 14 orta, 0 yüksek/kritik. Başlıca Expo iOS build-tool xcode/
 
 Eğitim/oyun/Pixel Pet/market/genel topluluk/AI/Gemini/Google-Apple auth/Telegram mobil menü/route/runtime import'larında yok; source gate testi bunu kontrol eder. Arşivlenmiş web referansları mobil bundle'a dahil edilmez.
 
-CI quality PR kontrolleri eklendi; manuel debug APK job'u yalnızca test artifact'i üretir. CI sonucu ayrıca izlenecek; yerel sonuçla karıştırılmaz. Master merge, production AAB, mağaza/hosting/EAS Update/Submit veya production yayın yapılmadı. Issue #4 cihaz kabul kapıları kapanmadan otomatik kapatılmamalı.
+Draft PR #5 (`v1-release` hedefli) açıldı. [CI quality run 34700826073](https://github.com/Leo-P90/petid2/actions/runs/34700826073) `36e8fdf` için geçti: temiz npm ci, TypeScript, lint, Jest, Android JS export ve web export. Manuel debug APK job'u PR tetiklenmesinde tasarım gereği skipped; native APK veya cihaz QA kanıtı değildir. Master merge, production AAB, mağaza/hosting/EAS Update/Submit veya production yayın yapılmadı. Issue #4 cihaz kabul kapıları kapanmadan otomatik kapatılmamalı.
