@@ -1,28 +1,74 @@
-import { useState } from 'react';
-import { Button, Card, Label, Note, Screen, RouteButton, PetSelector } from '../../components/ui';
-import { discover } from '../../core/model';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, Animated, Image, Keyboard, Modal, PanResponder, Pressable, Text, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, Card, Field, Label, Note, Screen, RouteButton, PetSelector } from '../../components/ui';
+import { KeyboardScreen } from '../../components/keyboard-screen';
+import { discoverMatches, emptyMatch, validMessage, type Candidate } from '../../core/match-model';
+import { exitDuration, swipeChoice } from '../../core/match-motion';
+import { matchDemo } from '../../data/match-demo';
 import { useApp } from '../../state/app-state';
-export default function Match() {
-  const { pet } = useApp();
-  const [preferences, setPreferences] = useState<Record<string, boolean>>({});
-  const [excluded, setExcluded] = useState<Record<string, string[]>>({});
-  const [notices, setNotices] = useState<Record<string, string>>({});
-  const participating = preferences[pet.id] ?? false;
-  const candidate = discover(pet.species, excluded[pet.id] ?? [])[0];
-  function choose(like: boolean) {
-    if (!candidate) return;
-    setExcluded((previous) => ({ ...previous, [pet.id]: [...(previous[pet.id] ?? []), candidate.id] }));
-    setNotices((previous) => ({ ...previous, [pet.id]: like ? 'Demo beğeni kaydedildi. Karşılıklı eşleşme veya mesaj oluşturulmadı.' : 'Demo aday geçildi.' }));
+function Portrait({ candidate, small = false }: { candidate: Candidate; small?: boolean }) {
+  const { colors } = useApp(); const [failed, setFailed] = useState(false);
+  return <View style={{ height: small ? 48 : 240, width: small ? 48 : '100%', borderRadius: small ? 24 : 20, overflow: 'hidden', backgroundColor: colors.greenSoft, justifyContent: 'center', alignItems: 'center' }}>
+    {candidate.photo && !failed ? <Image accessibilityLabel={candidate.name + ' · demo fotoğraf'} source={{ uri: candidate.photo }} onError={() => setFailed(true)} style={{ height: '100%', width: '100%' }} resizeMode="cover" /> : <Text accessibilityLabel="PetID fotoğraf placeholder" style={{ fontSize: small ? 26 : 72 }}>🐾</Text>}
+  </View>;
+}
+function SwipeCard({ candidate, choose, reduced }: { candidate: Candidate; choose: (like: boolean) => void; reduced: boolean }) {
+  const { colors } = useApp(); const { width } = useWindowDimensions(); const [x] = useState(() => new Animated.Value(0));
+  const locked = useRef(false); const alive = useRef(true); const [busy, setBusy] = useState(false);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; x.stopAnimation(); }; }, [x]);
+  function commit(like: boolean) {
+    if (locked.current) return; locked.current = true; setBusy(true);
+    const finish = () => { if (alive.current) choose(like); };
+    if (reduced) { finish(); return; }
+    Animated.timing(x, { toValue: (like ? 1 : -1) * width * 1.3, duration: exitDuration(reduced), useNativeDriver: true }).start(({ finished }) => { if (finished) finish(); });
   }
-  return <Screen title="PatiMatch" tab>
-    <PetSelector />
-    <Card><Label heading>{pet.name} için aynı tür keşif</Label><Note>Demo adaylar · Gerçek kişiler, eşleşmeler veya mesajlar yok.</Note>
-      <RouteButton label="Hayvan değiştir" href="/profile" />
-      <Button label={participating ? 'Demo keşfine katılımı kapat' : 'Demo keşfine katıl'} onPress={() => setPreferences((previous) => ({ ...previous, [pet.id]: !participating }))} />
-    </Card>
-    {participating ? <Card>{candidate ? <><Label heading>{candidate.name}</Label><Note>{candidate.species} · {candidate.age}</Note><Note>{candidate.note}</Note>
-      <Button label="Beğen · demo" onPress={() => choose(true)} /><Button label="Geç" secondary onPress={() => choose(false)} /></> : <><Note>Bu hayvan için demo adaylar bitti.</Note><Button secondary label="Demo keşfini sıfırla" onPress={() => setExcluded((previous) => ({ ...previous, [pet.id]: [] }))} /></>}</Card> : null}
-    {notices[pet.id] ? <Note>{notices[pet.id]}</Note> : null}
-    <Card><Label>Gizlilik ve güvenlik</Label><Note>Karşılıklı eşleşme, mesajlaşma, engelleme ve şikayet sunucu tarafında uygulanmadan kullanıma açılmaz. Sağlık veya sahip iletişimi paylaşılmaz.</Note><RouteButton label="Sahiplendirmeyi aç" href="/adoption" /></Card>
+  // PanResponder stores these callbacks; refs are read only by native gesture events, never by the factory.
+  // eslint-disable-next-line react-hooks/refs
+  const pan = PanResponder.create({
+    onMoveShouldSetPanResponder: (_e, g) => !locked.current && Math.abs(g.dx) > 12 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+    onPanResponderMove: (_e, g) => x.setValue(g.dx),
+    onPanResponderRelease: (_e, g) => { const choice = swipeChoice(g.dx); if (choice) commit(choice === 'like'); else if (reduced) x.setValue(0); else Animated.spring(x, { toValue: 0, useNativeDriver: true, friction: 7 }).start(); },
+    onPanResponderTerminate: () => x.setValue(0),
+  });
+  return <><Animated.View {...pan.panHandlers} testID="match-swipe-card" style={{ transform: [{ translateX: x }, { rotate: reduced ? '0deg' : x.interpolate({ inputRange: [-width, 0, width], outputRange: ['-14deg', '0deg', '14deg'] }) }] }}><Card>
+    <View><Portrait candidate={candidate} /><View style={{ position: 'absolute', top: 12, right: 12, backgroundColor: colors.surface, borderRadius: 20, padding: 10 }}><Label>♡ Uyum %{candidate.compatibility}</Label></View></View>
+    <Label heading>{candidate.name}</Label><Note>{candidate.age} · {candidate.breed} · {candidate.gender}</Note><Note>📍 {candidate.distance} · demo mesafe</Note><Label>{candidate.bio}</Label>
+    <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>{['💉 Aşılar tam · DEMO', '🧬 Sağlık testi · DEMO', '🪪 Çipli · DEMO'].map((badge, i) => <View key={badge} style={{ padding: 8, borderRadius: 14, backgroundColor: [colors.greenSoft, colors.blueSoft, colors.amberSoft][i] }}><Label>{badge}</Label></View>)}</View>
+  </Card></Animated.View><View style={{ flexDirection: 'row', gap: 14 }}><View style={{ flex: 1 }}><Button label="Geç" secondary disabled={busy} onPress={() => commit(false)} /></View><View style={{ flex: 1 }}><Button label="Beğen · demo" disabled={busy} onPress={() => commit(true)} /></View></View></>;
+}
+export default function Match() { const { pet } = useApp(); return <MatchExperience key={pet.id} />; }
+function MatchExperience() {
+  const { pet, matches, dispatchMatch, colors } = useApp(); const state = matches[pet.id] ?? emptyMatch(); const candidate = discoverMatches(pet, state, matchDemo)[0];
+  const [celebration, setCelebration] = useState<{ petId: string; candidate: Candidate } | null>(null);
+  const [active, setActive] = useState<{ petId: string; candidateId: string } | null>(null); const [text, setText] = useState(''); const [reduced, setReduced] = useState(true);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]); const visible = useRef(active); const compose = useRef<View>(null);
+  useEffect(() => { visible.current = active; }, [active]);
+  useEffect(() => {
+    let mounted = true; const pending = timers.current; AccessibilityInfo.isReduceMotionEnabled().then(value => { if (mounted) setReduced(value); }).catch(() => undefined);
+    const listener = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
+    return () => { mounted = false; listener.remove(); pending.forEach(clearTimeout); Keyboard.dismiss(); };
+  }, []);
+  const thread = active?.petId === pet.id ? state.conversations[active.candidateId] : undefined;
+  function open(c: Candidate) {
+    if (!state.conversations[c.id] || c.species !== pet.species) return;
+    dispatchMatch({ type: 'read', pet, candidate: c }); setActive({ petId: pet.id, candidateId: c.id }); setCelebration(null); setText('');
+  }
+  function choose(like: boolean) {
+    if (!candidate || candidate.species !== pet.species) return; dispatchMatch({ type: like ? 'like' : 'pass', pet, candidate });
+    if (like && candidate.mutual && !state.conversations[candidate.id]) { setCelebration({ petId: pet.id, candidate }); AccessibilityInfo.announceForAccessibility('Demo karşılıklı eşleşme: ' + pet.name + ' ve ' + candidate.name); }
+  }
+  function send() {
+    if (!thread || !validMessage(text)) return; const snapshot = { id: pet.id, species: pet.species }; const c = thread.candidate;
+    dispatchMatch({ type: 'send', pet: snapshot, candidate: c, text }); setText('');
+    timers.current.push(setTimeout(() => dispatchMatch({ type: 'reply', pet: snapshot, candidate: c, text: c.reply, visible: visible.current?.petId === snapshot.id && visible.current?.candidateId === c.id }), 700));
+  }
+  return <Screen title="PatiMatch" tab><PetSelector /><Card><Label heading>{pet.name} için aynı tür keşif</Label><Note>Demo adaylar · Gerçek kişiler, eşleşmeler veya mesajlar yok.</Note><Note>{reduced ? 'Azaltılmış hareket açık' : 'Sağa beğen · sola geç · düğmelerle de kullanabilirsin'}</Note><RouteButton label="Hayvan değiştir" href="/profile" /><Button label={state.participating ? 'Demo keşfine katılımı kapat' : 'Demo keşfine katıl'} onPress={() => dispatchMatch({ type: 'toggle', pet })} /></Card>
+    {state.participating ? candidate ? <SwipeCard key={pet.id + candidate.id} candidate={candidate} choose={choose} reduced={reduced} /> : <Card><Label>Adaylar bitti 🐾</Label><Button label="Baştan göster" secondary onPress={() => dispatchMatch({ type: 'reset', pet })} /><Button label="Demo keşfini sıfırla" secondary onPress={() => dispatchMatch({ type: 'reset', pet })} /></Card> : null}
+    {state.likes.some(id => !state.conversations[id]) ? <Note>Tek taraflı demo beğeni kaydedildi. Karşılıklı eşleşme veya mesaj oluşturulmadı.</Note> : null}
+    <Card><Label heading>Eşleşmeler / Mesajlar</Label>{Object.values(state.conversations).length ? Object.values(state.conversations).map(conv => <Pressable key={conv.candidate.id} accessibilityRole="button" accessibilityLabel={conv.candidate.name + ' demo konuşmasını aç' + (conv.unread ? ' · okunmamış' : '')} onPress={() => open(conv.candidate)} style={{ minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 8, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}><Portrait candidate={conv.candidate} small /><View style={{ flex: 1 }}><Label>{conv.candidate.name}</Label><Text numberOfLines={1} style={{ color: colors.text }}>{conv.messages.at(-1)?.text}</Text></View>{conv.unread ? <Text accessibilityLabel="Okunmamış" style={{ color: colors.danger }}>●</Text> : null}</Pressable>) : <Note>Henüz eşleşme yok. Tek taraflı beğeni konuşma açmaz.</Note>}</Card>
+    <Card><Label>Gizlilik ve güvenlik</Label><Note>Kurgu, oturumluk demo. Engelleme, şikayet, moderasyon ve güvenli gerçek mesajlaşma sonraki backend kapısıdır. Sağlık rozetleri doğrulanmış kayıt değildir; sahip iletişimi paylaşılmaz.</Note><RouteButton label="Sahiplendirmeyi aç" href="/adoption" /></Card>
+    <Modal visible={celebration?.petId === pet.id} transparent animationType={reduced ? 'none' : 'fade'} onRequestClose={() => setCelebration(null)}><SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.background }}><View accessibilityViewIsModal><Card><Label heading>Karşılıklı demo eşleşme! 🎉</Label><Label heading>{pet.species === 'Kedi' ? '🐱 ♡ 🐱' : '🐶 ♡ 🐶'}</Label><Label>{pet.name} ve {celebration?.candidate.name}</Label><Note>Gerçek kullanıcı bağlantısı değil; kurgu karşılıklı beğeni.</Note><Button label="Mesaj gönder" onPress={() => { if (celebration) open(celebration.candidate); }} /><Button label="Keşfe devam et" secondary onPress={() => setCelebration(null)} /></Card></View></SafeAreaView></Modal>
+    <Modal visible={!!thread} animationType={reduced ? 'none' : 'slide'} onRequestClose={() => { Keyboard.dismiss(); setActive(null); }}><SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><View accessibilityViewIsModal style={{ flex: 1 }}><View style={{ padding: 18, gap: 12 }}><Button label="Konuşmayı kapat" secondary onPress={() => { Keyboard.dismiss(); setActive(null); }} />{thread ? <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}><Portrait candidate={thread.candidate} small /><Label heading>Demo sohbet · {thread.candidate.name}</Label></View> : null}</View><KeyboardScreen followEnd>{thread?.messages.map(message => <View key={message.id} style={{ alignSelf: message.from === 'me' ? 'flex-end' : 'flex-start', maxWidth: '85%', padding: 12, borderRadius: 16, backgroundColor: message.from === 'me' ? colors.accent : colors.greenSoft }}><Text style={{ color: message.from === 'me' ? colors.onAccent : colors.text, fontSize: 16 }}>{message.text}</Text></View>)}<Note>Otomatik yanıtlar demo; canlı kullanıcı yok.</Note><View ref={compose} style={{ gap: 12 }}><Field label="Demo mesaj" focusArea={compose} value={text} onChangeText={setText} maxLength={500} /><Button label="Demo mesajı gönder" disabled={!validMessage(text)} onPress={send} /></View></KeyboardScreen></View></SafeAreaView></Modal>
   </Screen>;
 }

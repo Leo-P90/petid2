@@ -9,7 +9,7 @@ import Reports from '../src/app/reports';
 import Adoption from '../src/app/adoption/index';
 import { nativeServices } from '../src/services/native';
 import { THEME_KEY } from '../src/core/theme';
-import { Keyboard } from 'react-native';
+import { AccessibilityInfo, Keyboard } from 'react-native';
 jest.mock('@react-native-async-storage/async-storage', () =>
   jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
@@ -65,8 +65,32 @@ test('match requires opt-in and never invents mutual matches', async () => {
   await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
   expect(screen.getByText('Luna')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Beğen · demo' }));
-  expect(screen.getByText('Ada')).toBeTruthy();
+  await waitFor(() => expect(screen.getByText('Ada')).toBeTruthy());
   expect(screen.getByText(/Karşılıklı eşleşme veya mesaj oluşturulmadı/)).toBeTruthy();
+});
+test('mutual demo conversation supports reduced motion, keyboard composer and isolated pets', async () => {
+  const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+  const listener = jest.spyOn(Keyboard, 'addListener');
+  const view = await mount(<Match />);
+  await waitFor(() => expect(screen.getByText('Azaltılmış hareket açık')).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Beğen · demo' }));
+  expect(screen.getByText('Karşılıklı demo eşleşme! 🎉')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mesaj gönder' }));
+  expect(screen.getByRole('button', { name: 'Demo mesajı gönder' }).props.accessibilityState.disabled).toBe(true);
+  expect(listener).toHaveBeenCalledWith('keyboardDidShow', expect.any(Function));
+  await fireEvent(screen.getByLabelText('Demo mesaj'), 'focus', { nativeEvent: { target: 1 } });
+  await fireEvent.changeText(screen.getByLabelText('Demo mesaj'), '<b>plain text</b>');
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo mesajı gönder' }));
+  expect(screen.getAllByText('<b>plain text</b>').length).toBeGreaterThan(0);
+  expect(screen.getByLabelText('Demo mesaj').props.value).toBe('');
+  await fireEvent.press(screen.getByRole('button', { name: 'Konuşmayı kapat' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
+  expect(screen.queryByText('Ada')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
+  expect(screen.getByText('Max')).toBeTruthy();
+  await view.unmount(); motion.mockRestore(); listener.mockRestore();
 });
 test('report denial remains recoverable with manual coordinates; never publishes', async () => {
   jest.mocked(nativeServices.locate).mockResolvedValue({ status: 'denied', canAskAgain: true });

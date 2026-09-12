@@ -70,6 +70,18 @@ Son renk config'iyle native prebuild ve Gradle `:app:assembleDebug` tekrar başa
 
 ## Bilinen prototipler ve riskler
 
+## PR #5 PatiMatch kurtarma — 12 Eylül 2026
+
+7438bcc uzak HEAD üzerinden ayrı temiz clone oluşturuldu; kayıp ad73544'e dayanılmadı. Native büyük fotoğraflı kart, 95dp sağ/sol swipe eşiği, geri yaylanma/çıkış, reduced-motion ve görünür ≥48dp düğme yolları yeniden uygulandı. Avatar/photo error PetID placeholder; demo mesafe/sağlık açıkça işaretli. Merkezi tema ve dört sekme korundu.
+
+Pet kimliğiyle provider'da saf tipli reducer; aynı tür discovery, pass/like, read/send/reply katmanlarında zorunlu. Karşılıklı demo beğeni deterministik tek konuşma üretir, tek taraflı beğeni sohbet açmaz. Reset adayları tekrar gösterir ama eşleşmeleri çoğaltmaz. Pet değişiminde kart/modal/thread key ile remount; gecikmiş yanıt zamanlayıcıları iptal edilir, snapshot reducer doğru pet/thread'i doğrular. Mesajlar trim/500 karakter doğrulaması ve düz Text render; engelle/şikayet sonraki backend kapısı.
+
+Temiz mobile npm ci başarılı. TypeScript ve lint sıfır uyarı; 42/42 test, 7suite (ilk34+8regression). Android Hermes/17webroute export, Doctor21/21; eskiweb14/14test+Vitebuild başarılı. İlk denemelerde eksik kopyalanmış bağımlılık, TS union narrowing, SDK PanResponder callback'leri için ref lint yanlış pozitifi ve animasyon sonrası senkron assertion sorunları yakalanıp düzeltildi. Gesture factory için yalnızca tek satırlık gerekçeli lint istisnası; genelleştirilmiş rule kapatma yok.
+
+Native API37 emülatör: gerçek sağa Luna beğen/tek taraflı kayıt, Ada düğme karşılıklı modal, demo mesaj/yanıt, normal Gboard input/gönder görünür (IME1517,input1184–1310,gönder1342–1468px). Atlas ayrı köpek havuzu/boş konuşma, koyu tema ve cold-start kalıcılığı; güncel Metro kaynakları aynı development client üzerinde. Native `assembleDebug` 8m37s / 511 task ile geçti; SDK XML/CMake obje-yolu ve Gradle deprecation uyarıları sürdü, build başarısız değil. Görseller: [PatiMatch kurtarma QA](docs/qa/pr5-patimatch/README.md). Sonuçlar ve push/PR head/Actions doğrulaması PR yorumuna eklenir; bunlar doğrulanmadan tamamlandı iddiası yok.
+
+Picker recovery, bağımsız preview cold-start, fiziksel/stabil Android/iOS ve otomatik GPS başarı kapıları açık kalır. Gerçek kullanıcı/backend mesajlaşması, gerçek sağlık güveni veya production yayın yoktur.
+
 Son APK kurulumu ardından Metro bağlantısı bir kez boş açılış ekranında bekledi; geliştirme sunucusu temiz önbellekle yeniden başlatılınca bundle yüklenip açık/koyu ana ekran çalıştı. Ardından son APK ile tekrar cold start ve koyu tema kalıcılığı geçti. Bu development-server bağımlılığıdır; bağımsız preview açılışı doğrulanmış sayılmaz. Yenileme bandı olan ilk görseller kullanılmadı, temiz son paket görselleri yeniden alındı.
 
 Backend bağlantısı yok; ekranlar açıkça demo modundadır. Tema dışındaki değişiklikler oturumluk. Hesap/auth, gerçek kalıcı profil/sağlık/private dosya upload-download, paylaşılabilir/iptal edilebilir QR, canlı interaktif harita/ihbar/sahip onayı/arşiv backend'i, gerçek PatiMatch eşleşme/mesaj/moderasyon ve sahiplendirme CRUD/başvuru/iletişim sonraki dilimdir. Harita şu an koordinat önizleme iskeletidir. Örnek klinik iletişimi, açık/nöbetçi iddiası ve gerçek sahiplendirme kartı iddiası yoktur.

@@ -4,7 +4,7 @@ import { focusScroll, imeOverlap } from '../core/keyboard';
 type Target = RefObject<View | null>;
 const FocusContext = createContext<(target: Target | null) => void>(() => undefined);
 export const useKeyboardFocus = () => useContext(FocusContext);
-export function KeyboardScreen({ children, bottom = 32 }: { children: ReactNode; bottom?: number }) {
+export function KeyboardScreen({ children, bottom = 32, followEnd = false }: { children: ReactNode; bottom?: number; followEnd?: boolean }) {
   const host = useRef<View>(null);
   const viewport = useRef<View>(null);
   const scroll = useRef<ScrollView>(null);
@@ -49,7 +49,7 @@ export function KeyboardScreen({ children, bottom = 32 }: { children: ReactNode;
     {/* Measure the fixed outer frame, not the padded scroll frame: no double inset after adjustResize. */}
     <View ref={host} onLayout={layout} style={{ flex: 1, paddingBottom: inset }}>
       <View ref={viewport} onLayout={reveal} style={{ flex: 1 }}>
-      <ScrollView ref={scroll} onLayout={reveal} onScroll={(event) => { offset.current = event.nativeEvent.contentOffset.y; }} scrollEventThrottle={16}
+      <ScrollView ref={scroll} onLayout={reveal} onContentSizeChange={() => { if (followEnd) { scroll.current?.scrollToEnd({ animated: false }); reveal(); } }} onScroll={(event) => { offset.current = event.nativeEvent.contentOffset.y; }} scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled" keyboardDismissMode="none"
         contentContainerStyle={{ padding: 18, paddingBottom: open ? 32 : bottom, gap: 14, width: '100%', maxWidth: 640, alignSelf: 'center' }}>
         {children}

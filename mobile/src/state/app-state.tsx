@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance, Platform } from 'react-native';
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react';
+import { matchReducer, type MatchStore, type MatchAction } from '../core/match-model';
 import { demoPets, type Pet, type ThemeMode } from '../core/model';
 import { palettes, parseTheme, THEME_KEY } from '../core/theme';
 type Storage = Pick<typeof AsyncStorage, 'getItem' | 'setItem'>;
 type State = {
+  matches: MatchStore; dispatchMatch: (action: MatchAction) => void;
   mode: ThemeMode; colors: typeof palettes.light; ready: boolean; notice: string; themeBusy: boolean;
   toggleTheme: () => Promise<void>; pets: Pet[]; pet: Pet;
   selectPet: (id: string) => void; updatePet: (id: string, changes: Partial<Pet>) => void;
@@ -12,6 +14,7 @@ type State = {
 const Context = createContext<State | null>(null);
 export function AppProvider({ children, storage = AsyncStorage }: { children: ReactNode; storage?: Storage }) {
   const [mode, setMode] = useState<ThemeMode>('light');
+  const [matches, dispatchMatch] = useReducer(matchReducer, {});
   const [ready, setReady] = useState(false);
   const [notice, setNotice] = useState('');
   const [themeBusy, setThemeBusy] = useState(false);
@@ -40,6 +43,7 @@ export function AppProvider({ children, storage = AsyncStorage }: { children: Re
   }
   const pet = pets.find((item) => item.id === selected) ?? pets[0];
   return <Context.Provider value={{
+    matches, dispatchMatch,
     mode, colors: palettes[mode], ready, notice, themeBusy, toggleTheme, pets, pet,
     selectPet: (id) => { if (pets.some((item) => item.id === id)) setSelected(id); },
     updatePet: (id, changes) => setPets((items) => items.map((item) =>
