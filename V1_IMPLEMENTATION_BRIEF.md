@@ -2,6 +2,17 @@
 
 Kullanıcı tarafından onaylanan kapsam. Çalışma branch'i: v1-release. Bu belge uygulamanın tamamlandığı anlamına gelmez.
 
+## Ürün biçimi ve mobil mimari
+- PetID V1 bir mobil uygulamadır; web sitesi olarak yayınlanması hedef değildir.
+- İlk uygulama mimarisi Capacitor ile mevcut Vite uygulamasının Android ve iOS kabuğuna alınmasıdır. Bu karar mevcut birinci dilim çalışmasını korur.
+- Android ve iOS aynı kaynak kodunu kullanmalı. Öncelikli teslim Android debug APK ve release AAB; iOS projesi aynı dilimde üretime hazır tutulmalı.
+- Web preview yalnızca geliştirme ve hızlı test için kullanılmalı.
+- Safe-area, ekran çentiği, durum çubuğu, klavye, geri tuşu, dokunma hedefleri, dikey mobil yerleşim ve küçük ekran taşmaları ele alınmalı.
+- Konum, kamera/fotoğraf seçimi, dosya erişimi, dış telefon/WhatsApp bağlantıları ve bildirim izinleri mobil cihaz davranışıyla test edilmeli.
+- Uygulama internet kesildiğinde anlaşılır hata göstermeli; yerel prototip verisini gerçek sunucu verisi gibi sunmamalı.
+- Capacitor konfigürasyonu, Android/iOS proje üretim komutları, uygulama kimliği, ikon/splash yerleri ve imzalama dışındaki release adımları repoda belgelenmeli.
+- Uygulama mağazası yayınlama, gerçek imzalama anahtarları ve üretim dağıtımı ayrıca onaylanmadan yapılmamalı.
+
 ## V1 kapsamında
 - E-posta/parola kayıt, giriş, çıkış ve hesap kurtarma.
 - Çoklu hayvan profili, fotoğraf yönetimi, dijital kimlik ve iptal edilebilir QR paylaşımı.
@@ -25,13 +36,22 @@ Eğitim git geçmişinde korunmalı. Üretim menüsü, ekranı, bağlantısı ve
 6. npm ci, npm test, npm run build çalıştır; gerçek tarayıcıda gezinme, profil değiştirme ve tema kontrolü yap. Mevcut dört içerik testi tek başına yeterli değildir.
 7. Sonuçları, kalan prototipleri ve test sınırlarını açıkça kaydet. İnceleme için draft PR hazırla; master'a merge veya üretime yayın yapma.
 
+## İkinci geliştirme dilimi: mobil kabuk
+1. Birinci dilim PR'ının head branch'ini temel al; değişiklikleri kaybetme.
+2. Capacitor bağımlılıklarını kilitli sürümlerle ekle ve app build çıktısını native projelere bağla.
+3. Android/iOS platformlarını üret; uygulama kimliğini ve görünen adını merkezi konfigürasyonda tanımla.
+4. Navigasyon geri davranışı, safe-area, klavye açılması, dosya/fotoğraf seçimi, konum izni ve dış bağlantıları mobil cihaz için düzelt.
+5. 360–430 px ekranlarda tüm V1 akışlarını kontrol et.
+6. Android debug APK üretimini doğrula. İmzalı AAB veya mağaza yüklemesi yapma.
+7. npm test/build yanında native sync ve Android build kontrollerini CI için belgele.
+
 ## Sonraki geliştirme dilimleri
 - Supabase hesap/pet kalıcılığı, private dosya depolama ve veri sahipliği. Boş hesap/demo verileri karışmamalı; kaydetme hataları görünür olmalı.
 - Sağlık kayıtlarını owner_id/pet_id ile ayır. Gerçek klinik doğrulaması hazır değilse kullanıcı yüklemesini veteriner onaylı etiketleme.
 - Kayıp ilanı ve ihbar backend'i; sahibin kapatma yetkisi, durum geçmişi, şikayet.
 - PatiMatch ve sahiplendirme backend'i; karşılıklı erişim, bloklama, moderasyon. Sahip rızası olmadan sağlık veya iletişim bilgilerini açma.
 - QR paylaşımında izin verilen alanlar, iptal ve yetkisiz erişim testleri.
-- Yayına hazırlık: gizlilik metinleri, hesap/veri silme, mobil QA, CI, ortam kurulumu ve geri alma dokümanı.
+- Yayına hazırlık: gizlilik metinleri, hesap/veri silme, mobil cihaz QA, CI, ortam kurulumu ve geri alma dokümanı.
 
 ## Doğrulama kapıları
 - İki hesap arasında özel profil, sağlık dosyası veya mesaj erişimi olmamalı.
@@ -40,6 +60,7 @@ Eğitim git geçmişinde korunmalı. Üretim menüsü, ekranı, bağlantısı ve
 - PatiMatch karşılıklı eşleşme ve engelleme sunucu tarafında uygulanmalı.
 - Sahiplendirme ilanını yalnızca yetkili sahibi düzenleyebilmeli.
 - Client paketinde gizli API anahtarı bulunmamalı.
+- Android uygulaması açılış, geri tuşu, fotoğraf seçimi, konum izni, tema ve temel navigasyon testlerini geçmeli.
 - Canlı veritabanına geçiş öncesi hedef ortam ve migration etkileri doğrulanmalı. Sırları koda veya rapora yazma.
 
 ## Başlangıç kanıtı
