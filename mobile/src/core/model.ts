@@ -1,5 +1,5 @@
 export type ThemeMode = 'light' | 'dark';
-export type Pet = { id: string; name: string; species: 'Kedi' | 'Köpek'; age: string; photos: string[] };
+export type Pet = { id: string; name: string; species: 'Kedi' | 'Köpek'; age: string; photos: string[]; photoObjects?: Record<string, string> };
 export const demoPets: Pet[] = [
   { id: 'demo-mia', name: 'Mia', species: 'Kedi', age: '2 yaş', photos: [] },
   { id: 'demo-atlas', name: 'Atlas', species: 'Köpek', age: '3 yaş', photos: [] },

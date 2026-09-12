@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { Screen, Label, Note, PetSelector } from '../../components/ui';
+import { Screen, Label, Note, PetSelector, RouteButton } from '../../components/ui';
 import { useApp } from '../../state/app-state';
 import { geometry } from '../../core/theme';
 const modules: { label: string; description: string; icon: string; tone: 'blue' | 'red' | 'purple' | 'amber'; href: Href }[] = [
@@ -13,6 +13,7 @@ export default function Home() {
   const { pet, colors } = useApp();
   return <Screen title="Dostunun dünyası, bir arada" tab>
     <PetSelector />
+    <RouteButton label="Hesap ve oturum" href="/account" />
     <Pressable accessibilityRole="button" accessibilityLabel="Profili ve dijital kimliği aç" onPress={() => router.push('/profile')}
       style={{ backgroundColor: colors.greenDark, borderRadius: geometry.radius, padding: 20, overflow: 'hidden', minHeight: 190, gap: 8 }}>
       <View accessible={false} style={{ position: 'absolute', right: -60, bottom: -45, width: 150, height: 150, borderRadius: 75, backgroundColor: colors.green }} />

@@ -5,6 +5,7 @@ import { router, type Href } from 'expo-router';
 import { useApp } from '../state/app-state';
 import { geometry, secondaryText } from '../core/theme';
 import { KeyboardScreen, useKeyboardFocus } from './keyboard-screen';
+import { useAuth } from '../state/auth-state';
 export function Label({ children, heading = false }: { children: ReactNode; heading?: boolean }) {
   const { colors } = useApp();
   return <Text accessibilityRole={heading ? 'header' : undefined}
@@ -45,6 +46,7 @@ export function Screen({ title, children, tab = false }: { title: string; childr
   const { colors, mode, toggleTheme, notice, themeBusy } = useApp();
   const { fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const auth = useAuth();
   return <SafeAreaView edges={tab ? ['top', 'left', 'right'] : ['left', 'right', 'bottom']}
     style={{ flex: 1, backgroundColor: colors.background }}>
     <KeyboardScreen bottom={tab ? 96 + insets.bottom + Math.max(0, fontScale - 1) * 32 : 32}>
@@ -54,7 +56,7 @@ export function Screen({ title, children, tab = false }: { title: string; childr
         </View>
         {notice ? <Note>{notice}</Note> : null}
         {children}
-        <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 12 }}><Note>Demo · Sunucu bağlı değil. Tema dışındaki değişiklikler oturum sonunda sıfırlanır; veri paylaşılmaz.</Note></View>
+        <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 12 }}><Note>{auth.status === 'signedIn' && !auth.demo ? 'Hesap modu · Profilleriniz özel ve kalıcıdır.' : 'Demo · Hesap verileriyle karışmaz; tema dışındaki değişiklikler oturum sonunda sıfırlanır.'}</Note></View>
     </KeyboardScreen>
   </SafeAreaView>;
 }
