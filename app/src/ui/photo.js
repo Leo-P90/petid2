@@ -1,57 +1,78 @@
-import { petData, appState } from '../state/store.js';
-import { DEFAULT_FOTO } from '../data/default-photos.js';
-import { detectPetColor } from './color-match.js';
-
-/* profil düzenleme modalında seçilen ama henüz kaydedilmemiş fotoğraf */
+import { petData, appState, el } from "../state/store.js";
+import { DEFAULT_FOTO } from "../data/default-photos.js";
+import { toast } from "./toast.js";
 export const photoState = { temp: undefined };
-
-export function updateBigFoto() {
-  const img = document.getElementById('bigFoto'), cv = document.getElementById('bigPet');
-  if (!img || !cv) return;
-  const p = petData[appState.curPet];
-  const src = p.foto || DEFAULT_FOTO[p.tur] || '';
-  if (!src) { fotoYok(img); return; }
-  img.style.display = 'block'; cv.style.display = 'none';
-  if (img.getAttribute('src') !== src) img.src = src;
+function updateBigFoto() {
+  let e = document.getElementById(`bigFoto`),
+    t = document.getElementById(`bigPet`);
+  if (!e || !t) return;
+  let n = petData[appState.curPet],
+    r = (n.fotolar && n.fotolar[0]) || n.foto || DEFAULT_FOTO[n.tur] || ``;
+  if (!r) {
+    fotoYok(e);
+    return;
+  }
+  ((e.style.display = `block`),
+    (t.style.display = `none`),
+    e.getAttribute(`src`) !== r && (e.src = r));
 }
-
-/* foto yüklenemedi → pixel dosta dön */
-export function fotoYok(img) {
-  img.style.display = 'none';
-  const cv = document.getElementById('bigPet'); if (cv) cv.style.display = 'block';
+function fotoYok(e) {
+  e.style.display = `none`;
+  let t = document.getElementById(`bigPet`);
+  t && (t.style.display = `block`);
 }
-
-export function fotoSec(inp) {
-  const f = inp.files && inp.files[0]; if (!f) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    const im = new Image();
-    im.onload = () => {
-      const mx = 520, k = Math.min(1, mx / Math.max(im.width, im.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-      const ctx = c.getContext('2d');
-      ctx.drawImage(im, 0, 0, c.width, c.height);
-      photoState.temp = c.toDataURL('image/jpeg', .82);
-      fotoPrevGoster(photoState.temp);
-      /* pixel rengini fotoğraftan otomatik tespit et — kullanıcı isterse yine değiştirebilir */
-      const renkSel = document.getElementById('f_renk');
-      if (renkSel) renkSel.value = detectPetColor(ctx, c.width, c.height);
-    };
-    im.src = rd.result;
-  };
-  rd.readAsDataURL(f);
+async function fotoSec(e) {
+  let t = Array.from(e.files || []).slice(0, 5);
+  if (!t.length) return;
+  e.files.length > 5 && toast(`En fazla 5 fotoğraf ekleyebilirsin`);
+  let n = document.getElementById(`editSaveBtn`),
+    r = n?.textContent;
+  n && ((n.disabled = !0), (n.textContent = `Fotoğraflar hazırlanıyor...`));
+  try {
+    const photos = await Promise.all(t.map(resizePhoto));
+    if (photos.some((photo) => !photo)) {
+      toast("Fotoğraf okunamadı — önceki seçim korunuyor");
+      return;
+    }
+    photoState.temp = photos;
+    fotoPrevGoster(photoState.temp);
+  } finally {
+    n && ((n.disabled = !1), (n.textContent = r));
+  }
 }
-
-export function fotoPrevGoster(src) {
-  const pv = document.getElementById('fotoPrev'); if (!pv) return;
-  pv.innerHTML = src
-    ? '<img src="' + src + '" style="height:54px;width:54px;object-fit:cover;border-radius:12px;border:1px solid var(--line)"><a style="font-size:11px;color:var(--red);cursor:pointer;font-weight:700" onclick="fotoKaldir()">Kaldır ✕</a>'
-    : '<span style="font-size:11px;color:var(--gray)">Fotoğraf yok — varsayılan görsel kullanılır</span>';
+function resizePhoto(e) {
+  return new Promise((t) => {
+    let n = new FileReader();
+    ((n.onload = () => {
+      let e = new Image();
+      ((e.onload = () => {
+        let n = Math.min(1, 440 / Math.max(e.width, e.height)),
+          r = document.createElement(`canvas`);
+        ((r.width = Math.round(e.width * n)),
+          (r.height = Math.round(e.height * n)),
+          r.getContext(`2d`).drawImage(e, 0, 0, r.width, r.height),
+          t(r.toDataURL(`image/jpeg`, 0.72)));
+      }),
+        (e.onerror = () => t(``)),
+        (e.src = n.result));
+    }),
+      (n.onerror = () => t(``)),
+      n.readAsDataURL(e));
+  });
 }
-
-export function fotoKaldir() {
-  photoState.temp = '';
-  const i = document.getElementById('f_foto'); if (i) i.value = '';
-  fotoPrevGoster('');
+function fotoPrevGoster(e) {
+  let t = document.getElementById(`fotoPrev`);
+  if (!t) return;
+  let n = (Array.isArray(e) ? e : e ? [e] : []).filter(Boolean);
+  t.innerHTML = n.length
+    ? `<div class="photo-preview-list">` +
+      n.map((e) => `<img src="` + e + `" alt="">`).join(``) +
+      `</div><a class="photo-remove" onclick="fotoKaldir()">Tümünü kaldır ✕</a>`
+    : `<span style="font-size:11px;color:var(--gray)">Fotoğraf yok — varsayılan görsel kullanılır</span>`;
 }
+function fotoKaldir() {
+  photoState.temp = [];
+  let e = document.getElementById(`f_foto`);
+  (e && (e.value = ``), fotoPrevGoster(``));
+}
+export { updateBigFoto, fotoYok, fotoSec, fotoPrevGoster, fotoKaldir };
