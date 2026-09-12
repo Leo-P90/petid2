@@ -92,7 +92,8 @@ export async function addPet(fields) {
     ad: (fields.ad || '').trim() || 'Dostum', tur: fields.tur || 'kedi', cins: fields.cins || '',
     cinsiyet: fields.cinsiyet || 'Dişi', dogum: fields.dogum || '', kilo: fields.kilo || '',
     cip: fields.cip || '', kan: fields.kan || '', kisir: fields.kisir || 'Hayır',
-    alerji: fields.alerji || '', renk: fields.renk || 'gri', foto: fields.foto || ''
+    alerji: fields.alerji || '', renk: fields.renk || 'gri', foto: fields.foto || '',
+    fotolar: Array.isArray(fields.fotolar) ? fields.fotolar : fields.foto ? [fields.foto] : []
   };
   const state = { tok: 80, mut: 70, enj: 90, xp: 0, coin: 15, items: [], worn: {}, claimedGoals: [], flappyBest: 0 };
   if (supabase && appState.session) {
