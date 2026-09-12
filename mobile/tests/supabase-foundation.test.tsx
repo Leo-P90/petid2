@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { AuthProvider, useAuth } from '../src/state/auth-state';
 import { AppProvider, useApp } from '../src/state/app-state';
 import { createAuthAdapter } from '../src/services/auth';
+import { normalizeAge, PetMutationError, requireAffected } from '../src/services/pets';
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -32,4 +33,14 @@ test('restored authenticated account starts empty without demo pet leakage', asy
   });
   await waitFor(() => expect(screen.getByText('signedIn:empty')).toBeTruthy());
   expect(screen.queryByText(/Mia|Atlas/)).toBeNull();
+});
+
+test('protected mutation converts a silent zero-row response into a typed failure', () => {
+  expect(() => requireAffected(null)).toThrow(PetMutationError);
+  expect(requireAffected({ id: 'owned-row' })).toEqual({ id: 'owned-row' });
+});
+
+test('nullable database age is normalized at the client boundary', () => {
+  expect(normalizeAge(null)).toBe('');
+  expect(normalizeAge('2 yaş')).toBe('2 yaş');
 });

@@ -11,3 +11,5 @@ npx --yes supabase@2.117.0 stop
 ```
 
 Copy `.env.example` to an ignored local environment file only for an explicitly approved test project. Use its public project URL and publishable key; never place a service-role key in the mobile application.
+
+The mobile configuration intentionally accepts only hosted `https://<project-ref>.supabase.co` URLs and `sb_publishable_` keys. Local CLI URLs, custom domains, legacy anon keys, service-role keys, and secret keys are rejected as unconfigured instead of being sent from the client.

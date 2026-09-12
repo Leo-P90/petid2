@@ -1,7 +1,6 @@
 name: PetID mobile checks
 on:
   pull_request:
-    branches: [v1-release]
   workflow_dispatch:
 permissions:
   contents: read

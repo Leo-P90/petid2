@@ -58,6 +58,13 @@ export function AppProvider({ children, storage = AsyncStorage, petRepository = 
       .finally(() => { if (active) setPetsBusy(false); });
     return () => { active = false; };
   }, [accountMode, auth.session?.user.id, petRepository]);
+  useEffect(() => {
+    if (!accountMode) return;
+    const refresh = () => Promise.all(pets.map((item) => petRepository.refreshPhotos(item)))
+      .then(setPets).catch(() => setPetNotice('Fotoğraf bağlantıları yenilenemedi.'));
+    const timer = setInterval(refresh, 50 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, [accountMode, petRepository, pets]);
   async function toggleTheme() {
     if (themeLock.current) return;
     themeLock.current = true;
