@@ -1,0 +1,733 @@
+.archive-confirm {
+  max-width: 320px;
+  border: 1px solid #326653;
+  border-radius: 16px;
+  padding: 20px;
+  background: #eef6f1;
+  color: #183d2d;
+}
+.archive-confirm::backdrop {
+  background: #0008;
+}
+.archive-confirm button {
+  padding: 10px;
+  margin: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.phone.dark .report-help {
+  color: #f6bec8;
+}
+.pet-pill {
+  font-family: inherit;
+  text-align: left;
+}
+.pet-pill > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+/* sağlık bölümleri — aç/kapa (native <details>, JS yok) */
+.sag-sec {
+  margin: 0 0 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.sag-sec > summary {
+  margin: 0;
+  padding: 14px 16px;
+  cursor: pointer;
+  gap: 10px;
+  list-style: none;
+}
+.sag-sec > summary::-webkit-details-marker {
+  display: none;
+}
+.sag-sec > summary h2 {
+  margin-right: auto;
+}
+.sag-sec > summary::after {
+  content: "›";
+  color: #b9c7c0;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+.sag-sec[open] > summary {
+  background: var(--green-soft);
+  border-bottom: 1px solid var(--line);
+}
+.sag-sec[open] > summary::after {
+  transform: rotate(90deg);
+  color: var(--green);
+}
+.sag-sec > .card {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ana ekran: büyük foto gizli */
+.bigpet-wrap {
+  display: none;
+}
+
+/* --- saate göre sahne ---
+   data-time'ı açılışta JS bir kez yazıyor. Güneş doğudan (sol) batıya (sağ)
+   bir yay çiziyor: sabah alçak-sol, öğle tepe-orta, akşam alçak-sağ.
+   Güneş/ay/yıldızlar radial-gradient katmanı — ekstra element yok.
+   Üst tonlar bilerek okunur tutuldu: topbar yazısı koyu mürekkep. */
+#scr-home {
+  transition: background 0.6s ease;
+}
+#scr-home[data-time="sabah"] {
+  background: linear-gradient(
+    180deg,
+    #ffd59a 0%,
+    #ffe7bd 26%,
+    #c9ebd7 62%,
+    var(--bg) 100%
+  );
+}
+#scr-home[data-time="ogle"] {
+  background: linear-gradient(
+    180deg,
+    #84d0ff 0%,
+    #b6e5fb 30%,
+    #d3f0e3 64%,
+    var(--bg) 100%
+  );
+}
+#scr-home[data-time="aksam"] {
+  background: linear-gradient(
+    180deg,
+    #ff9673 0%,
+    #ffbb9f 24%,
+    #f0c3da 58%,
+    var(--bg) 100%
+  );
+}
+#scr-home[data-time="gece"] {
+  background:
+    radial-gradient(circle 2px at 28% 92px, #fff 0 60%, transparent 62%),
+    radial-gradient(circle 1.5px at 44% 138px, #fff 0 60%, transparent 62%),
+    radial-gradient(circle 2px at 63% 74px, #fff 0 60%, transparent 62%),
+    radial-gradient(circle 1.5px at 88% 148px, #fff 0 60%, transparent 62%),
+    linear-gradient(
+      180deg,
+      #8fa5c8 0%,
+      #adbfd9 30%,
+      #cfdce9 64%,
+      var(--bg) 100%
+    );
+}
+/* karanlık modda saat sahnesi yerine tek sakin gece tonu */
+.phone.dark #scr-home[data-time] {
+  background:
+    radial-gradient(circle 2px at 28% 92px, #93a8c8 0 60%, transparent 62%),
+    radial-gradient(circle 2px at 63% 74px, #93a8c8 0 60%, transparent 62%),
+    linear-gradient(180deg, #16202e 0%, #141d1a 52%, var(--bg) 100%);
+}
+
+/* --- güneş/ay: disk + dönen ışınlar. renk currentColor'dan geliyor,
+   böylece her saat dilimi tek satırda konum + renk veriyor. --- */
+.sun {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  transition:
+    left 0.6s ease,
+    top 0.6s ease,
+    color 0.6s ease;
+}
+.sun::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 26px 9px currentColor;
+}
+.sun::before {
+  content: "";
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  opacity: 0.55;
+  background: repeating-conic-gradient(
+    from 0deg,
+    currentColor 0deg 4deg,
+    transparent 4deg 18deg
+  );
+  -webkit-mask: radial-gradient(
+    circle,
+    transparent 0 36px,
+    #000 38px,
+    #000 58px,
+    transparent 60px
+  );
+  mask: radial-gradient(
+    circle,
+    transparent 0 36px,
+    #000 38px,
+    #000 58px,
+    transparent 60px
+  );
+  animation: sunSpin 60s linear infinite;
+}
+@keyframes sunSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* top değerleri topbar'ın altından başlıyor: topbar ~82px'te bitiyor,
+   ışınlar diskin 30px dışına taştığı için en tepedeki (öğle) güneş 104px'te. */
+#scr-home[data-time="sabah"] .sun {
+  left: 11%;
+  top: 165px;
+  color: #ffc95c;
+}
+#scr-home[data-time="ogle"] .sun {
+  left: calc(50% - 32px);
+  top: 104px;
+  color: #fff2a0;
+}
+#scr-home[data-time="aksam"] .sun {
+  left: 74%;
+  top: 175px;
+  color: #ff8f45;
+}
+/* gece: gerçek hilal ay — küçük, ışınsız, sağ-üst köşesi kesilmiş disk */
+#scr-home[data-time="gece"] .sun {
+  width: 44px;
+  height: 44px;
+  left: 73%;
+  top: 98px;
+  color: #f4f6e8;
+}
+#scr-home[data-time="gece"] .sun::before {
+  display: none;
+}
+#scr-home[data-time="gece"] .sun::after {
+  box-shadow: 0 0 15px 2px #ffffff3d;
+  -webkit-mask: radial-gradient(circle at 70% 30%, transparent 0 54%, #000 57%);
+  mask: radial-gradient(circle at 70% 30%, transparent 0 54%, #000 57%);
+}
+.phone.dark .sun {
+  color: #39496a;
+}
+.phone.dark .sun::before {
+  opacity: 0.14;
+}
+/* sahne en arkada kalsın, içerik üstünde */
+.landing {
+  position: relative;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sun::before {
+    animation: none;
+  }
+}
+
+/* --- buzlu cam SADECE arama kutusunda; pixel kedi açık sahnede, arkasında kutu yok --- */
+.hero-search {
+  margin: 96px 0 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+/* pixel kediye beyaz halo: güneş dahil her arka planda net görünsün */
+#hCanvas {
+  filter: drop-shadow(0 0 2.5px #fff) drop-shadow(0 0 2px #fff);
+}
+.search.big {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px #122b2422;
+}
+.phone.dark .search.big {
+  background: rgba(26, 36, 32, 0.5);
+  border-color: #ffffff1f;
+}
+
+/* acil veteriner butonu */
+.acil-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 14px;
+  padding: 13px 16px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px #e5484d55;
+}
+.acil-btn span {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.match-btn {
+  background: var(--purple);
+  box-shadow: 0 6px 18px #7c6bf055;
+}
+
+/* --- ACİL EKRANI (kendi kodum, bundle'dan bağımsız) --- */
+.acil-ov {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  display: none;
+  flex-direction: column;
+  animation: acilIn 0.25s ease;
+}
+.acil-ov.open {
+  display: flex;
+}
+@keyframes acilIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.acil-head {
+  padding: 18px 18px 12px;
+  background: var(--red);
+  color: #fff;
+  flex-shrink: 0;
+}
+.acil-head h2 {
+  font-size: 19px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.acil-head .sub2 {
+  font-size: 12px;
+  opacity: 0.92;
+  margin-top: 3px;
+}
+.acil-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff2e;
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+}
+.acil-loc {
+  margin: 12px 18px 4px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px dashed var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.acil-list {
+  overflow-y: auto;
+  padding: 8px 18px 24px;
+  scrollbar-width: none;
+}
+.acil-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 13px 14px;
+  margin-bottom: 11px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.acil-card.nearest {
+  border-color: var(--green);
+  border-width: 2px;
+}
+.acil-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.acil-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.acil-info {
+  flex: 1;
+  min-width: 0;
+}
+.acil-info b {
+  font-size: 14px;
+  color: var(--ink);
+  display: block;
+  line-height: 1.25;
+}
+.acil-meta {
+  font-size: 11.5px;
+  color: var(--gray);
+  margin-top: 2px;
+}
+.acil-dist {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--green);
+  flex-shrink: 0;
+  text-align: right;
+}
+.acil-dist small {
+  display: block;
+  font-size: 9px;
+  color: var(--gray);
+  font-weight: 600;
+}
+.acil-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+.acil-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 99px;
+  letter-spacing: 0.2px;
+}
+.tag-free {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.tag-disc {
+  background: #fff3d6;
+  color: #b7791f;
+}
+.tag-open {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.tag-hours {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.tag-near {
+  background: var(--green);
+  color: #fff;
+}
+.acil-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+.acil-card.open .acil-detail {
+  max-height: 220px;
+}
+.acil-detail-in {
+  padding: 12px 2px 2px;
+  border-top: 1px solid var(--line);
+  margin-top: 11px;
+}
+.acil-addr {
+  font-size: 12px;
+  color: var(--gray);
+  line-height: 1.5;
+  margin-bottom: 11px;
+}
+.acil-acts {
+  display: flex;
+  gap: 9px;
+}
+.acil-acts a {
+  flex: 1;
+  text-align: center;
+  padding: 11px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.act-call {
+  background: var(--green);
+  color: #fff;
+}
+.act-wa {
+  background: #25d366;
+  color: #fff;
+}
+
+/* ana ekran sadeleştirme: alt modül bölümü gizli */
+.below {
+  display: none;
+}
+
+/* --- alt sahne: Boncuk & Zeytin bir yumakla oynuyor (inline SVG, rüya gibi) ---
+   Tüm sahne yarı saydam ve yavaşça süzülüyor → düş havası.
+   Karakterler ters fazda zıplıyor, kuyruklar sallanıyor, yumak sekip dönüyor. */
+.playzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  padding: 2px 0 6px;
+}
+.dreamscene {
+  width: 240px;
+  max-width: 86%;
+  opacity: 0.74;
+  filter: drop-shadow(0 8px 16px #6b8cff33);
+  animation: dreamFloat 5.5s ease-in-out infinite;
+}
+.phone.dark .dreamscene {
+  opacity: 0.56;
+}
+@keyframes dreamFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+/* her animasyonlu SVG parçası kendi kutusuna göre dönsün/kaysın */
+.ds-cat,
+.ds-dog,
+.cat-bob,
+.dog-bob,
+.leg,
+.ds-tail-c,
+.ds-tail-d,
+.ball-hop,
+.ball-roll {
+  transform-box: fill-box;
+}
+
+/* KOVALAMA: gövdeler ortadaki topa doğru hamle yapıp geri çekiliyor (2.4s).
+   Kedi soldan sağa, köpek sağdan sola bastırıyor — biri yaklaşınca top kaçıyor. */
+.ds-cat {
+  animation: chaseC 2.4s ease-in-out infinite;
+}
+.ds-dog {
+  animation: chaseD 2.4s ease-in-out infinite;
+}
+@keyframes chaseC {
+  0%,
+  100% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(13px);
+  }
+}
+@keyframes chaseD {
+  0%,
+  100% {
+    transform: translateX(5px);
+  }
+  50% {
+    transform: translateX(-13px);
+  }
+}
+/* KOŞU: gövde hızlı iniş-çıkış (ayak vuruşu ritmi) */
+.cat-bob {
+  animation: runBob 0.4s ease-in-out infinite;
+}
+.dog-bob {
+  animation: runBob 0.43s ease-in-out infinite;
+}
+@keyframes runBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+/* BACAKLAR: kalçadan (üst orta) ileri-geri salınım; ön ve arka ters fazda */
+.leg {
+  transform-origin: top center;
+}
+.legF {
+  animation: legSwing 0.4s ease-in-out infinite alternate;
+}
+.legB {
+  animation: legSwing 0.4s ease-in-out infinite alternate-reverse;
+}
+.ds-dog .legF {
+  animation-duration: 0.43s;
+}
+.ds-dog .legB {
+  animation-duration: 0.43s;
+}
+@keyframes legSwing {
+  from {
+    transform: rotate(-30deg);
+  }
+  to {
+    transform: rotate(30deg);
+  }
+}
+/* KUYRUKLAR: koşarken uçuşuyor */
+.ds-tail-c {
+  transform-origin: right bottom;
+  animation: tailRunC 0.34s ease-in-out infinite alternate;
+}
+.ds-tail-d {
+  transform-origin: left bottom;
+  animation: tailRunD 0.37s ease-in-out infinite alternate;
+}
+@keyframes tailRunC {
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+@keyframes tailRunD {
+  from {
+    transform: rotate(10deg);
+  }
+  to {
+    transform: rotate(-18deg);
+  }
+}
+/* TOP: yuvarlanıyor (iç g döner) + ara sıra sekiyor (dış g zıplar) */
+.ball-roll {
+  transform-origin: center;
+  animation: ballRoll 0.7s linear infinite;
+}
+.ball-hop {
+  transform-origin: center;
+  animation: ballHop 2.4s ease-in-out infinite;
+}
+@keyframes ballRoll {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes ballHop {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(6px, -13px);
+  }
+  50% {
+    transform: translate(0, 0);
+  }
+  75% {
+    transform: translate(-6px, -13px);
+  }
+}
+.ds-names {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  opacity: 0.85;
+  letter-spacing: 0.3px;
+}
+.ds-names span {
+  color: var(--green);
+}
+/* not: dekoratif sahne, kullanıcının açık isteğiyle reduced-motion'dan muaf. */
+
+/* --- alt menü: kenardan ayrık, yüzen buzlu cam bar --- */
+.nav {
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px solid #ffffff9e;
+  border-top: 1px solid #ffffff9e;
+  border-radius: 24px;
+  padding: 7px 7px;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 10px 30px #122b241f;
+}
+.phone.dark .nav {
+  background: rgba(26, 36, 32, 0.78);
+  border-color: #ffffff1f;
+  border-top-color: #ffffff1f;
+}
+.nav button[data-s] {
+  width: auto;
+  flex: 1;
+  gap: 3px;
+  border-radius: 18px;
+  padding: 8px 4px 7px;
+  background: none;
+  border: none;
+  transition:
+    background 0.18s,
+    color 0.18s;
+}
+.nav button[data-s] .ic {
+  font-size: 19px;
+  transition:
+    filter 0.18s,
+    opacity 0.18s;
+}
+/* aktif sekme: dolu yeşil hap, beyaz yazı */
+.nav button[data-s].on {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 4px 12px #0ea57459;
+}
+.nav button[data-s].on .ic {
+  filter: none;
+  opacity: 1;
+}
