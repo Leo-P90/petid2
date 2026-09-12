@@ -1,0 +1,92 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppProvider, useApp } from '../src/state/app-state';
+import { Button, Label } from '../src/components/ui';
+import Home from '../src/app/(tabs)/index';
+import Profile from '../src/app/profile';
+import Match from '../src/app/(tabs)/match';
+import Reports from '../src/app/reports';
+import Adoption from '../src/app/adoption/index';
+import { nativeServices } from '../src/services/native';
+import { THEME_KEY } from '../src/core/theme';
+jest.mock('@react-native-async-storage/async-storage', () =>
+  jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
+jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
+jest.mock('../src/services/native', () => ({
+  nativeServices: { pickPhotos: jest.fn(), locate: jest.fn(), pickFile: jest.fn(), contact: jest.fn() },
+}));
+const storage = { getItem: jest.fn(async () => null as string | null), setItem: jest.fn(async () => undefined) };
+const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 24, right: 0, bottom: 24, left: 0 } };
+async function mount(child: React.ReactNode) {
+  return render(<SafeAreaProvider initialMetrics={metrics}><AppProvider storage={storage}>{child}</AppProvider></SafeAreaProvider>);
+}
+beforeEach(() => { storage.getItem.mockResolvedValue(null); });
+test('home routes include every retained screen and no deferred destination', async () => {
+  await mount(<Home />);
+  for (const label of ['Sağlık geçmişi', 'Kayıp veya yaralı hayvan', 'Acil veteriner', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) {
+    expect(screen.getByRole('button', { name: label })).toBeTruthy();
+  }
+  expect(screen.queryByText(/Gemini|Pixel Pet|Pati Market|Eğitim/)).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Sahiplendirme ilanları' }));
+  const { router } = jest.requireMock('expo-router');
+  expect(router.push).toHaveBeenCalledWith('/adoption');
+});
+test('photo addition stays with selected pet; denial is visible', async () => {
+  jest.mocked(nativeServices.pickPhotos).mockResolvedValue({ status: 'success', value: ['file:///mia.jpg'] });
+  await mount(<Profile />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Galeriden fotoğraf seç' }));
+  await waitFor(() => expect(screen.getByLabelText('Mia fotoğraf 1')).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
+  expect(screen.queryByLabelText('Mia fotoğraf 1')).toBeNull();
+  jest.mocked(nativeServices.pickPhotos).mockResolvedValue({ status: 'denied', canAskAgain: false });
+  await fireEvent.press(screen.getByRole('button', { name: 'Galeriden fotoğraf seç' }));
+  await waitFor(() => expect(screen.getByText(/İzin kapalı/)).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'Mia profiline geç' }));
+  expect(screen.getByLabelText('Mia fotoğraf 1')).toBeTruthy();
+});
+test('match requires opt-in and never invents mutual matches', async () => {
+  await mount(<Match />);
+  expect(screen.queryByText('Luna')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
+  expect(screen.getByText('Luna')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Beğen · demo' }));
+  expect(screen.getByText('Ada')).toBeTruthy();
+  expect(screen.getByText(/Karşılıklı eşleşme veya mesaj oluşturulmadı/)).toBeTruthy();
+});
+test('report denial remains recoverable with manual coordinates; never publishes', async () => {
+  jest.mocked(nativeServices.locate).mockResolvedValue({ status: 'denied', canAskAgain: true });
+  await mount(<Reports />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Cihaz konumunu al' }));
+  await waitFor(() => expect(screen.getByText(/İzin verilmedi/)).toBeTruthy());
+  await fireEvent.changeText(screen.getByLabelText('Enlem'), '41');
+  await fireEvent.changeText(screen.getByLabelText('Boylam'), '29');
+  await fireEvent.press(screen.getByRole('button', { name: 'Koordinatları önizle' }));
+  await fireEvent.changeText(screen.getByLabelText('İlan açıklaması'), 'Parkta görüldü');
+  await fireEvent.press(screen.getByRole('button', { name: 'Yayınlamadan demo taslağı ekle' }));
+  expect(screen.getByText('Kayıp · Mia · Parkta görüldü')).toBeTruthy();
+  expect(screen.getByText(/Gerçek ilan yayınlanmadı/)).toBeTruthy();
+});
+test('adoption cards are reachable and explicitly examples', async () => {
+  await mount(<Adoption />);
+  expect(screen.getByRole('button', { name: 'Pamuk örnek detayını aç' })).toBeTruthy();
+  expect(screen.getAllByText(/gerçek sahiplendirme ilanı değildir/)).toHaveLength(2);
+});
+function ThemeProbe() {
+  const { mode, ready, toggleTheme, notice } = useApp();
+  return <><Label>{ready ? mode : 'loading'}</Label><Button label="toggle" onPress={() => void toggleTheme()} /><Label>{notice}</Label></>;
+}
+test('stored theme loads without overwriting it and toggle persists', async () => {
+  storage.getItem.mockResolvedValue('dark');
+  await mount(<ThemeProbe />);
+  await waitFor(() => expect(screen.getByText('dark')).toBeTruthy());
+  expect(storage.setItem).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: 'toggle' }));
+  await waitFor(() => expect(storage.setItem).toHaveBeenCalledWith(THEME_KEY, 'light'));
+});
+test('storage failures are visible instead of claimed persistence', async () => {
+  storage.setItem.mockRejectedValueOnce(new Error('full'));
+  await mount(<ThemeProbe />);
+  await waitFor(() => expect(screen.getByText('light')).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'toggle' }));
+  await waitFor(() => expect(screen.getByText(/cihazda saklanamadı/)).toBeTruthy());
+});
