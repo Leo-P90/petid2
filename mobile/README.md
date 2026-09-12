@@ -93,7 +93,9 @@ Eğitim/görev/oyun/Pixel Pet/market/genel topluluk/AI/Google-Apple auth/Telegra
 
 `.github/workflows/mobile.yml` v1-release hedefli PR'larda npm ci, TypeScript, sıfır uyarılı lint, Jest, Android JS export ve web export çalıştırır. EAS veya production işlemi yoktur. Workflow manuel çalıştırılırsa ek debug APK job'u native prebuild + assembleDebug yapar ve APK'yı yedi gün saklanan test artifact'i olarak yükler; cihaz testi ayrıca yapılmalıdır. Yeni workflow'lar repo varsayılan branch'ine alınmadan workflow_dispatch görünmeyebilir; bu görev master'a merge etmez.
 
-## Cihaz kabul kontrol listesi — henüz geçildi sayılmaz
+## Cihaz kabul kontrol listesi — kısmi emülatör QA
+
+12 Eylül 2026 API 37 / 16KB x86_64 emülatöründe native açılış/gezinme, tema process-restart kalıcılığı, galeri ve belge seçimi/iptali/hayvan ayrımı, konum izni ret/foreground grant, manuel taslak ve tel ekranı açılışı doğrulandı. **Klavye odak alanını otomatik görünür tutma yerleşimi başarısız**; düzeltme ve tekrar test gerekir. Otomatik GPS sonucu Google Location Accuracy onayı verilmediğinden kullanıcı kararıyla açık. Ayrıntılı geçen/açık kapılar `V1_SLICE2_REPORT.md` içinde; aşağıdaki listenin tamamı geçti sayılmaz. Fiziksel/stabil Android ve iOS QA ayrı gereklidir.
 
 Android development client veya preview APK ile:
 

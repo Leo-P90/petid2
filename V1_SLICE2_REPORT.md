@@ -31,7 +31,26 @@ Yerel debug APK **başarılı**: aynı `36e8fdf` commit'i kısa gerçek QA klas�
 
 APK: `petid-v1-slice2-development.apk`, 154239145 byte. AAPT: `com.petid.app.dev`, `PetID Dev`, version 0.1.0/code 1, min SDK 24/target 36, arm64-v8a + x86_64. apksigner verify geçti; v2 imza, `CN=Android Debug`. Production signing anahtarı değildir, git'e eklenmedi. SHA-256: `68a6b59030e4faf0313e93ae10308a5738a403727ecb8e1d11d129a793e8a0f9`. Development client APK Metro gerektirir; bağımsız preview veya production paket değildir.
 
-Bu ortamda Android Studio/JDK/SDK vardır; WHPX hızlandırması kullanılabilir ama son ADB kontrolünde bağlı cihaz/emülatör yoktur. Kullanıcı system-image indirmesini ve emülatör kurulumunu Android Studio'da tamamlıyor. İmajın lisans onayı kullanıcıya bırakıldı; yeni lisanslar otomatik kabul edilmedi. Android açılış, fiziksel geri/klavye/safe-area, native picker izin ver-red-kısıtlı erişim ve dış telefon/WhatsApp uygulamaları **gerçek cihazda doğrulanmadı**. Web ve mock SDK testleri bunların yerine sayılmaz. iOS native derleme/QA Windows'ta yapılmadı. mobile/README.md cihaz kabul listesi açık kalır.
+12 Eylül 2026: Kullanıcı Android Studio emülatörünü hazırladı. `emulator-5554`, Android API **37**, Google 16KB **x86_64**, fiziksel 1080×2400 / 420dpi. İlk boot tamamlandıktan sonra APK kurulumu başarılı. Bu native emülatör testi fiziksel telefon veya iOS QA yerine sayılmaz; API 35/36 stabil Android ayrıca doğrulanmalı.
+
+### Geçen native emülatör kontrolleri
+
+- Development client / yerel Metro bağlantısı ve MainActivity cold start başarılı; tekrar process kapat/aç başarılı. Son uygulama filtreli `ReactNativeJS:E / AndroidRuntime:E` logcat boş.
+- Dört sekme ve profil, sağlık, kayıp/yaralı, acil, PatiMatch, sahiplendirme liste/detay açıldı. PatiMatch demo opt-in ve beğen sonrası sonraki aynı-tür aday görüldü. Sahiplendirme detayından Android geri listeye döndü. Sağlıktan profil/hayvan seçimine gidip geri dönüldü.
+- Koyu tema `am force-stop` + yeniden cold start sonrasında korundu. Native status/navigation bar koyu görünüm ve ekran sınırları görsel olarak kontrol edildi.
+- Galeri gerçek Android sistem picker'ı ile yerel test PNG seçimi ve iptali geçti. Mia fotoğrafı 1/5, Atlas 0/5; iptalde değişiklik yok mesajı. Bu imajın modern photo picker'ı ayrıca galeri izin diyaloğu göstermedi; OS galeri ret/kısıtlı izin yolları geçti sayılmaz.
+- Belge picker gerçek Android DocumentsUI'da açıldı, geri ile iptal mesajı ve `petid-qa-photo-a.png` seçimi başarılı. Mia dosyası seçili, Atlas'a geçince dosya görünmedi. Upload yapılmadı. PDF/10MB/error sınırları yalnızca mevcut mock testlerdedir.
+- Foreground konum OS diyaloğunda **Don't allow** sonrası tekrar izin verilebilir ret mesajı görüldü. Sonra **While using the app** verildi. Google Location Accuracy ek veri işleme onayı **No thanks** ile reddedildi; uygulama GPS/bağlantı hatası ve manuel giriş mesajı gösterdi. Google onayı kullanıcı adına kabul edilmedi.
+- Manuel 41.01 / 29.02 önizleme ve `Emulator-QA` açıklamasıyla yayınsız demo taslağı oluştu; gerçek ilan yayınlanmadı.
+- Test numarasıyla `tel:` Android telefon ekranını açtı; arama düğmesine basılmadı, arama/mesaj yapılmadı. WhatsApp native uygulaması ve dış ağ hata senaryosu doğrulanmadı.
+- Native 360/390/430dp ana ekran boyutları geçici `wm size` ile kontrol edildi; dört sekme görünür, yatay taşma gözlenmedi. Tema düğmesi yüksekliği 126px / 2.625 = **48dp**. Alt içerik kaydırılabilir. Ekran boyutu tekrar fiziksel boyuta döndürüldü. Dev-client Tools overlay'i küçük ekranda başlık üstüne gelebilir; preview/release UI kontrolü ayrı yapılmalı.
+- Gboard stylus ilk eğitimi normal klavye testinden ayrıldı. Normal sanal klavyede ilk geri klavyeyi kapatıp profili korudu, ikinci geri ana ekrana döndü. Test için değiştirilen emülatör `show_ime_with_hard_keyboard=0` ve varsayılan stylus ayarı geri yüklendi.
+
+### Açık native bulgular / kabul kapıları
+
+1. **Klavye yerleşimi başarısız:** Profil alanına dokunup normal Gboard açılınca odaklı alan otomatik görünür kalmadı, klavye tarafından örtüldü. `Screen` Android'de yalnızca adjustResize'a dayanıyor; KeyboardAvoidingView behavior sadece iOS'ta etkin. Otomatik odak/IME inset/scroll düzeltmesi ve profil/ilan/telefon formlarında tekrar QA gerekir. Test isteği kapsamında uygulama kodu değiştirilmedi. Görsel kanıt kullanıcı çıktısında `android-keyboard-finding.png`.
+2. **Otomatik GPS başarı sonucu açık:** Foreground izin verildi fakat ek Google Location Accuracy onayı verilmedi. Kullanıcı açık kapı raporlanmasını ve son toplu kontrolde tekrar test edilmesini seçti. İzin grant'i, başarılı koordinat edinimi demek değildir.
+3. Fiziksel Android ve stabil API 35/36; gesture/predictive root back, büyük sistem fontu, çentik/3-button kombinasyonu, fotoğraf OS kalıcı ret/kısıtlı erişim, picker process-death, PDF/gerçek URI açma/10MB cihaz sınırı, WhatsApp/dış ağ hata yolu ve iOS QA açık. Tüm native kabul kriterleri tamamlandı veya Issue #4 kapanabilir iddiası yoktur.
 
 ## Bilinen prototipler ve riskler
 
