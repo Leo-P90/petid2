@@ -95,7 +95,7 @@ Eğitim/görev/oyun/Pixel Pet/market/genel topluluk/AI/Google-Apple auth/Telegra
 
 ## Cihaz kabul kontrol listesi — kısmi emülatör QA
 
-12 Eylül 2026 API 37 / 16KB x86_64 emülatöründe native açılış/gezinme, tema process-restart kalıcılığı, galeri ve belge seçimi/iptali/hayvan ayrımı, konum izni ret/foreground grant, manuel taslak ve tel ekranı açılışı doğrulandı. **Klavye odak alanını otomatik görünür tutma yerleşimi başarısız**; düzeltme ve tekrar test gerekir. Otomatik GPS sonucu Google Location Accuracy onayı verilmediğinden kullanıcı kararıyla açık. Ayrıntılı geçen/açık kapılar `V1_SLICE2_REPORT.md` içinde; aşağıdaki listenin tamamı geçti sayılmaz. Fiziksel/stabil Android ve iOS QA ayrı gereklidir.
+12 Eylül 2026 API 37 / 16KB x86_64 emülatöründe native açılış/gezinme, tema process-restart kalıcılığı, galeri ve belge seçimi/iptali/hayvan ayrımı, konum izni ret/foreground grant, manuel taslak ve tel ekranı açılışı doğrulandı. PR #5 takip çalışmasında klavye örtüşmesi IME inset + odak scroll ile düzeltildi; gerçek Gboard üzerinde profil etiketi/input/kaydet ve 360×640dp / %130 yazı kontrolü geçti. PetID web token/kart/hero/pill/yüzen nav tasarımı native bileşenlere geri taşındı; demo uyarısı ikincil alt bilgidir. Ekran/font activity yeniden üretiminde Expo dev-client picker launcher bağlantısını kaybedebilir; cold start ile galeri tekrar çalıştı, SDK kurtarma bulgusu açıktır. Otomatik GPS sonucu Google Location Accuracy onayı verilmediğinden kullanıcı kararıyla açık. Ayrıntılı geçen/açık kapılar `V1_SLICE2_REPORT.md` ve `docs/qa/pr5-design-keyboard/README.md` içinde; aşağıdaki listenin tamamı geçti sayılmaz. Fiziksel/stabil Android ve iOS QA ayrı gereklidir.
 
 Android development client veya preview APK ile:
 

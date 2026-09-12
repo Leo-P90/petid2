@@ -15,7 +15,7 @@ Merkezi app.config.ts, Android/iOS dev-preview-production kimlikleri, ikon/splas
 ## Geçen kontroller
 
 - TypeScript `npm run typecheck` ve sıfır uyarılı `npm run lint`.
-- Mobil Jest: 5 suite, 28 test. Service success/cancel/denial/errors, gerçek adaptör sözleşmeleri (mock native SDK), GPS timeout, config/EAS/runtime dışlama, aynı tür keşif, beş fotoğraf sınırı, profil fotoğraf ayrımı, tema disk yükleme/yazma hatası ve ekran etkileşimleri.
+- Mobil Jest: 6 suite, 34 test (ilk 28 test korunur). Service success/cancel/denial/errors, gerçek adaptör sözleşmeleri (mock native SDK), GPS timeout, config/EAS/runtime dışlama, aynı tür keşif, beş fotoğraf sınırı, profil fotoğraf ayrımı, tema disk yükleme/yazma hatası ve ekran etkileşimleri; ek IME/focus-scroll, profil odak/kaydet/hayvan ayrımı, marka tokenları ve AA kontrast regresyonları.
 - Expo Doctor 21/21.
 - `expo prebuild --platform android --no-install`: native Android proje üretimi geçti. Manifest'te kamera/mikrofon/background location remove, predictive back ve keyboard adjustResize kontrol edildi.
 - Android Metro/Hermes export ve web static export başarılı. Android JS export **APK değildir**.
@@ -48,15 +48,33 @@ APK: `petid-v1-slice2-development.apk`, 154239145 byte. AAPT: `com.petid.app.dev
 
 ### Açık native bulgular / kabul kapıları
 
-1. **Klavye yerleşimi başarısız:** Profil alanına dokunup normal Gboard açılınca odaklı alan otomatik görünür kalmadı, klavye tarafından örtüldü. `Screen` Android'de yalnızca adjustResize'a dayanıyor; KeyboardAvoidingView behavior sadece iOS'ta etkin. Otomatik odak/IME inset/scroll düzeltmesi ve profil/ilan/telefon formlarında tekrar QA gerekir. Test isteği kapsamında uygulama kodu değiştirilmedi. Görsel kanıt kullanıcı çıktısında `android-keyboard-finding.png`.
+1. **Önceki klavye bulgusu giderildi:** İlk QA'da normal Gboard profili örtüyordu (`android-keyboard-finding.png`). PR #5 son talimatında ortak Screen, pencere koordinatlı IME inset ve odak alanına otomatik scroll ile değiştirildi. Profil etiketi/input/kaydet grubu normal Gboard ve 360×640dp / %130 yazı ölçeğinde görünür kaldı. Klavye açıkken kaydetme/kaydırma ve geriyle kapatma geçti. Görsel ve teknik kanıtlar aşağıdaki restorasyon bölümündedir.
 2. **Otomatik GPS başarı sonucu açık:** Foreground izin verildi fakat ek Google Location Accuracy onayı verilmedi. Kullanıcı açık kapı raporlanmasını ve son toplu kontrolde tekrar test edilmesini seçti. İzin grant'i, başarılı koordinat edinimi demek değildir.
-3. Fiziksel Android ve stabil API 35/36; gesture/predictive root back, büyük sistem fontu, çentik/3-button kombinasyonu, fotoğraf OS kalıcı ret/kısıtlı erişim, picker process-death, PDF/gerçek URI açma/10MB cihaz sınırı, WhatsApp/dış ağ hata yolu ve iOS QA açık. Tüm native kabul kriterleri tamamlandı veya Issue #4 kapanabilir iddiası yoktur.
+3. Fiziksel Android ve stabil API 35/36; gesture/predictive root back, %130 üzeri sistem fontu, çentik/3-button kombinasyonu, fotoğraf OS kalıcı ret/kısıtlı erişim, picker process-death, PDF/gerçek URI açma/10MB cihaz sınırı, WhatsApp/dış ağ hata yolu ve iOS QA açık. Tüm native kabul kriterleri tamamlandı veya Issue #4 kapanabilir iddiası yoktur.
+
+## PR #5 — klavye ve PetID tasarım restorasyonu
+
+Son @codex talimatı mevcut `codex/v1-slice-2-expo` üzerinde uygulandı. Web CSS/ekranları değiştirilmedi. `preserved-shell.css` kök/.phone.dark tokenları, pet-pill, hero, mod-card ve `shell.css` yüzen/aktif nav desenleri native View/Text/Pressable bileşenlerine taşındı; WebView veya ertelenmiş oyun/eğitim modülü eklenmedi.
+
+Renklerin tek kaynağı `mobile/src/core/brand-tokens.json`, tema erişimi `theme.ts`. JSON hem Expo config hem RN tarafından okunur; config'in TS alt modül import kısıtı giderildi. #0EA574 marka/dekorasyon/seçim sınırı, #0B8560 okunabilir beyaz etiketli ana işlem/hero/aktif sekme; eski #6B7B75 korunur, küçük yazı AA karşılığı açıkta #62726C, koyuda #96A69F. 20dp kartlar, yumuşak sınır/gölge, renk kodlu modüller, pati/hayvan karakteri, yeşil dijital kimlik ve yatay seçili hayvan pill'leri geri geldi. Dört sekme değişmedi; bar 12dp kenar boşluğu ve safe-area üzerinde yüzer, yazı ölçeğine göre yüksekliği artar. Tema düğmesi 48dp; uzun demo açıklaması her ekranın ikincil alt bilgi alanına indirildi.
+
+Klavye: adjustResize korunur; `keyboardDidShow/Hide` ile ölçülen dış pencere sınırı/IME üst çizgisi yalnızca gerçek örtüşme kadar inset verir (zaten resize olmuşsa ikinci padding yok). Field odaklanan etiket/input bölgesini kayıt eder; profil ref'i kaydet düğmesini de içerir. Inset/layout sonrası otomatik scroll hesaplanır, scroll offset takip edilir; `keyboardShouldPersistTaps=handled`, `keyboardDismissMode=none` ile açık klavyede kaydetme/kaydırma mümkündür. Listener/animation-frame unmount temizliği vardır. [React Native klavye API'si](https://reactnative.dev/docs/keyboard), [yerleşim ölçümü](https://reactnative.dev/docs/the-new-architecture/layout-measurements).
+
+Gerçek Gboard küçük ekran ölçümü: 945×1680 / 420dpi = 360×640dp, font_scale 1.3. IME üstü 895px; etiket 318–384px, input 399–542px, kaydet düğmesi 668–809px; üçü de görünür. Ekran/yazı ölçeği sonra eski ayara döndürüldü.
+
+Tekrar native galeri PNG seçimi ve Mia 1/5–Atlas 0/5 ayrımı; DocumentsUI test PNG seçimi ve hayvan dosya ayrımı geçti. Ekran/font ayarı activity yeniden üretiminden sonra Expo dev-client photo picker bir kez unregistered ActivityResultLauncher hatası verdi; cold start ile gerçek seçici çalıştı. Bu SDK/configuration-change kurtarma bulgusu açık, gizlenmedi; geçici yalnızca-QA hata loglaması kaynaklara taşınmadı. Debug Tools balonu testte tema düğmesinden uzaklaştırıldı; release arayüzünün parçası değildir.
+
+Önce/sonra ve eski web referans ekranları: [PR #5 QA görselleri](docs/qa/pr5-design-keyboard/README.md). Otomatik GPS başarı testi kullanıcı kararıyla açık; yeni PR, merge veya production yayın yapılmadı.
+
+Son renk config'iyle native prebuild ve Gradle `:app:assembleDebug` tekrar başarılı: 5m46s, 487 task (53 executed, 434 up-to-date). İlk config denemesi TS alt modül import'unda hata verdi; ortak JSON ile düzeltildi. İlk temiz native derlemede Clang çöktü; max-workers=1 ile tekrar geçti. SDK/Gradle deprecation ve CMake uzun obje-yolu uyarıları sürüyor, son derleme başarısız değil. Güncel development APK emülatöre `install -r` ile kuruldu. 154239145 byte; SHA-256 `dd3a7c9a1f91474d066dc3aa37d513b5cd09961882021728bc5d9266ae8a75eb`, aynı Android Debug sertifikası doğrulandı. Yerel artifact `petid-pr5-development.apk`; Metro gerektirir, bağımsız preview/production değildir, git'e eklenmez.
 
 ## Bilinen prototipler ve riskler
 
+Son APK kurulumu ardından Metro bağlantısı bir kez boş açılış ekranında bekledi; geliştirme sunucusu temiz önbellekle yeniden başlatılınca bundle yüklenip açık/koyu ana ekran çalıştı. Ardından son APK ile tekrar cold start ve koyu tema kalıcılığı geçti. Bu development-server bağımlılığıdır; bağımsız preview açılışı doğrulanmış sayılmaz. Yenileme bandı olan ilk görseller kullanılmadı, temiz son paket görselleri yeniden alındı.
+
 Backend bağlantısı yok; ekranlar açıkça demo modundadır. Tema dışındaki değişiklikler oturumluk. Hesap/auth, gerçek kalıcı profil/sağlık/private dosya upload-download, paylaşılabilir/iptal edilebilir QR, canlı interaktif harita/ihbar/sahip onayı/arşiv backend'i, gerçek PatiMatch eşleşme/mesaj/moderasyon ve sahiplendirme CRUD/başvuru/iletişim sonraki dilimdir. Harita şu an koordinat önizleme iskeletidir. Örnek klinik iletişimi, açık/nöbetçi iddiası ve gerçek sahiplendirme kartı iddiası yoktur.
 
-Android picker activity/process ölümü pending-result kurtarması henüz uygulanmadı. GPS timeout JS beklemesini sınırlar; Expo tek seferlik native konum isteğinin iptal API'si yoktur. Büyük sistem fontu ve native status/navigation bar QA cihaz kapısında açıktır.
+Android picker activity/process ölümü pending-result kurtarması henüz uygulanmadı. GPS timeout JS beklemesini sınırlar; Expo tek seferlik native konum isteğinin iptal API'si yoktur. %130 üzeri büyük sistem fontu ve fiziksel/stabil Android status/navigation bar kombinasyonları QA kapısında açıktır.
 Expo SDK'nın transitif `expo-dom-webview` native/DOM interop bağımlılığı vardır. Bu, PetID web prototipini sarmalama değildir; tüm PetID ekranları RN bileşenleridir ve uygulama kaynaklarında WebView/DOM import'u yoktur. Source-gate testi uygulama kaynaklarını denetler, tüm vendor SDK bileşenlerinin fiziksel olarak yokluğunu iddia etmez.
 
 Mobil npm audit: 14 orta, 0 yüksek/kritik. Başlıca Expo iOS build-tool xcode/uuid ve Router query-string/decode-uri-component transitif uyarıları. npm'nin önerdiği fix eski/uyumsuz Expo major'larına düşürüyor; `audit fix --force` uygulanmadı. Birinci dilimin mevcut web araç zinciri riskleri önceki raporda kalır.

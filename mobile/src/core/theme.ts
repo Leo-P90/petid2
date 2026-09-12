@@ -1,8 +1,10 @@
 import type { ThemeMode } from './model';
-export const palettes = {
-  light: { background: '#F3F8F7', surface: '#FFFFFF', text: '#183C3A', muted: '#526B69', accent: '#116C61', onAccent: '#FFFFFF', border: '#CADBD7', danger: '#A62E35' },
-  dark: { background: '#102826', surface: '#183B37', text: '#F0F8F5', muted: '#B2CBC5', accent: '#8FE1CE', onAccent: '#102826', border: '#3C6058', danger: '#FFB3B6' },
-};
+import brandTokens from './brand-tokens.json';
+// PetID preserved-shell.css tokens; dark surfaces come from .phone.dark.
+// Original gray/green are preserved; readable small text uses AA foreground variants.
+export const secondaryText = { light: '#62726C', dark: '#96A69F' };
+export const palettes = brandTokens;
+export const geometry = { radius: 20, buttonRadius: 14, touch: 48, pagePadding: 18, gap: 14 };
 export function parseTheme(value: string | null): ThemeMode {
   return value === 'dark' ? 'dark' : 'light';
 }

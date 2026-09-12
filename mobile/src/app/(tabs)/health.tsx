@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, Label, Note, Screen, RouteButton } from '../../components/ui';
+import { Button, Card, Label, Note, Screen, RouteButton, PetSelector } from '../../components/ui';
 import { useApp } from '../../state/app-state';
 import { nativeServices } from '../../services/native';
 import { resultMessage, type SelectedFile } from '../../core/services';
@@ -19,6 +19,7 @@ export default function Health() {
     setBusy(false);
   }
   return <Screen title={pet.name + ' · Sağlık'} tab>
+    <PetSelector disabled={busy} />
     <RouteButton label="Hayvan değiştir" href="/profile" />
     <Card><Label heading>Hayvana özel geçmiş</Label>
       {['Aşı', 'İlaç', 'Kilo', 'Muayene'].map((category) => <Note key={category}>{category} · Bu demo hayvan için henüz kayıt yok.</Note>)}

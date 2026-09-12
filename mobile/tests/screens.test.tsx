@@ -9,6 +9,7 @@ import Reports from '../src/app/reports';
 import Adoption from '../src/app/adoption/index';
 import { nativeServices } from '../src/services/native';
 import { THEME_KEY } from '../src/core/theme';
+import { Keyboard } from 'react-native';
 jest.mock('@react-native-async-storage/async-storage', () =>
   jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
 jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
@@ -21,6 +22,20 @@ async function mount(child: React.ReactNode) {
   return render(<SafeAreaProvider initialMetrics={metrics}><AppProvider storage={storage}>{child}</AppProvider></SafeAreaProvider>);
 }
 beforeEach(() => { storage.getItem.mockResolvedValue(null); });
+test('profile focus/edit/save keeps keyboard-friendly scrolling and pet separation', async () => {
+  const listener = jest.spyOn(Keyboard, 'addListener');
+  const view = await mount(<Profile />);
+  expect(listener).toHaveBeenCalledWith('keyboardDidShow', expect.any(Function));
+  expect(listener).toHaveBeenCalledWith('keyboardDidHide', expect.any(Function));
+  await fireEvent(screen.getByLabelText('Hayvanın adı'), 'focus', { nativeEvent: { target: 1 } });
+  await fireEvent.changeText(screen.getByLabelText('Hayvanın adı'), 'Mia QA');
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo profili kaydet' }));
+  expect(screen.getByRole('button', { name: 'Mia QA · seçili' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
+  expect(screen.getByLabelText('Hayvanın adı').props.value).toBe('Atlas');
+  await view.unmount();
+  listener.mockRestore();
+});
 test('home routes include every retained screen and no deferred destination', async () => {
   await mount(<Home />);
   for (const label of ['Sağlık geçmişi', 'Kayıp veya yaralı hayvan', 'Acil veteriner', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) {

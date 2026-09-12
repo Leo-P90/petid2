@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { Image, View } from 'react-native';
-import { Button, Card, Field, Label, Note, Screen } from '../components/ui';
+import { useRef, useState } from 'react';
+import { Image, Text, View } from 'react-native';
+import { Button, Card, Field, Label, Note, PetSelector, Screen } from '../components/ui';
 import { useApp } from '../state/app-state';
 import { appendPhotos } from '../core/model';
 import { nativeServices } from '../services/native';
 import { resultMessage } from '../core/services';
 function ProfileEditor() {
-  const { pets, pet, selectPet, updatePet } = useApp();
+  const { pet, updatePet, colors } = useApp();
+  const nameArea = useRef<View>(null);
   const [name, setName] = useState(pet.name);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,8 +22,8 @@ function ProfileEditor() {
     setBusy(false);
   }
   return <Screen title="Hayvan profili">
-    <Card><Label>Aktif hayvan</Label>{pets.map((item) => <Button key={item.id} label={item.name + (item.id === pet.id ? ' · seçili' : ' profiline geç')} secondary onPress={() => selectPet(item.id)} disabled={busy} />)}</Card>
-    <Card><Field label="Hayvanın adı" value={name} onChangeText={setName} maxLength={50} />
+    <PetSelector disabled={busy} />
+    <Card focusArea={nameArea}><Field focusArea={nameArea} label="Hayvanın adı" value={name} onChangeText={setName} maxLength={50} returnKeyType="done" />
       <Note>{pet.species} · {pet.age}</Note>
       <Button label="Demo profili kaydet" disabled={!name.trim() || busy} onPress={() => { updatePet(pet.id, { name: name.trim() }); setMessage('Profil yalnızca bu oturumda güncellendi.'); }} />
     </Card>
@@ -34,9 +35,12 @@ function ProfileEditor() {
       <Button label="Galeriden fotoğraf seç" disabled={busy || pet.photos.length >= 5} onPress={() => void pickPhotos()} />
       {message ? <Note>{message}</Note> : null}
     </Card>
-    <Card><Label heading>Dijital kimlik</Label><Label>{pet.name} · {pet.id}</Label>
-      <Note>QR paylaşımı kapalıdır. İzin verilen alanlar, paylaşım iptali ve yetkisiz erişim kontrolleri backend diliminde uygulanacak. Bu kimlik gerçek kayıt değildir.</Note>
-    </Card>
+    <View style={{ backgroundColor: colors.greenDark, borderRadius: 20, padding: 18, gap: 12 }}>
+      <Text accessibilityRole="header" style={{ color: colors.white, fontSize: 12, fontWeight: '700', letterSpacing: 1 }}>PETID · DİJİTAL KİMLİK 🐾</Text>
+      <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}><Text accessible={false} style={{ fontSize: 38 }}>{pet.species === 'Kedi' ? '🐱' : '🐶'}</Text><View style={{ flex: 1, gap: 4 }}><Text style={{ color: colors.white, fontSize: 20, fontWeight: '800' }}>{pet.name}</Text><Text style={{ color: colors.white, fontSize: 14 }}>{pet.species} · {pet.age}</Text></View></View>
+      <Text style={{ color: colors.white, fontSize: 14 }}>{pet.id} · Örnek kimlik</Text>
+      <Text style={{ color: colors.white, fontSize: 14, lineHeight: 21 }}>QR paylaşımı kapalıdır. İzin verilen alanlar, paylaşım iptali ve yetkisiz erişim kontrolleri backend diliminde uygulanacak. Bu kimlik gerçek kayıt değildir.</Text>
+    </View>
   </Screen>;
 }
 export default function Profile() {

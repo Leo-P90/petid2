@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, Label, Note, Screen, RouteButton } from '../../components/ui';
+import { Button, Card, Label, Note, Screen, RouteButton, PetSelector } from '../../components/ui';
 import { discover } from '../../core/model';
 import { useApp } from '../../state/app-state';
 export default function Match() {
@@ -15,6 +15,7 @@ export default function Match() {
     setNotices((previous) => ({ ...previous, [pet.id]: like ? 'Demo beğeni kaydedildi. Karşılıklı eşleşme veya mesaj oluşturulmadı.' : 'Demo aday geçildi.' }));
   }
   return <Screen title="PatiMatch" tab>
+    <PetSelector />
     <Card><Label heading>{pet.name} için aynı tür keşif</Label><Note>Demo adaylar · Gerçek kişiler, eşleşmeler veya mesajlar yok.</Note>
       <RouteButton label="Hayvan değiştir" href="/profile" />
       <Button label={participating ? 'Demo keşfine katılımı kapat' : 'Demo keşfine katıl'} onPress={() => setPreferences((previous) => ({ ...previous, [pet.id]: !participating }))} />
