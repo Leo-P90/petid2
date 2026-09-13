@@ -1,7 +1,7 @@
 name: PetID mobile checks
 on:
   pull_request:
-    branches: [v1-release]
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,6 +25,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - run: npx expo-doctor
       - run: npm run build:android:js
       - run: npm run build:web
   debug-apk:
@@ -58,3 +59,70 @@ jobs:
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
+  preview-apk:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.pull_request.number == 7 && github.head_ref == 'codex/v1-slice-3-supabase-foundation') ||
+      contains(github.event.pull_request.labels.*.name, 'preview-apk'))
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: petid-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      APP_VARIANT: preview
+      EXPO_NO_DOTENV: '1'
+      EXPO_PUBLIC_SUPABASE_URL: ''
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npx expo prebuild --platform android --no-install
+      - name: Verify non-production signing and build standalone preview
+        working-directory: mobile/android
+        run: |
+          set -euo pipefail
+          grep -q 'signingConfig signingConfigs.debug' app/build.gradle
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a,x86_64
+      - name: Verify APK bundle, signature and metadata
+        run: |
+          set -euo pipefail
+          apk=android/app/build/outputs/apk/release/app-release.apk
+          test -s "$apk"
+          unzip -p "$apk" assets/index.android.bundle > /tmp/petid-preview-bundle
+          test -s /tmp/petid-preview-bundle
+          tools="$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose --print-certs "$apk"
+          "$tools/aapt" dump badging "$apk" > android/app/build/outputs/apk/release/APK-METADATA.txt
+          grep -q "name='com.petid.app.preview'" android/app/build/outputs/apk/release/APK-METADATA.txt
+          ! grep -q 'application-debuggable' android/app/build/outputs/apk/release/APK-METADATA.txt
+          sha256sum "$apk" >> android/app/build/outputs/apk/release/APK-METADATA.txt
+          stat -c 'APK size: %s bytes' "$apk" >> android/app/build/outputs/apk/release/APK-METADATA.txt
+          echo "Standalone preview; embedded Hermes bundle; debug test certificate; no production signing." >> android/app/build/outputs/apk/release/APK-METADATA.txt
+          cat android/app/build/outputs/apk/release/APK-METADATA.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: petid-v1-preview-apk
+          path: |
+            mobile/android/app/build/outputs/apk/release/app-release.apk
+            mobile/android/app/build/outputs/apk/release/APK-METADATA.txt
+          if-no-files-found: error
+          retention-days: 14

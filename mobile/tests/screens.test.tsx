@@ -7,6 +7,7 @@ import Profile from '../src/app/profile';
 import Match from '../src/app/(tabs)/match';
 import Reports from '../src/app/reports';
 import Adoption from '../src/app/adoption/index';
+import Health from '../src/app/(tabs)/health';
 import { nativeServices } from '../src/services/native';
 import { THEME_KEY } from '../src/core/theme';
 import { AccessibilityInfo, Keyboard } from 'react-native';
@@ -27,11 +28,13 @@ test('profile focus/edit/save keeps keyboard-friendly scrolling and pet separati
   const view = await mount(<Profile />);
   expect(listener).toHaveBeenCalledWith('keyboardDidShow', expect.any(Function));
   expect(listener).toHaveBeenCalledWith('keyboardDidHide', expect.any(Function));
+  await fireEvent.press(screen.getByRole('button', { name: 'Profili düzenle' }));
   await fireEvent(screen.getByLabelText('Hayvanın adı'), 'focus', { nativeEvent: { target: 1 } });
   await fireEvent.changeText(screen.getByLabelText('Hayvanın adı'), 'Mia QA');
   await fireEvent.press(screen.getByRole('button', { name: 'Demo profili kaydet' }));
   expect(screen.getByRole('button', { name: 'Mia QA · seçili' })).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Profili düzenle' }));
   expect(screen.getByLabelText('Hayvanın adı').props.value).toBe('Atlas');
   await view.unmount();
   listener.mockRestore();
@@ -109,6 +112,22 @@ test('adoption cards are reachable and explicitly examples', async () => {
   await mount(<Adoption />);
   expect(screen.getByRole('button', { name: 'Pamuk örnek detayını aç' })).toBeTruthy();
   expect(screen.getAllByText(/gerçek sahiplendirme ilanı değildir/)).toHaveLength(2);
+});
+test('adoption species filter preserves reachable demo details', async () => {
+  await mount(<Adoption />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Kediler' }));
+  expect(screen.getByRole('button', { name: 'Pamuk örnek detayını aç' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Zeytin örnek detayını aç' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Köpekler' }));
+  expect(screen.getByRole('button', { name: 'Zeytin örnek detayını aç' })).toBeTruthy();
+});
+test('health tabs retain empty records and device document selection', async () => {
+  await mount(<Health />);
+  await fireEvent.press(screen.getByRole('button', { name: 'Kilo' }));
+  expect(screen.getByText('Henüz ölçüm yok')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'İlaçlar' }));
+  expect(screen.getByText('Henüz kayıt yok')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Cihazdan belge seç' })).toBeTruthy();
 });
 function ThemeProbe() {
   const { mode, ready, toggleTheme, notice } = useApp();
