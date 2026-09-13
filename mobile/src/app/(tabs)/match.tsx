@@ -10,7 +10,7 @@ import { useApp } from '../../state/app-state';
 function Portrait({ candidate, small = false }: { candidate: Candidate; small?: boolean }) {
   const colors = useSectionColors('match'); const [failed, setFailed] = useState(false);
   return <View style={{ height: small ? 48 : 245, width: small ? 48 : '100%', borderRadius: 24, overflow: 'hidden', backgroundColor: colors.greenSoft, justifyContent: 'center', alignItems: 'center' }}>
-    {candidate.photo && !failed ? <Image accessibilityLabel={candidate.name + ' · demo fotoğraf'} source={{ uri: candidate.photo }} onError={() => setFailed(true)} style={{ height: '100%', width: '100%' }} resizeMode="cover" /> : <Text accessibilityLabel="PetID fotoğraf placeholder" style={{ fontSize: small ? 26 : 72 }}>🐾</Text>}
+    {candidate.photo && !failed ? <Image accessibilityLabel={candidate.name + ' · demo fotoğraf'} source={{ uri: candidate.photo }} onError={() => setFailed(true)} style={{ height: '100%', width: '100%' }} resizeMode="cover" /> : <Text accessibilityLabel="Temsili aday tür avatarı" style={{ fontSize: small ? 26 : 110 }}>{candidate.species === 'Kedi' ? '🐱' : '🐶'}</Text>}
   </View>;
 }
 function SwipeCard({ candidate, choose, reduced }: { candidate: Candidate; choose: (like: boolean) => void; reduced: boolean }) {

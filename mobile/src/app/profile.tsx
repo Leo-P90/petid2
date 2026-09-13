@@ -31,7 +31,7 @@ function ProfileEditor() {
     } catch { setMessage('Fotoğraf işlemi tamamlanamadı.'); }
     finally { setBusy(false); }
   }
-  return <Screen title="Hayvan profili">
+  return <Screen title="Dostum">
     <PetSelector disabled={busy} />
     <View style={{ backgroundColor: '#194B38', borderRadius: 24, padding: 24, gap: 14 }}><Text style={{ color: '#BEDACA', fontSize: 11, letterSpacing: 2 }}>PETID / DİJİTAL KİMLİK</Text><PetPortrait key={pet.id + pet.photos[0]} size={90} /><Text accessibilityRole="header" style={{ color: colors.white, fontSize: 31, fontWeight: '800' }}>{pet.name}</Text><Text style={{ color: '#C9DDD2', fontSize: 14 }}>{pet.species} · {pet.age}</Text><Text style={{ color: '#C9DDD2', fontSize: 13 }}>QR paylaşımı ve doğrulanmış kimlik sunulmaz.</Text></View>
     <Button secondary label={editing ? 'Düzenlemeyi kapat' : 'Profili düzenle'} onPress={() => setEditing(!editing)} />

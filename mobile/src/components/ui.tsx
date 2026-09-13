@@ -62,15 +62,16 @@ export function Field({ label, focusArea, onFocus, onBlur, ...props }: TextInput
       borderColor: colors.border, borderWidth: 1, borderRadius: 12, minHeight: 48, padding: 12, fontSize: 16 }} /></View>;
 }
 export function Screen({ title, children, tab = false, tone = 'home' }: { title: string; children: ReactNode; tab?: boolean; tone?: Tone }) {
-  const { mode, toggleTheme, notice, themeBusy } = useApp();
+  const { pet, mode, toggleTheme, notice, themeBusy } = useApp();
   const colors = useSectionColors(tone);
   const { fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const auth = useAuth();
+  const subtitle = { home: 'Can dostunun dijital dünyası', health: 'Bakım defteri', match: 'Küçük bir merhabayla başlar', adoption: 'Bir yuva, yeni bir hayat', services: 'Yakınında ol, yanında ol' }[tone];
   return <UIColors.Provider value={colors}><SafeAreaView edges={tab ? ['top', 'left', 'right'] : ['left', 'right', 'bottom']}
     style={{ flex: 1, backgroundColor: colors.background }}>
     <KeyboardScreen bottom={tab ? 96 + insets.bottom + Math.max(0, fontScale - 1) * 32 : 32}>
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}><View style={{ flex: 1, gap: 3 }}><Label heading>{title}</Label><Note>PetID · Dostun için, her gün</Note></View>
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><View style={{ flex: 1, gap: 3 }}><Label heading>{title}</Label><Note>{subtitle}</Note></View><PetPortrait key={pet.id + pet.photos[0]} size={32} />
           <Pressable accessibilityRole="button" accessibilityLabel={mode === 'light' ? 'Koyu temaya geç' : 'Açık temaya geç'} accessibilityState={{ disabled: themeBusy }} disabled={themeBusy} onPress={() => void toggleTheme()}
             style={{ minHeight: 48, minWidth: 48, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.greenSoft, borderColor: colors.greenMid, borderWidth: 1, borderRadius: 24 }}><Text accessible={false} style={{ fontSize: 22, color: colors.accent }}>{mode === 'light' ? '☾' : '☀'}</Text></Pressable>
         </View>
