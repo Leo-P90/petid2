@@ -70,26 +70,26 @@ values ('pet-photos', 'pet-photos', false, 5242880, array['image/jpeg','image/pn
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
 create policy pet_objects_select_own on storage.objects for select to authenticated
-using (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
-  and array_length(storage.foldername(name), 1) = 2
-  and storage.filename(name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
-  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(name))[2]));
+using (bucket_id = 'pet-photos' and (storage.foldername(storage.objects.name))[1] = (select auth.uid())::text
+  and array_length(storage.foldername(storage.objects.name), 1) = 2
+  and storage.filename(storage.objects.name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
+  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(storage.objects.name))[2]));
 create policy pet_objects_insert_own on storage.objects for insert to authenticated
-with check (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
-  and array_length(storage.foldername(name), 1) = 2
-  and storage.filename(name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
-  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(name))[2]));
+with check (bucket_id = 'pet-photos' and (storage.foldername(storage.objects.name))[1] = (select auth.uid())::text
+  and array_length(storage.foldername(storage.objects.name), 1) = 2
+  and storage.filename(storage.objects.name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
+  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(storage.objects.name))[2]));
 create policy pet_objects_update_own on storage.objects for update to authenticated
-using (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
-  and array_length(storage.foldername(name), 1) = 2
-  and storage.filename(name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
-  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(name))[2]))
-with check (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
-  and array_length(storage.foldername(name), 1) = 2
-  and storage.filename(name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
-  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(name))[2]));
+using (bucket_id = 'pet-photos' and (storage.foldername(storage.objects.name))[1] = (select auth.uid())::text
+  and array_length(storage.foldername(storage.objects.name), 1) = 2
+  and storage.filename(storage.objects.name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
+  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(storage.objects.name))[2]))
+with check (bucket_id = 'pet-photos' and (storage.foldername(storage.objects.name))[1] = (select auth.uid())::text
+  and array_length(storage.foldername(storage.objects.name), 1) = 2
+  and storage.filename(storage.objects.name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
+  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(storage.objects.name))[2]));
 create policy pet_objects_delete_own on storage.objects for delete to authenticated
-using (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
-  and array_length(storage.foldername(name), 1) = 2
-  and storage.filename(name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
-  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(name))[2]));
+using (bucket_id = 'pet-photos' and (storage.foldername(storage.objects.name))[1] = (select auth.uid())::text
+  and array_length(storage.foldername(storage.objects.name), 1) = 2
+  and storage.filename(storage.objects.name) ~ '^[0-9a-f-]{36}[.](jpg|jpeg|png|webp)$'
+  and exists (select 1 from public.pets p where p.owner_id = (select auth.uid()) and p.id::text = (storage.foldername(storage.objects.name))[2]));

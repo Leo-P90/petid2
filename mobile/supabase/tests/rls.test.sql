@@ -1,5 +1,6 @@
 begin;
 select plan(33);
+set local storage.allow_delete_query = 'true';
 insert into auth.users(id,email) values
  ('11111111-1111-4111-8111-111111111111','a@example.test'),
  ('22222222-2222-4222-8222-222222222222','b@example.test');
