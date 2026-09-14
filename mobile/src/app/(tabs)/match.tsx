@@ -7,13 +7,15 @@ import { discoverMatches, emptyMatch, validMessage, type Candidate } from '../..
 import { exitDuration, swipeChoice } from '../../core/match-motion';
 import { matchDemo } from '../../data/match-demo';
 import { useApp } from '../../state/app-state';
-function Portrait({ candidate, small = false }: { candidate: Candidate; small?: boolean }) {
+import { useAuth } from '../../state/auth-state';
+import { MatchAccount } from '../../components/match-account';
+function Portrait({ candidate, small = false, live = false }: { candidate: Candidate; small?: boolean; live?: boolean }) {
   const colors = useSectionColors('match'); const [failed, setFailed] = useState(false);
   return <View style={{ height: small ? 48 : 245, width: small ? 48 : '100%', borderRadius: 24, overflow: 'hidden', backgroundColor: colors.greenSoft, justifyContent: 'center', alignItems: 'center' }}>
-    {candidate.photo && !failed ? <Image accessibilityLabel={candidate.name + ' · demo fotoğraf'} source={{ uri: candidate.photo }} onError={() => setFailed(true)} style={{ height: '100%', width: '100%' }} resizeMode="cover" /> : <Text accessibilityLabel="Temsili aday tür avatarı" style={{ fontSize: small ? 26 : 110 }}>{candidate.species === 'Kedi' ? '🐱' : '🐶'}</Text>}
+    {candidate.photo && !failed ? <Image accessibilityLabel={candidate.name + (live ? ' · paylaşılan fotoğraf' : ' · demo fotoğraf')} source={{ uri: candidate.photo }} onError={() => setFailed(true)} style={{ height: '100%', width: '100%' }} resizeMode="cover" /> : <Text accessibilityLabel="Temsili aday tür avatarı" style={{ fontSize: small ? 26 : 110 }}>{candidate.species === 'Kedi' ? '🐱' : '🐶'}</Text>}
   </View>;
 }
-function SwipeCard({ candidate, choose, reduced }: { candidate: Candidate; choose: (like: boolean) => void; reduced: boolean }) {
+function SwipeCard({ candidate, choose, reduced, live = false }: { candidate: Candidate; choose: (like: boolean) => void; reduced: boolean; live?: boolean }) {
   const colors = useSectionColors('match'); const { width } = useWindowDimensions(); const [x] = useState(() => new Animated.Value(0));
   const locked = useRef(false); const alive = useRef(true); const [busy, setBusy] = useState(false);
   useEffect(() => { alive.current = true; return () => { alive.current = false; x.stopAnimation(); }; }, [x]);
@@ -32,12 +34,16 @@ function SwipeCard({ candidate, choose, reduced }: { candidate: Candidate; choos
     onPanResponderTerminate: () => x.setValue(0),
   });
   return <><Animated.View {...pan.panHandlers} testID="match-swipe-card" style={{ transform: [{ translateX: x }, { rotate: reduced ? '0deg' : x.interpolate({ inputRange: [-width, 0, width], outputRange: ['-14deg', '0deg', '14deg'] }) }] }}><Card>
-    <View><Portrait candidate={candidate} /><View style={{ position: 'absolute', top: 12, left: 12, backgroundColor: colors.surface, borderRadius: 20, padding: 8 }}><Note>{candidate.species} · Örnek aday</Note></View></View>
-    <Label heading>{candidate.name}</Label><Note>{candidate.age} · {candidate.breed} · {candidate.gender}</Note><Note>📍 {candidate.distance} · demo mesafe</Note><Label>{candidate.bio}</Label>
-    <Note>Aynı tür arkadaşlar · Mesafe temsilidir</Note>
-  </Card></Animated.View><View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28 }}><Pressable accessibilityRole="button" accessibilityLabel="Geç" disabled={busy} onPress={() => commit(false)} style={{ width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }}><Text style={{ fontSize: 28, color: colors.danger }}>×</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel="Beğen · demo" disabled={busy} onPress={() => commit(true)} style={{ width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', backgroundColor: '#E11D48' }}><Text style={{ fontSize: 27, color: '#FFFFFF' }}>♥</Text></Pressable></View></>;
+    <View><Portrait candidate={candidate} live={live} /><View style={{ position: 'absolute', top: 12, left: 12, backgroundColor: colors.surface, borderRadius: 20, padding: 8 }}><Note>{candidate.species} · {live ? 'Paylaşılan profil' : 'Örnek aday'}</Note></View></View>
+    <Label heading>{candidate.name}</Label><Note>{candidate.age} · {candidate.breed} · {candidate.gender}</Note><Note>📍 {candidate.distance}{live ? '' : ' · demo mesafe'}</Note><Label>{candidate.bio}</Label>
+    <Note>{live ? 'Yaklaşık il / ilçe · kesin GPS paylaşılmaz' : 'Aynı tür arkadaşlar · Mesafe temsilidir'}</Note>
+  </Card></Animated.View><View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28 }}><Pressable accessibilityRole="button" accessibilityLabel="Geç" disabled={busy} onPress={() => commit(false)} style={{ width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }}><Text style={{ fontSize: 28, color: colors.danger }}>×</Text></Pressable><Pressable accessibilityRole="button" accessibilityLabel={live ? 'Beğen' : 'Beğen · demo'} disabled={busy} onPress={() => commit(true)} style={{ width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', backgroundColor: '#E11D48' }}><Text style={{ fontSize: 27, color: '#FFFFFF' }}>♥</Text></Pressable></View></>;
 }
-export default function Match() { const { pet } = useApp(); return <MatchExperience key={pet.id} />; }
+export default function Match() {
+  const { pet, accountMode } = useApp(); const auth = useAuth();
+  if (accountMode && auth.session) return <MatchAccount key={auth.session.user.id + '/' + pet.id} ownerId={auth.session.user.id} pet={pet} renderCandidate={(candidate, choose, key) => <SwipeCard key={key} candidate={candidate} choose={choose} reduced live />} />;
+  return <MatchExperience key={pet.id} />;
+}
 function MatchExperience() {
   const { pet, matches, dispatchMatch } = useApp(); const colors = useSectionColors('match'); const state = matches[pet.id] ?? emptyMatch(); const candidate = discoverMatches(pet, state, matchDemo)[0];
   const [section, setSection] = useState('Keşfet');

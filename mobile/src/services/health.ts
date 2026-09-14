@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
+import { randomUUID } from 'expo-crypto';
 import { fileTypes, validateFile, validateHealth, type HealthInput, type HealthRecord, type HealthDocument } from '../core/health';
 import type { SelectedFile } from '../core/services';
 import { requireAffected } from './pets';
@@ -28,7 +29,7 @@ export function createHealthRepository(client: SupabaseClient | null) {
       const mime = selected.mimeType || file.type;
       validateFile(mime, file.size);
       if (!selected.name.trim() || selected.name.length > 255) throw new Error('Geçersiz dosya adı.');
-      const uuid = globalThis.crypto?.randomUUID?.(); if (!uuid) throw new Error('secure uuid unavailable');
+      const uuid = randomUUID();
       const path = `${ownerId}/${petId}/${uuid}.${fileTypes[mime]}`;
       const storage = db().storage.from('health-documents');
       const { error } = await storage.upload(path, await file.arrayBuffer(), { contentType: mime, upsert: false }); if (error) throw error;
