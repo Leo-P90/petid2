@@ -1,4 +1,4 @@
-import { Stack, ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
+import { Stack, ThemeProvider, DarkTheme, DefaultTheme, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from 'react';
@@ -6,8 +6,10 @@ import { Text, View } from 'react-native';
 import { AppProvider, useApp } from '../state/app-state';
 import { AuthProvider, useAuth } from '../state/auth-state';
 import { Button, Card, Field, Note, Screen } from '../components/ui';
+import { statusBarStyle } from '../core/theme';
 export const unstable_settings = { initialRouteName: '(tabs)' };
 function Navigation() {
+  const pathname = usePathname();
   const { colors, mode, ready, pets, petsBusy, petNotice, createPet } = useApp();
   const auth = useAuth();
   if (!ready) return <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: colors.text }}>PetID hazırlanıyor…</Text></View>;
@@ -16,7 +18,7 @@ function Navigation() {
   if (!auth.demo && (petsBusy || pets.length === 0)) return <EmptyPets busy={petsBusy} notice={petNotice} createPet={createPet} />;
   const base = mode === 'dark' ? DarkTheme : DefaultTheme;
   return <ThemeProvider value={{ ...base, colors: { ...base.colors, background: colors.background, card: colors.surface, text: colors.text, primary: colors.accent, border: colors.border } }}>
-    <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+    <StatusBar style={statusBarStyle(mode, pathname)} />
     <Stack screenOptions={{ headerTintColor: colors.text, headerStyle: { backgroundColor: colors.surface }, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" options={{ title: 'PetID', headerShown: false }} />
       <Stack.Screen name="profile" options={{ title: 'Hayvan profili' }} />

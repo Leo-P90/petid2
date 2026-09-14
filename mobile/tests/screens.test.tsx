@@ -65,16 +65,19 @@ test('photo addition stays with selected pet; denial is visible', async () => {
 test('match requires opt-in and never invents mutual matches', async () => {
   await mount(<Match />);
   expect(screen.queryByText('Luna')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
   expect(screen.getByText('Luna')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'Beğen · demo' }));
   await waitFor(() => expect(screen.getByText('Ada')).toBeTruthy());
-  expect(screen.getByText(/Karşılıklı eşleşme veya mesaj oluşturulmadı/)).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Mesajlar' }));
+  expect(screen.getByText(/Henüz eşleşme yok/)).toBeTruthy();
 });
 test('mutual demo conversation supports reduced motion, keyboard composer and isolated pets', async () => {
   const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
   const listener = jest.spyOn(Keyboard, 'addListener');
   const view = await mount(<Match />);
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
   await waitFor(() => expect(screen.getByText('Azaltılmış hareket açık')).toBeTruthy());
   await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
@@ -89,8 +92,10 @@ test('mutual demo conversation supports reduced motion, keyboard composer and is
   expect(screen.getAllByText('<b>plain text</b>').length).toBeGreaterThan(0);
   expect(screen.getByLabelText('Demo mesaj').props.value).toBe('');
   await fireEvent.press(screen.getByRole('button', { name: 'Konuşmayı kapat' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
   expect(screen.queryByText('Ada')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
   expect(screen.getByText('Max')).toBeTruthy();
   await view.unmount(); motion.mockRestore(); listener.mockRestore();
@@ -123,10 +128,10 @@ test('adoption species filter preserves reachable demo details', async () => {
 });
 test('health tabs retain empty records and device document selection', async () => {
   await mount(<Health />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Kilo' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Kilo kayıtlarını aç' }));
   expect(screen.getByText('Henüz ölçüm yok')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', { name: 'İlaçlar' }));
-  expect(screen.getByText('Henüz kayıt yok')).toBeTruthy();
+  expect(screen.getAllByText('Henüz kayıt yok').length).toBeGreaterThan(0);
   expect(screen.getByRole('button', { name: 'Cihazdan belge seç' })).toBeTruthy();
 });
 function ThemeProbe() {

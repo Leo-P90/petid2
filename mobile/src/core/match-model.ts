@@ -1,11 +1,11 @@
 import type { Pet } from './model';
-export type Candidate = { id: string; species: Pet['species']; name: string; age: string; breed: string; gender: string; distance: string; bio: string; compatibility: number; photo?: string; mutual: boolean; opener: string; reply: string };
+export type Candidate = { id: string; species: Pet['species']; name: string; age: string; breed: string; gender: string; distance: string; bio: string; compatibility: number; photo?: string; verification?: string; mutual: boolean; opener: string; reply: string };
 export type Message = { id: number; from: 'me' | 'demo'; text: string };
 export type Conversation = { candidate: Candidate; messages: Message[]; unread: boolean };
 export type MatchState = { participating: boolean; excluded: string[]; likes: string[]; conversations: Record<string, Conversation> };
 export type MatchStore = Record<string, MatchState>;
 export type MatchAction = { pet: Pick<Pet, 'id' | 'species'> } & (
-  { type: 'toggle' } | { type: 'reset' } | { type: 'pass'; candidate: Candidate } | { type: 'like'; candidate: Candidate } | { type: 'read'; candidate: Candidate } |
+  { type: 'toggle' } | { type: 'reset' } | { type: 'undo'; candidate: Candidate } | { type: 'pass'; candidate: Candidate } | { type: 'like'; candidate: Candidate } | { type: 'read'; candidate: Candidate } |
   { type: 'send'; candidate: Candidate; text: string } | { type: 'reply'; candidate: Candidate; text: string; visible?: boolean });
 export const emptyMatch = (): MatchState => ({ participating: false, excluded: [], likes: [], conversations: {} });
 export const discoverMatches = (pet: Pick<Pet, 'species'>, state: MatchState, pool: readonly Candidate[]) => pool.filter(c => c.species === pet.species && !state.excluded.includes(c.id));
@@ -18,7 +18,10 @@ export function matchReducer(store: MatchStore, action: MatchAction): MatchStore
   else {
     const c = action.candidate;
     if (c.species !== action.pet.species) return store;
-    if (action.type === 'pass' || action.type === 'like') {
+    if (action.type === 'undo') {
+      if (!previous.participating || previous.likes.includes(c.id)) return store;
+      next = { ...previous, excluded: previous.excluded.filter(id => id !== c.id) };
+    } else if (action.type === 'pass' || action.type === 'like') {
       if (!previous.participating || previous.excluded.includes(c.id)) return store;
       next = { ...previous, excluded: [...previous.excluded, c.id] };
       if (action.type === 'like') {

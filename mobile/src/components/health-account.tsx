@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Linking, View } from 'react-native';
-import { Button, Card, Field, Label, Note, Segments } from './ui';
+import { Keyboard, Linking, Modal, View } from 'react-native';
+import { Button, Card, Field, Label, Note, Screen, Segments } from './ui';
+import { HealthSummary } from './health-summary';
 import { createHealthRepository } from '../services/health';
 import { supabase } from '../services/supabase';
 import { nativeServices } from '../services/native';
@@ -10,7 +11,8 @@ import { healthKinds, type HealthInput, type HealthRecord, type HealthDocument, 
 const repository = createHealthRepository(supabase);
 const kindNames = ['Aşı', 'İlaç', 'Kilo', 'Muayene', 'Genel'];
 const empty = (kind: HealthKind): HealthInput => ({ kind, title: '', occurred_on: '', due_on: null, notes: null, weight_kg: null });
-export function HealthAccount({ ownerId, petId, tab, repo = repository }: { ownerId: string; petId: string; tab: string; repo?: typeof repository }) {
+export function HealthAccount({ ownerId, petId, tab, overview = false, repo = repository }: { ownerId: string; petId: string; tab: string; overview?: boolean; repo?: typeof repository }) {
+  const [details, setDetails] = useState<string | null>(null);
   const [records, setRecords] = useState<HealthRecord[]>([]);
   const [documents, setDocuments] = useState<HealthDocument[]>([]);
   const [form, setForm] = useState<HealthInput | null>(null);
@@ -38,10 +40,11 @@ export function HealthAccount({ ownerId, petId, tab, repo = repository }: { owne
     catch (error) { if (alive.current) setMessage(error instanceof Error ? error.message : 'İşlem tamamlanamadı. Yeniden deneyin.'); }
     finally { lock.current = false; if (alive.current) setBusy(false); }
   }
-  const selectedKind: HealthKind = tab === 'Aşılar' ? 'vaccine' : tab === 'İlaçlar' ? 'medication' : tab === 'Kilo' ? 'weight' : 'general';
-  const visible = tab === 'Geçmiş' ? records : records.filter((record) => record.kind === selectedKind);
-  return <>
-    <Card><Label heading>{tab}</Label>
+  const selectedTab = details ?? tab;
+  const selectedKind: HealthKind = selectedTab === 'Aşılar' ? 'vaccine' : selectedTab === 'İlaçlar' ? 'medication' : selectedTab === 'Kilo' ? 'weight' : 'general';
+  const visible = selectedTab === 'Geçmiş' ? records : records.filter((record) => record.kind === selectedKind);
+  const content = <>
+    <Card><Label heading>{selectedTab}</Label>
       {!loaded ? <Note>Sağlık verileri yükleniyor.</Note> : !visible.length ? <Note>Bu hayvan için henüz kayıt yok.</Note> : null}
       {visible.map((record) => <View key={record.id} style={{ gap: 8 }}>
         <Label>{record.title}</Label><Note>{record.occurred_on}{record.weight_kg !== null ? ` · ${record.weight_kg} kg` : ''}{record.due_on ? ` · Sonraki: ${record.due_on}` : ''}</Note>
@@ -79,5 +82,7 @@ export function HealthAccount({ ownerId, petId, tab, repo = repository }: { owne
     {message ? <Note>{message}</Note> : null}
     <Button label="Sağlık verilerini yenile" secondary disabled={busy} onPress={() => void run(async () => undefined, '')} />
   </>;
+  if (!overview) return content;
+  return <><HealthSummary records={records} loaded={loaded} message={message} onOpen={setDetails} /><Modal visible={!!details} onRequestClose={() => { Keyboard.dismiss(); setDetails(null); setForm(null); }}><Screen title="Sağlık kayıtları" tone="health"><Button label="Sağlık detayını kapat" secondary onPress={() => { Keyboard.dismiss(); setDetails(null); setForm(null); }} /><Segments labels={['Aşılar', 'Geçmiş', 'İlaçlar', 'Kilo']} selected={selectedTab} onSelect={setDetails} />{content}</Screen></Modal></>;
 }
 
