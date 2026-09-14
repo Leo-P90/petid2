@@ -13,8 +13,8 @@ insert into public.pets(id,owner_id,name,species) values
  ('cccccccc-cccc-4ccc-8ccc-ccccccccccc1','33333333-3333-4333-8333-333333333333','C cat','Kedi');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-insert into public.match_profiles(pet_id,species,display_name,active) values
- ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1','Kedi','A cat',true),('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2','Köpek','A dog',true),('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3','Kedi','A cat 2',true);
+select lives_ok($$insert into public.match_profiles(pet_id,species,display_name,active) values
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1','Kedi','A cat',true),('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2','Köpek','A dog',true),('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3','Kedi','A cat 2',true) returning pet_id$$,'owner INSERT RETURNING works without stale helper snapshot');
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
 insert into public.match_profiles(pet_id,species,display_name,active) values
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1','Kedi','B cat',true),('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2','Köpek','B dog',true);

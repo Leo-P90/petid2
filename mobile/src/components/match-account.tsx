@@ -89,6 +89,7 @@ export function MatchAccount({ ownerId, pet, renderCandidate, repo = repository 
   return <Screen title="PatiMatch" tab tone="match"><PetSelector /><Segments labels={['Keşfet', 'Mesajlar']} selected={section} onSelect={setSection} />
     <Note>{pet.name} için gerçek hesap modu · özel sağlık ve pet fotoğrafları paylaşılmaz.</Note>
     <Button label="PatiMatch ayarları" secondary disabled={busy} onPress={edit} />
+    {settings ? <Note>Kendi profil onayınız: {snapshot.ownVerification ?? 'Onaylanmadı'} · Sağlık/veteriner doğrulaması değildir. Kullanıcı tarafından değiştirilemez.</Note> : null}
     {!pet.id ? <Note>Önce bir hayvan profili oluşturun.</Note> : !loaded ? <Note>PatiMatch yükleniyor.</Note> : !snapshot.profile?.active ? <Note>Keşif kapalı. Ayarlardan açıkça paylaşılacak profil ve fotoğrafları seçebilirsiniz.</Note> : null}
     {section === 'Keşfet' && snapshot.profile?.active ? card ? <><LivePhoto key={candidate!.pet_id} petId={candidate!.pet_id} repo={repo}>{uri => renderCandidate({ ...card, photo: uri }, like => choose(like), `${pet.id}/${card.id}/${nonce}`)}</LivePhoto>
       <Button label="Adayı engelle" secondary disabled={busy} onPress={() => void run(() => repo.block(pet.id, card.id), 'Engellendi.')} />

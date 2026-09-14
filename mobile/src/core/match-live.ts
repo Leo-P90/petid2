@@ -10,7 +10,7 @@ export type LiveMessage = { id: string; conversation_id: string; sender_pet: str
 export type ReadState = { conversation_id: string; pet_id: string; last_message_id: string | null; read_at: string };
 export type Verification = { pet_id: string; status: 'pending' | 'verified' | 'rejected' };
 export type LiveThread = { id: string; candidate: MatchProfile; messages: LiveMessage[]; reads: ReadState[]; verification: Verification['status'] | null };
-export type MatchSnapshot = { profile: MatchProfile | null; candidates: MatchProfile[]; threads: LiveThread[]; media: MatchMedia[] };
+export type MatchSnapshot = { profile: MatchProfile | null; candidates: MatchProfile[]; threads: LiveThread[]; media: MatchMedia[]; ownVerification?: Verification['status'] | null };
 export function matchMessage(text: string) {
   const body = text.trim(); if (!body || [...body].length > 500) throw new Error('Mesaj 1–500 karakter olmalı.'); return body;
 }

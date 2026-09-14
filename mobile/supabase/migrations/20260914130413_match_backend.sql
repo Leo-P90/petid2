@@ -231,7 +231,7 @@ end $$;
 grant insert,update,delete on public.match_profiles to authenticated;
 grant insert,delete on public.match_media to authenticated;
 grant insert on public.match_reports to authenticated;
-create policy match_profiles_read on public.match_profiles for select to authenticated using(private.can_view_match(pet_id));
+create policy match_profiles_read on public.match_profiles for select to authenticated using(owner_id=(select auth.uid()) or private.can_view_match(pet_id));
 create policy match_profiles_insert on public.match_profiles for insert to authenticated with check(owner_id=(select auth.uid()));
 create policy match_profiles_update on public.match_profiles for update to authenticated using(owner_id=(select auth.uid())) with check(owner_id=(select auth.uid()));
 create policy match_profiles_delete on public.match_profiles for delete to authenticated using(owner_id=(select auth.uid()));

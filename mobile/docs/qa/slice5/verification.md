@@ -24,6 +24,9 @@ while foreground + foreground reload, cleanup on unmount; no broadcast/subscript
 RLS rechecked on each snapshot/download. Latest 200 messages per thread are loaded (no older-history UI yet).
 No optimistic writes: failed likes retain candidate; failed send retains draft and request ID.
 Private media is downloaded with JWT and cached only for the mounted candidate; cache cleaned on unmount.
+Shared photos are decoded and re-encoded as a new JPEG via pinned SDK-compatible image manipulator,
+without copying source EXIF/GPS metadata; original private gallery remains untouched. RN Blob reads use native
+FileReader rather than unsupported Blob.arrayBuffer. Pet deletion cleans match objects before metadata cascade.
 Already downloaded bytes cannot be recalled. Storage signed URLs requested by other authorized clients
 remain valid until expiry; native code does not create them. This is not a claim of retroactive media revocation.
 
