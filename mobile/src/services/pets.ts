@@ -29,6 +29,9 @@ export function createPetRepository(client: SupabaseClient | null) {
     async create(input: Pick<Pet, 'name' | 'species' | 'age'>): Promise<Pet> { const { data, error } = await requireClient().from('pets').insert({ name: input.name.trim(), species: input.species, age_label: input.age.trim() }).select('id,name,species,age_label').single(); if (error) throw error; return hydrate(data as PetRow); },
     async update(id: string, changes: Partial<Pick<Pet, 'name' | 'species' | 'age'>>): Promise<void> { const body = { ...(changes.name === undefined ? {} : { name: changes.name.trim() }), ...(changes.species === undefined ? {} : { species: changes.species }), ...(changes.age === undefined ? {} : { age_label: changes.age.trim() || null }) }; if (!Object.keys(body).length) return; const { data, error } = await requireClient().from('pets').update(body).eq('id', id).select('id').maybeSingle(); if (error) throw error; requireAffected(data); },
     async remove(id: string): Promise<void> {
+      const { data: matchMedia, error: matchError } = await requireClient().from('match_media').select('object_name').eq('pet_id', id); if (matchError) throw matchError;
+      const matchPaths = (matchMedia ?? []).map((item) => item.object_name as string);
+      if (matchPaths.length) { const { error } = await requireClient().storage.from('match-media').remove(matchPaths); if (error) throw error; }
       const { data: documents, error: documentError } = await requireClient().from('health_documents').select('storage_path').eq('pet_id', id); if (documentError) throw documentError;
       const documentPaths = (documents ?? []).map((item) => item.storage_path as string);
       if (documentPaths.length) { const { error } = await requireClient().storage.from('health-documents').remove(documentPaths); if (error) throw error; }
