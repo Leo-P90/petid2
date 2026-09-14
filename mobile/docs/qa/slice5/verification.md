@@ -53,8 +53,35 @@ self/same-owner/cross-species/forged owner/inactive rejected; send/read/idempote
 third-party isolation; unmatch/block; report privacy; candidate-media/private-gallery isolation.
 pgTAP additionally populates server-controlled verification and tests before/after mutual visibility.
 
-Windows local stack cannot start: Docker Desktop Linux engine pipe is absent.
-ADB devices list empty. Native two-account Android E2E, keyboard/swipe/photo permissions/relaunch
-are NOT verified; CI/API evidence does not replace that QA. No screenshots fabricated.
-CI/mobile results and final remote SHA are to be recorded in the stacked draft PR after runs complete.
+## Windows Android follow-up — 2026-09-14
+
+Docker Desktop and emulator-5554 are now accessible. Local database lint/security advisors,
+117 pgTAP tests and both real Auth/API/Storage security matrices passed on Windows.
+Node 24: TypeScript, lint, 80 Jest tests (13 suites), Doctor 21/21 and Android/web exports passed.
+Local x86_64 debug native build passed. Installed separate `com.petid.app.dev` / PetID Dev;
+old `com.petid.app.preview` was preserved (it was the PR #7 232e49e APK, not this slice).
+Only localhost Supabase and Metro via adb reverse are used; Dev requires both running.
+
+Two synthetic local accounts with Luna QA / Mavi QA: sign-in, explicit discovery opt-in,
+single-like without conversation, right-swipe reciprocal match, native photo picker/upload,
+authorized candidate photo display, two-way messages, unread/read state and force-stop/relaunch
+with session, dark theme and messages restored passed. Screenshots below are real emulator captures.
+Native UUID generation failed with absent global Web Crypto: corrected to explicit Expo crypto
+for match IDs and existing pet/health uploads, with regression coverage. Removed literal JSX space
+from first-pet form that generated an Android raw-text warning during initial hydration.
+
+Photo permission denial and EXIF forensic inspection remain open. Gboard started in stylus mode
+with a first-run tutorial; tutorial was cancelled and message entry/send worked in that IME mode.
+Full docked-keyboard overlap QA is NOT claimed. Native block/unmatch/report UI and automatic GPS
+success remain open; backend security matrices cover block/unmatch/report authorization.
+Windows long-path CMake limitation was worked around with a temporary P: mapping to this SAME
+checkout and a local generated-build path init script outside the repository; no source move or
+global OS/SDK/security configuration change. No APK artifact or deployment is promised by CI.
+
+![Authorized candidate photo (light)](candidate-photo-light.png)
+![Photo upload success](photo-upload-pass.png)
+![Unread conversation (dark)](unread-dark.png)
+![Restored two-way conversation (dark)](relaunch-chat-dark.png)
+
+Final remote SHA and CI results are recorded in the stacked draft PR after runs complete.
 No cloud Supabase project, real accounts, EAS, merge or production operation.

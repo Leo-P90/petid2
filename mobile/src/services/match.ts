@@ -2,10 +2,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { File, Paths } from 'expo-file-system';
 import { Platform } from 'react-native';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { randomUUID } from 'expo-crypto';
 import { eligibleCandidate, matchMessage, profileInput, uniqueMessages, type MatchProfile, type MatchProfileInput, type MatchSnapshot, type MatchMedia, type LiveMessage, type ReadState, type Verification } from '../core/match-live';
 import type { Pet } from '../core/model';
 const columns = 'pet_id,owner_id,species,display_name,birth_date,age_label,breed,sex,bio,city,district,active';
-export function secureRequestId() { const id = globalThis.crypto?.randomUUID?.(); if (!id) throw new Error('Güvenli istek kimliği oluşturulamadı.'); return id; }
+export function secureRequestId() { return randomUUID(); }
 // RN Blob lacks arrayBuffer(); FileReader uses the native Blob module.
 export function nativeBlobBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {

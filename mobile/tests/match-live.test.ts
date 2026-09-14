@@ -1,5 +1,12 @@
 import { eligibleCandidate, matchMessage, profileInput, uniqueMessages, unread, type MatchProfile, type LiveMessage } from '../src/core/match-live';
-import { createMatchRepository, nativeBlobBase64 } from '../src/services/match';
+import { createMatchRepository, nativeBlobBase64, secureRequestId } from '../src/services/match';
+import { randomUUID } from 'expo-crypto';
+jest.mock('expo-crypto', () => ({ randomUUID: jest.fn(() => '12345678-1234-4234-8234-123456789abc') }));
+
+test('request IDs use native Expo crypto without a global Web Crypto API', () => {
+  expect(secureRequestId()).toBe('12345678-1234-4234-8234-123456789abc');
+  expect(randomUUID).toHaveBeenCalled();
+});
 const own: MatchProfile = { pet_id: 'a', owner_id: 'owner-a', species: 'Kedi', display_name: 'A', active: true, birth_date: null, age_label: null, breed: '', sex: 'Belirtilmedi', bio: '', city: '', district: '' };
 const other = { ...own, pet_id: 'b', owner_id: 'owner-b' };
 test.each([{ ...other, species: 'Köpek' as const }, { ...other, active: false }, { ...other, owner_id: own.owner_id }, own])('ineligible candidate rejected in model and service: %j', async row => {

@@ -48,7 +48,8 @@ function AuthGate() {
 function EmptyPets({ busy, notice, createPet }: { busy: boolean; notice: string; createPet: (input: { name: string; species: 'Kedi' | 'Köpek'; age: string }) => Promise<void> }) {
   const auth = useAuth(); const [name, setName] = useState(''); const [age, setAge] = useState(''); const [species, setSpecies] = useState<'Kedi' | 'Köpek'>('Kedi');
   return <Screen title="İlk hayvan profiliniz"><Card><Note>Bu hesapta henüz hayvan profili yok. Demo hayvanları hesap verilerine karıştırılmaz.</Note>
-    <Field label="Hayvanın adı" value={name} onChangeText={setName} /> <Field label="Yaşı" value={age} onChangeText={setAge} />
+    <Field label="Hayvanın adı" value={name} onChangeText={setName} />
+    <Field label="Yaşı" value={age} onChangeText={setAge} />
     <Button secondary label={`Tür: ${species}`} onPress={() => setSpecies(species === 'Kedi' ? 'Köpek' : 'Kedi')} />
     <Button label="Hayvan profili ekle" disabled={busy || !name.trim() || !age.trim()} onPress={() => void createPet({ name, age, species })} />
     <Button secondary label="Çıkış yap" disabled={busy} onPress={() => void auth.signOut()} />{notice ? <Note>{notice}</Note> : null}</Card></Screen>;

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
+import { randomUUID } from 'expo-crypto';
 import type { Pet } from '../core/model';
 import { validateFile } from '../core/health';
 
@@ -45,7 +46,7 @@ export function createPetRepository(client: SupabaseClient | null) {
       const file = Platform.OS === 'web' ? await (await fetch(uri)).blob() : new File(uri);
       const mime = file.type || 'image/jpeg'; const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
       validateFile(mime, file.size, true);
-      const randomId = globalThis.crypto?.randomUUID?.(); if (!randomId) throw new Error('secure uuid unavailable');
+      const randomId = randomUUID();
       const objectName = `${ownerId}/${petId}/${randomId}.${extensions[mime]}`;
       const { error: uploadError } = await requireClient().storage.from('pet-photos').upload(objectName, await file.arrayBuffer(), { contentType: mime, upsert: false });
       if (uploadError) throw uploadError;
