@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 import type { Pet } from '../core/model';
+import { validateFile } from '../core/health';
 
 type PetRow = { id: string; name: string; species: Pet['species']; age_label: string | null; pet_photos?: { object_name: string }[] };
 export class PetMutationError extends Error {
@@ -28,6 +29,9 @@ export function createPetRepository(client: SupabaseClient | null) {
     async create(input: Pick<Pet, 'name' | 'species' | 'age'>): Promise<Pet> { const { data, error } = await requireClient().from('pets').insert({ name: input.name.trim(), species: input.species, age_label: input.age.trim() }).select('id,name,species,age_label').single(); if (error) throw error; return hydrate(data as PetRow); },
     async update(id: string, changes: Partial<Pick<Pet, 'name' | 'species' | 'age'>>): Promise<void> { const body = { ...(changes.name === undefined ? {} : { name: changes.name.trim() }), ...(changes.species === undefined ? {} : { species: changes.species }), ...(changes.age === undefined ? {} : { age_label: changes.age.trim() || null }) }; if (!Object.keys(body).length) return; const { data, error } = await requireClient().from('pets').update(body).eq('id', id).select('id').maybeSingle(); if (error) throw error; requireAffected(data); },
     async remove(id: string): Promise<void> {
+      const { data: documents, error: documentError } = await requireClient().from('health_documents').select('storage_path').eq('pet_id', id); if (documentError) throw documentError;
+      const documentPaths = (documents ?? []).map((item) => item.storage_path as string);
+      if (documentPaths.length) { const { error } = await requireClient().storage.from('health-documents').remove(documentPaths); if (error) throw error; }
       const { data: photos, error: readError } = await requireClient().from('pet_photos').select('object_name').eq('pet_id', id); if (readError) throw readError;
       const names = (photos ?? []).map((item) => item.object_name as string);
       if (names.length) { const { error } = await requireClient().storage.from('pet-photos').remove(names); if (error) throw error; }
@@ -37,7 +41,7 @@ export function createPetRepository(client: SupabaseClient | null) {
       // Native bytes come from Expo's file API, never RN fetch/Blob/FormData.
       const file = Platform.OS === 'web' ? await (await fetch(uri)).blob() : new File(uri);
       const mime = file.type || 'image/jpeg'; const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-      if (!extensions[mime] || file.size > 5 * 1024 * 1024) throw new Error('unsupported photo');
+      validateFile(mime, file.size, true);
       const randomId = globalThis.crypto?.randomUUID?.(); if (!randomId) throw new Error('secure uuid unavailable');
       const objectName = `${ownerId}/${petId}/${randomId}.${extensions[mime]}`;
       const { error: uploadError } = await requireClient().storage.from('pet-photos').upload(objectName, await file.arrayBuffer(), { contentType: mime, upsert: false });

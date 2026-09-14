@@ -20,7 +20,13 @@ type State = {
 const Context = createContext<State | null>(null);
 const emptyPet: Pet = { id: '', name: '', species: 'Kedi', age: '', photos: [] };
 const defaultPets = createPetRepository(supabase);
-export function AppProvider({ children, storage = AsyncStorage, petRepository = defaultPets }: { children: ReactNode; storage?: Storage; petRepository?: ReturnType<typeof createPetRepository> }) {
+type AppProviderProps = { children: ReactNode; storage?: Storage; petRepository?: ReturnType<typeof createPetRepository> };
+export function AppProvider(props: AppProviderProps) {
+  const auth = useAuth();
+  const scope = `${auth.demo ? 'demo' : auth.status}/${auth.session?.user.id ?? ''}`;
+  return <AppSessionProvider key={scope} {...props} />;
+}
+function AppSessionProvider({ children, storage = AsyncStorage, petRepository = defaultPets }: AppProviderProps) {
   const auth = useAuth();
   const [mode, setMode] = useState<ThemeMode>('light');
   const [matches, dispatchMatch] = useReducer(matchReducer, {});
@@ -28,7 +34,7 @@ export function AppProvider({ children, storage = AsyncStorage, petRepository = 
   const [notice, setNotice] = useState('');
   const [themeBusy, setThemeBusy] = useState(false);
   const themeLock = useRef(false);
-  const [pets, setPets] = useState<Pet[]>(() => demoPets.map((pet) => ({ ...pet, photos: [] })));
+  const [pets, setPets] = useState<Pet[]>(() => auth.status === 'signedIn' && !auth.demo ? [] : demoPets.map((pet) => ({ ...pet, photos: [] })));
   const [selected, setSelected] = useState(demoPets[0].id);
   const [petsBusy, setPetsBusy] = useState(false);
   const [petNotice, setPetNotice] = useState('');
@@ -60,10 +66,11 @@ export function AppProvider({ children, storage = AsyncStorage, petRepository = 
   }, [accountMode, auth.session?.user.id, petRepository]);
   useEffect(() => {
     if (!accountMode) return;
+    let active = true;
     const refresh = () => Promise.all(pets.map((item) => petRepository.refreshPhotos(item)))
-      .then(setPets).catch(() => setPetNotice('Fotoğraf bağlantıları yenilenemedi.'));
+      .then((items) => { if (active) setPets(items); }).catch(() => { if (active) setPetNotice('Fotoğraf bağlantıları yenilenemedi.'); });
     const timer = setInterval(refresh, 50 * 60 * 1000);
-    return () => clearInterval(timer);
+    return () => { active = false; clearInterval(timer); };
   }, [accountMode, petRepository, pets]);
   async function toggleTheme() {
     if (themeLock.current) return;
@@ -101,7 +108,7 @@ export function AppProvider({ children, storage = AsyncStorage, petRepository = 
     if (!auth.session || pet.photos.length >= 5) return;
     setPetsBusy(true); setPetNotice('');
     try { const added = await petRepository.uploadPhoto(auth.session.user.id, pet.id, uri); setPets((items) => items.map((item) => item.id === pet.id ? { ...item, photos: [...item.photos, added.url].slice(0, 5), photoObjects: { ...item.photoObjects, [added.url]: added.objectName } } : item)); }
-    catch { setPetNotice('Fotoğraf yüklenemedi. JPEG, PNG veya WebP ve en fazla 5 MB kullanın.'); throw new Error('photo upload failed'); }
+    catch { setPetNotice('Fotoğraf yüklenemedi. JPEG, PNG veya WebP ve en fazla 10 MB kullanın.'); throw new Error('photo upload failed'); }
     finally { setPetsBusy(false); }
   }
   async function removePhoto(uri: string) {
