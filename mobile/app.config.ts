@@ -17,7 +17,7 @@ const config: ExpoConfig = {
   },
   web: { output: 'static', favicon: './assets/images/favicon.png' },
   plugins: [
-    'expo-router', ...(variant === 'development' ? ['expo-dev-client'] : []),
+    'expo-router', ...(variant === 'development' ? ['expo-dev-client', './plugins/with-dev-tools'] : []),
     ['expo-image-picker', { photosPermission: 'PetID profilinize fotoğraf seçmek için galerinize erişir.', cameraPermission: false, microphonePermission: false }],
     ['expo-location', { locationWhenInUsePermission: 'PetID kayıp veya yaralı ilan taslağı için konumunuzu yalnızca isteğiniz üzerine kullanır.' }],
     'expo-document-picker',

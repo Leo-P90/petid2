@@ -4,6 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, type Href } from 'expo-router';
 import { useApp } from '../state/app-state';
 import { geometry, secondaryText } from '../core/theme';
+import { PetSketch } from './pet-sketch';
 import { KeyboardScreen, useKeyboardFocus } from './keyboard-screen';
 type Tone = 'home' | 'health' | 'match' | 'adoption' | 'services';
 type Colors = ReturnType<typeof useApp>['colors'];
@@ -18,16 +19,16 @@ export function Paw({ size = 28, color = '#8B7CF6' }: { size?: number; color?: s
 }
 export function MatchScreen({ section, onSection, onSettings, children }: { section: string; onSection: (section: string) => void; onSettings: () => void; children: ReactNode }) {
   const colors = useSectionColors('match');
-  return <UIColors.Provider value={colors}><SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.background }}><View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 4, flexDirection: 'row', alignItems: 'center', gap: 12 }}><Paw size={24} /><View style={{ maxWidth: 200, flexShrink: 1 }}><Segments labels={['Keşfet', 'Mesajlar']} selected={section} onSelect={onSection} /></View><Pressable accessibilityRole="button" accessibilityLabel="PatiMatch ayarları" onPress={onSettings} style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: colors.text, fontSize: 24 }}>⚙</Text></Pressable></View><View style={{ flex: 1, paddingHorizontal: 12, paddingBottom: 6, gap: 8 }}>{children}</View></SafeAreaView></UIColors.Provider>;
+  return <UIColors.Provider value={colors}><SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.background }}><View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 4, flexDirection: 'row', alignItems: 'center', gap: 12 }}><Paw size={24} /><View style={{ maxWidth: 200, flexShrink: 1 }}><Segments labels={['Keşfet', 'Mesajlar']} selected={section} onSelect={onSection} /></View><Pressable accessibilityRole="button" accessibilityLabel="PatiMatch ayarları" onPress={onSettings} style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: colors.text, fontSize: 24 }}>⚙</Text></Pressable></View><View style={{ flex: 1, paddingHorizontal: 8, paddingBottom: 4, gap: 4 }}>{children}</View></SafeAreaView></UIColors.Provider>;
 }
 function useUIColors() { const { colors } = useApp(); return useContext(UIColors) ?? colors; }
 export function PetPortrait({ size = 160 }: { size?: number }) {
   const { pet } = useApp(); const colors = useUIColors(); const [failed, setFailed] = useState(false);
-  return <View style={{ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.greenSoft, overflow: 'hidden' }}>{pet.photos[0] && !failed ? <Image source={{ uri: pet.photos[0] }} accessibilityLabel={pet.name + ' profil fotoğrafı'} onError={() => setFailed(true)} style={{ width: size, height: size }} /> : <View accessibilityLabel={pet.name + ' tür avatarı'}><Paw size={size * .52} color={colors.accent} /></View>}</View>;
+  return <View style={{ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.greenSoft, overflow: 'hidden' }}>{pet.photos[0] && !failed ? <Image source={{ uri: pet.photos[0] }} accessibilityLabel={pet.name + ' profil fotoğrafı'} onError={() => setFailed(true)} style={{ width: size, height: size }} /> : <View accessibilityLabel={pet.name + ' tür avatarı'}><PetSketch species={pet.species} size={Math.min(size * .8, 72)} color={colors.accent} /></View>}</View>;
 }
-export function Segments({ labels, selected, onSelect }: { labels: string[]; selected: string; onSelect: (label: string) => void }) {
+export function Segments({ labels, selected, onSelect, testID }: { labels: string[]; selected: string; onSelect: (label: string) => void; testID?: string }) {
   const colors = useUIColors();
-  return <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>{labels.map(label => <Pressable key={label} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: label === selected }} onPress={() => onSelect(label)} style={{ minHeight: 48, paddingHorizontal: 15, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: label === selected ? colors.greenSoft : colors.surface, borderWidth: 1, borderColor: colors.border }}><Text style={{ fontSize: 14, fontWeight: '600', color: label === selected ? colors.accent : colors.text }}>{label}</Text></Pressable>)}</ScrollView>;
+  return <ScrollView testID={testID} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>{labels.map(label => <Pressable key={label} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: label === selected }} onPress={() => onSelect(label)} style={{ minHeight: 48, paddingHorizontal: 15, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: label === selected ? colors.greenSoft : colors.surface, borderWidth: 1, borderColor: colors.border }}><Text style={{ fontSize: 14, fontWeight: '600', color: label === selected ? colors.accent : colors.text }}>{label}</Text></Pressable>)}</ScrollView>;
 }
 export function Label({ children, heading = false }: { children: ReactNode; heading?: boolean }) {
   const colors = useUIColors();
@@ -49,9 +50,9 @@ export function Button({ label, onPress, disabled = false, secondary = false }: 
   return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }}
     disabled={disabled} onPress={onPress} style={({ pressed }) => ({
       minHeight: geometry.touch, justifyContent: 'center', paddingVertical: 12, paddingHorizontal: 16, borderRadius: geometry.buttonRadius,
-      borderWidth: 1, borderColor: colors.accent, backgroundColor: secondary ? colors.surface : colors.accent,
+      borderWidth: 1, borderColor: secondary ? colors.border : colors.accent, backgroundColor: secondary ? colors.surface : colors.accent,
       opacity: disabled ? 0.5 : pressed ? 0.75 : 1,
-    })}><Text style={{ color: secondary ? colors.accent : colors.onAccent, fontWeight: '600', textAlign: 'center', fontSize: 16 }}>{label}</Text></Pressable>;
+    })}><Text style={{ color: secondary ? colors.text : colors.onAccent, fontWeight: '600', textAlign: 'center', fontSize: 16 }}>{label}</Text></Pressable>;
 }
 export function RouteButton({ label, href }: { label: string; href: Href }) {
   return <Button label={label} onPress={() => router.push(href)} secondary />;
@@ -88,7 +89,7 @@ export function PetSelector({ disabled = false }: { disabled?: boolean }) {
   return <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingVertical: 2 }}>
     {pets.map((item) => { const selected = item.id === pet.id; return <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name + (selected ? ' · seçili' : ' profiline geç')} accessibilityState={{ selected, disabled }} disabled={disabled} onPress={() => selectPet(item.id)}
       style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 24, borderWidth: 1, borderColor: selected ? colors.green : colors.border, backgroundColor: selected ? colors.greenSoft : colors.surface }}>
-      <Paw size={22} color={colors.accent} /><View><Text style={{ color: colors.text, fontSize: 14, fontWeight: '700' }}>{item.name}</Text><Text style={{ color: secondaryText[mode], fontSize: 12 }}>{item.species} · {item.age}</Text></View>
+      <PetSketch species={item.species} size={26} color={colors.accent} /><View><Text style={{ color: colors.text, fontSize: 14, fontWeight: '700' }}>{item.name}</Text><Text style={{ color: secondaryText[mode], fontSize: 12 }}>{item.species} · {item.age}</Text></View>
     </Pressable>; })}
   </ScrollView>;
 }

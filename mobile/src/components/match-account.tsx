@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { AppState, Keyboard, Modal, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, Field, Label, Note, MatchScreen, PetSelector, Screen, Segments, useSectionColors } from './ui';
+import { MatchEmpty } from './match-empty';
 import { KeyboardScreen } from './keyboard-screen';
 import { createMatchRepository, secureRequestId } from '../services/match';
 import { supabase } from '../services/supabase';
@@ -90,7 +91,7 @@ export function MatchAccount({ ownerId, pet, renderCandidate, repo = repository 
   function undo() { const last = passed.at(-1); if (!last || busy) return; setExcluded(rows => rows.filter(id => id !== last)); setPassed(rows => rows.slice(0, -1)); setNonce(n => n + 1); }
   return <MatchScreen section={section} onSection={setSection} onSettings={edit}>
     {section === 'Keşfet' && (!loaded || !snapshot.profile?.active) ? <View style={{ flex: 1, justifyContent: 'center', padding: 20, gap: 16 }}><Label heading>{!loaded ? 'Patiler hazırlanıyor…' : 'Bir merhabaya hazır mısınız?'}</Label>{loaded ? <Button label="Paylaşım tercihlerini aç" onPress={edit} /> : null}</View> : null}
-    {section === 'Keşfet' && snapshot.profile?.active ? card ? <LivePhoto key={candidate!.pet_id} petId={candidate!.pet_id} repo={repo}>{uri => renderCandidate({ ...card, photo: uri }, like => choose(like), `${pet.id}/${card.id}/${nonce}`, { undo, canUndo: passed.length > 0, info: () => setInformation(true) })}</LivePhoto> : <View style={{ flex: 1, justifyContent: 'center', gap: 18, padding: 20 }}><Label heading>Şimdilik tüm patilerle tanıştın.</Label><Button label="Geri al" secondary disabled={!passed.length || busy} onPress={undo} /><Button label="Geçilen adayları tekrar göster" secondary onPress={() => { setExcluded([]); setPassed([]); }} /></View> : null}
+    {section === 'Keşfet' && snapshot.profile?.active ? card ? <LivePhoto key={candidate!.pet_id} petId={candidate!.pet_id} repo={repo}>{uri => renderCandidate({ ...card, photo: uri }, like => choose(like), `${pet.id}/${card.id}/${nonce}`, { undo, canUndo: passed.length > 0, info: () => setInformation(true) })}</LivePhoto> : <MatchEmpty species={pet.species} disabled={busy} onDiscover={() => { setExcluded([]); setPassed([]); void run(async () => undefined); }} /> : null}
     {section === 'Mesajlar' ? <ScrollView contentContainerStyle={{ gap: 14, padding: 8 }}><Label heading>Mesajlar</Label>{snapshot.threads.length ? snapshot.threads.map(row => <Card key={row.id}><Button label={`${row.candidate.display_name}${unread(row, pet.id) ? ' · okunmamış' : ''}`} secondary onPress={() => open(row.id)} /><Text numberOfLines={1} style={{ color: colors.muted }}>{row.messages.at(-1)?.body || 'İlk merhabayı sen söyle.'}</Text></Card>) : <Note>İlk karşılıklı eşleşmen burada olacak.</Note>}</ScrollView> : null}
     {message ? <Note>{message}</Note> : null}
     {message.includes('yüklenemedi') || message.includes('tamamlanamadı') ? <Button label="PatiMatch yenile / tekrar dene" secondary disabled={busy} onPress={() => void run(async () => undefined)} /> : null}

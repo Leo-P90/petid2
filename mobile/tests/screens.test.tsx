@@ -41,7 +41,7 @@ test('profile focus/edit/save keeps keyboard-friendly scrolling and pet separati
 });
 test('home routes include every retained screen and no deferred destination', async () => {
   await mount(<Home />);
-  for (const label of ['Sağlık geçmişi', 'Kayıp veya yaralı hayvan', 'Acil veteriner', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) {
+  for (const label of ['Sağlık geçmişi', 'Profili ve dijital kimliği aç', 'Fotoğraf ekle', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) {
     expect(screen.getByRole('button', { name: label })).toBeTruthy();
   }
   expect(screen.queryByText(/Gemini|Pixel Pet|Pati Market|Eğitim/)).toBeNull();

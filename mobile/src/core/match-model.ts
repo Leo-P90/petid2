@@ -1,5 +1,5 @@
 import type { Pet } from './model';
-export type Candidate = { id: string; species: Pet['species']; name: string; age: string; breed: string; gender: string; distance: string; bio: string; compatibility: number; photo?: string; verification?: string; mutual: boolean; opener: string; reply: string };
+export type Candidate = { id: string; species: Pet['species']; name: string; age: string; breed: string; gender: string; distance: string; bio: string; compatibility: number; photo?: string; photoPosition?: { x: number; y: number }; verification?: string; mutual: boolean; opener: string; reply: string };
 export type Message = { id: number; from: 'me' | 'demo'; text: string };
 export type Conversation = { candidate: Candidate; messages: Message[]; unread: boolean };
 export type MatchState = { participating: boolean; excluded: string[]; likes: string[]; conversations: Record<string, Conversation> };

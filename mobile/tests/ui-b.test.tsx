@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider } from '../src/state/app-state';
 import Services from '../src/app/(tabs)/services';
 import Health from '../src/app/(tabs)/health';
-import Match, { SwipeCard } from '../src/app/(tabs)/match';
+import Match, { Portrait, SwipeCard } from '../src/app/(tabs)/match';
 import Home from '../src/app/(tabs)/index';
 import TabLayout from '../src/app/(tabs)/_layout';
 import { HealthSummary } from '../src/components/health-summary';
@@ -90,4 +90,34 @@ test('undo only restores passed candidates, never cancels real/demo likes or mes
 test('approved slogan is correctly spelled and deferred modules stay absent', async () => {
   await mount(<Home />); expect(screen.getByText('Daha fazla iyi insan, daha mutlu patiler.')).toBeTruthy();
   expect(screen.queryByText(/Gemini|Pixel Pet|Pati Market|Eğitim/)).toBeNull();
+});
+test('Ada photo alignment is distinct from centered default and retained in small portraits', async () => {
+  await mount(<Portrait candidate={matchDemo[1]} />);
+  expect(screen.getByLabelText('Ada · demo fotoğraf').props).toMatchObject({ contentFit: 'cover', contentPosition: { left: '18%', top: '50%' } });
+});
+test('exhausted discovery has one rediscover action and hides old dev controls', async () => {
+  await mount(<Match />);
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
+  await waitFor(() => expect(screen.getByText('Ada')).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
+  await waitFor(() => expect(screen.getByText('Şimdilik tüm patilerle tanıştın')).toBeTruthy());
+  for (const name of ['Demo keşfini sıfırla', 'Baştan göster', 'Geri al']) expect(screen.queryByRole('button', { name })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'Yeniden keşfet' }));
+  expect(screen.getByText('Luna')).toBeTruthy();
+});
+test('service category row scrolls horizontally and trainer filter is reachable', async () => {
+  await mount(<Services />);
+  const categories = screen.getByTestId('service-categories');
+  expect(categories.props.horizontal).toBe(true);
+  await fireEvent.press(screen.getByRole('button', { name: 'Eğitmen' }));
+  expect(screen.getAllByRole('button', { name: /detayını aç/ })).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'PatiAkademi detayını aç' })).toBeTruthy();
+});
+test('home keeps a small avatar, photo action and three quick actions, not the old hero', async () => {
+  await mount(<Home />);
+  expect(screen.getByRole('button', { name: 'Fotoğraf ekle' })).toBeTruthy();
+  expect(screen.queryByText(/Kocaman bir dünya/)).toBeNull();
+  for (const name of ['Profili ve dijital kimliği aç', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) expect(screen.getByRole('button', { name })).toBeTruthy();
 });
