@@ -11,6 +11,8 @@ test.each([
       const config = jest.requireActual('../app.config').default;
       expect(config.android.package).toBe(identifier);
       expect(config.ios.bundleIdentifier).toBe(identifier);
+      expect(config.version).toBe(variant === 'development' ? '0.3.0' : '0.2.0');
+      expect(config.android.versionCode).toBe(variant === 'development' ? 3 : 2);
       expect(config.extra).toEqual({ demoMode: true });
       for (const file of [config.icon, config.android.adaptiveIcon.foregroundImage]) {
         expect(existsSync(join(__dirname, '..', file))).toBe(true);

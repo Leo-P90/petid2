@@ -6,6 +6,7 @@ import type { MatchSnapshot, MatchProfile } from '../src/core/match-live';
 jest.mock('../src/components/ui', () => {
   const { Text, View, Pressable, TextInput } = jest.requireActual('react-native');
   return { Screen: View, Card: View, Label: Text, Note: Text, PetSelector: () => null, useSectionColors: () => ({}),
+    MatchScreen: ({ children, onSettings }: { children: React.ReactNode; onSettings: () => void }) => <View><Pressable onPress={onSettings}><Text>PatiMatch ayarları</Text></Pressable>{children}</View>,
     Button: ({ label, onPress, disabled }: { label: string; onPress: () => void; disabled: boolean }) => <Pressable disabled={disabled} onPress={onPress}><Text>{label}</Text></Pressable>,
     Field: ({ label, ...props }: { label: string }) => <TextInput accessibilityLabel={label} {...props} />, Segments: () => null };
 });
