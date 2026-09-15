@@ -2,6 +2,9 @@ import { Stack, ThemeProvider, DarkTheme, DefaultTheme, usePathname } from 'expo
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from 'react';
+import { useFonts } from 'expo-font';
+import { Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
+import { Caveat_600SemiBold } from '@expo-google-fonts/caveat';
 import { Text, View } from 'react-native';
 import { AppProvider, useApp } from '../state/app-state';
 import { AuthProvider, useAuth } from '../state/auth-state';
@@ -32,6 +35,8 @@ function Navigation() {
   </ThemeProvider>;
 }
 export default function Layout() {
+  const [loaded, error] = useFonts({ Nunito_400Regular, Nunito_700Bold, Nunito_800ExtraBold, Caveat_600SemiBold });
+  if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: '#FFF9F2', justifyContent: 'center', alignItems: 'center' }}><Text>PetID hazırlanıyor…</Text></View>;
   return <SafeAreaProvider><AuthProvider><AppProvider><Navigation /></AppProvider></AuthProvider></SafeAreaProvider>;
 }
 

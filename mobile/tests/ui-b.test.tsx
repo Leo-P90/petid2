@@ -7,6 +7,7 @@ import Match, { Portrait, SwipeCard } from '../src/app/(tabs)/match';
 import Home from '../src/app/(tabs)/index';
 import TabLayout from '../src/app/(tabs)/_layout';
 import { HealthSummary } from '../src/components/health-summary';
+import { PetIDWordmark, MatchWordmark } from '../src/components/brand';
 import { StyleSheet } from 'react-native';
 import { statusBarStyle } from '../src/core/theme';
 import { matchDemo } from '../src/data/match-demo';
@@ -26,14 +27,14 @@ test('services grid filters, favorites stay local and detail discloses synthetic
   expect(screen.getAllByRole('button', { name: /detayını aç/ })).toHaveLength(4);
   await fireEvent.press(screen.getByRole('button', { name: 'PatiVet Klinik favori' }));
   expect(screen.getByRole('button', { name: 'PatiVet Klinik favori' }).props.accessibilityState.selected).toBe(true);
-  await fireEvent.press(screen.getByRole('button', { name: 'Pet Oteli' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Otel' }));
   expect(screen.getAllByRole('button', { name: /detayını aç/ })).toHaveLength(1);
   await fireEvent.press(screen.getByRole('button', { name: 'PatiKonak detayını aç' }));
   expect(screen.getByText(/Rezervasyon, ödeme/)).toBeTruthy();
 });
 test('health overview is four cards; forms/documents only open in detail', async () => {
   await mount(<Health />); expect(screen.getByTestId('health-summary-grid')).toBeTruthy();
-  expect(screen.getAllByRole('button', { name: /kayıtlarını aç/ })).toHaveLength(4);
+  for (const name of ['Aşılar', 'Parazit Koruması', 'Genel Kontrol', 'Diş ve Ağız']) expect(screen.getByRole('button', { name: name + ' kayıtlarını aç' })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Cihazdan belge seç' })).toBeNull();
   await fireEvent.press(screen.getByRole('button', { name: 'Sağlık kayıtları ve belgeler' }));
   expect(screen.getByRole('button', { name: 'Cihazdan belge seç' })).toBeTruthy();
@@ -70,7 +71,7 @@ test('charcoal PatiMatch keeps light status icons in either app theme without le
 test('demo discovery also retains the filled red heart without emoji presentation', async () => {
   await mount(<SwipeCard candidate={matchDemo[0]} choose={jest.fn()} reduced />);
   expect(StyleSheet.flatten(screen.getByRole('button', { name: 'Beğen · demo' }).props.style).backgroundColor).toBe('#F43F5E');
-  expect(screen.getByText('♥︎')).toBeTruthy();
+  expect(screen.queryByText('♥︎')).toBeNull();
 });
 test('health summary never labels unrelated medication as parasite care or expired date as next care', async () => {
   const record = { id: 'qa', owner_id: 'qa', pet_id: 'qa', created_at: '', updated_at: '', kind: 'medication' as const, title: 'Genel ilaç', occurred_on: '2000-01-01', due_on: '2000-02-01', notes: null, weight_kg: null };
@@ -115,9 +116,63 @@ test('service category row scrolls horizontally and trainer filter is reachable'
   expect(screen.getAllByRole('button', { name: /detayını aç/ })).toHaveLength(1);
   expect(screen.getByRole('button', { name: 'PatiAkademi detayını aç' })).toBeTruthy();
 });
-test('home keeps a small avatar, photo action and three quick actions, not the old hero', async () => {
+test('pet-first home has one hero, three paths and Acil Pati before adoption', async () => {
   await mount(<Home />);
-  expect(screen.getByRole('button', { name: 'Fotoğraf ekle' })).toBeTruthy();
-  expect(screen.queryByText(/Kocaman bir dünya/)).toBeNull();
+  expect(screen.getByTestId('home-pet-hero')).toBeTruthy();
+  expect(screen.getByText('Fotoğraf ekle ›')).toBeTruthy();
+  expect(screen.getByTestId('home-three-paths')).toBeTruthy();
+  expect(screen.getByTestId('home-acil-pati')).toBeTruthy();
+  expect(screen.getByTestId('home-adoption-carousel')).toBeTruthy();
+  expect(screen.queryByText(/Bakım notları ve küçük hatırlatmalar/)).toBeNull();
   for (const name of ['Profili ve dijital kimliği aç', 'PatiMatch keşfi', 'Sahiplendirme ilanları']) expect(screen.getByRole('button', { name })).toBeTruthy();
+});
+
+test('approved B wordmarks render as two-tone native text with a local paw', async () => {
+  await mount(<><PetIDWordmark /><MatchWordmark /></>);
+  expect(screen.getByTestId('petid-wordmark')).toBeTruthy();
+  expect(screen.getByTestId('match-wordmark')).toBeTruthy();
+  expect(screen.getByText('Pet').props.style.color).toBe('#182033');
+  expect(screen.getByText('ID').props.style.color).toBe('#8B7CF6');
+  expect(screen.getByText('Pati').props.style.color).toBe('#FFFFFF');
+  expect(screen.getByText('Match').props.style.color).toBe('#B7ACFF');
+});
+test('approved B tab activation has a small indicator without the legacy filled capsule', async () => {
+  await mount(<TabLayout />);
+  const options = screen.getByTestId('global-tabs').props.screenOptions;
+  expect(options.tabBarActiveBackgroundColor).toBeUndefined();
+  expect(options.tabBarItemStyle.borderRadius).toBeUndefined();
+  expect(screen.getAllByTestId('tab-route')).toHaveLength(4);
+});
+test('demo health plan is explicitly an example; empty real overview has one CTA', async () => {
+  await mount(<Health />);
+  expect(screen.getByText('ÖRNEK BAKIM PLANI')).toBeTruthy();
+  for(const label of ['Aşılar', 'Parazit Koruması', 'Genel Kontrol', 'Diş ve Ağız']) expect(screen.getByRole('button', { name: label + ' kayıtlarını aç' })).toBeTruthy();
+  expect(screen.queryAllByText('Henüz kayıt yok')).toHaveLength(0);
+  const empty = await mount(<HealthSummary records={[]} onOpen={jest.fn()} />);
+  expect(screen.getByRole('button', { name: 'İlk bakım kaydını aç' })).toBeTruthy();
+  expect(screen.queryAllByText('✓')).toHaveLength(0);
+  empty.unmount();
+});
+test('320dp service grid keeps two card widths and search narrows example results', async () => {
+  await mount(<Services />);
+  const grid = screen.getByTestId('services-grid');
+  expect(grid.props.children).toHaveLength(4);
+  for(const row of grid.props.children) expect(row.props.style.width).toBe('48%');
+  await fireEvent.press(screen.getByRole('button', { name: 'Hizmet ara' }));
+  await fireEvent.changeText(screen.getAllByLabelText('Hizmet ara').at(-1)!, 'PatiVet');
+  expect(screen.getAllByRole('button', { name: /detayını aç/ })).toHaveLength(1);
+  await fireEvent.press(screen.getByRole('button', { name: 'Konum seç' }));
+  expect(screen.getByText(/işletmeler ve mesafeler örnek/)).toBeTruthy();
+});
+test('exhausted discovery keeps two local vector pets and one action', async () => {
+  await mount(<Match />);
+  await fireEvent.press(screen.getByRole('button', { name: 'PatiMatch ayarları' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Demo keşfine katıl' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
+  await waitFor(() => expect(screen.getByText('Ada')).toBeTruthy());
+  await fireEvent.press(screen.getByRole('button', { name: 'Geç' }));
+  await waitFor(() => expect(screen.getByTestId('match-empty')).toBeTruthy());
+  expect(screen.getAllByTestId('pet-sketch')).toHaveLength(2);
+  expect(screen.getByRole('button', { name: 'Yeniden keşfet' })).toBeTruthy();
+  for(const name of ['Demo keşfini sıfırla','Baştan göster']) expect(screen.queryByRole('button', { name })).toBeNull();
 });
