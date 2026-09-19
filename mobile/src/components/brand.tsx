@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 export const fonts = { display: 'Nunito_800ExtraBold', strong: 'Nunito_700Bold', body: 'Nunito_400Regular', script: 'Caveat_600SemiBold' } as const;
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 
-type Icon = 'paw' | 'heart' | 'home' | 'health' | 'briefcase' | 'search' | 'filter' | 'bell' | 'pin' | 'chevron' | 'person' | 'vaccine' | 'shield' | 'tooth' | 'calendar' | 'info' | 'close' | 'undo' | 'star' | 'sparkle' | 'document' | 'scissors';
+type Icon = 'paw' | 'heart' | 'home' | 'health' | 'briefcase' | 'search' | 'filter' | 'bell' | 'pin' | 'chevron' | 'person' | 'vaccine' | 'shield' | 'tooth' | 'calendar' | 'info' | 'close' | 'undo' | 'star' | 'sparkle' | 'document' | 'scissors' | 'sun' | 'moon';
 const strokes: Record<Exclude<Icon, 'paw' | 'star'>, string> = {
   heart: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z',
   home: 'm3 10 9-7 9 7v10H3V10Zm6 10v-7h6v7',
@@ -24,6 +24,8 @@ const strokes: Record<Exclude<Icon, 'paw' | 'star'>, string> = {
   sparkle: 'm12 2 2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2L12 2Z',
   document: 'M5 2h9l5 5v15H5V2Zm9 0v5h5M8 12h8m-8 4h8',
   scissors: 'M4 7a2 2 0 1 0 4 0 2 2 0 0 0-4 0Zm0 10a2 2 0 1 0 4 0 2 2 0 0 0-4 0ZM8 8l12 12M8 16 20 4',
+  sun: 'M12 4v2m0 12v2M4 12h2m12 0h2M6.3 6.3l1.4 1.4m8.6 8.6 1.4 1.4m0-11.4-1.4 1.4M7.7 16.3l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+  moon: 'M19.7 15.2A8.4 8.4 0 0 1 8.8 4.3 8.5 8.5 0 1 0 19.7 15.2ZM19 3v4m-2-2h4',
 };
 export function BrandIcon({ name, size = 24, color = '#182033', filled = false, testID }: { name: Icon; size?: number; color?: string; filled?: boolean; testID?: string }) {
   return <Svg testID={testID} width={size} height={size} viewBox="0 0 24 24" fill="none" accessibilityElementsHidden>

@@ -1,6 +1,6 @@
 # Slice 6 — approved B design: QA
 
-Latest visual acceptance evidence: [Revision 2](revision2/README.md).
+Latest visual acceptance evidence: [Revision 4](revision4/README.md). Earlier B-design evidence: [Revision 2](revision2/README.md).
 
 Final 2026-09-15 native build, installation, cold-start and fresh B emulator
 checks: [final-verification.md](final-verification.md). The shutdown status and

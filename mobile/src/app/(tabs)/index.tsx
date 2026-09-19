@@ -1,20 +1,19 @@
-import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { Button, PetPortrait, PetSelector, Screen, useSectionColors } from '../../components/ui';
+import { PetPortrait, Screen, useSectionColors } from '../../components/ui';
 import { AdoptionPhoto } from '../../components/adoption-photo';
 import { BrandIcon, ScriptLine, fonts } from '../../components/brand';
 import { adoptionListings } from '../../core/model';
 import { useApp } from '../../state/app-state';
 export default function Home() {
-  const { pet, accountMode, mode } = useApp(); const colors = useSectionColors(); const [switchOpen, setSwitchOpen] = useState(false);
+  const { pet, accountMode, mode } = useApp(); const colors = useSectionColors();
   const tags = accountMode ? [] : pet.species === 'Kedi' ? ['Meraklı · örnek', 'Sosyal · örnek'] : ['Neşeli · örnek', 'Sosyal · örnek'];
   const actions: { title: string; label: string; icon: 'person' | 'heart' | 'home'; href: Href }[] = [
     { title: 'Dostum', label: 'Profili ve dijital kimliği aç', icon: 'person', href: '/profile' },
     { title: 'Tanış', label: 'PatiMatch keşfi', icon: 'heart', href: '/match' },
     { title: 'Yuva ol', label: 'Sahiplendirme ilanları', icon: 'home', href: '/adoption' },
   ];
-  return <Screen title="PetID" tab headerRight={<Pressable accessibilityRole="button" accessibilityLabel="Hayvan değiştir" onPress={() => setSwitchOpen(true)} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.purpleSoft, alignItems: 'center', justifyContent: 'center' }}><PetPortrait key={pet.id + pet.photos[0]} size={34}/></Pressable>}>
+  return <Screen title="PetID" tab>
     <Pressable testID="home-pet-hero" accessibilityRole="button" accessibilityLabel={pet.name + ' profilini aç'} onPress={() => router.push('/profile')} style={{ minHeight: 128, padding: 12, borderRadius: 22, backgroundColor: colors.purpleSoft, borderWidth: 1, borderColor: '#E7DEF7', flexDirection: 'row', alignItems: 'center', gap: 12 }}>
       <View style={{ width: 88, alignItems: 'center', gap: 2 }}><PetPortrait key={pet.id + pet.photos[0]} size={78}/>{!pet.photos.length ? <Text style={{ color: colors.accent, fontFamily: fonts.strong, fontSize: 10 }}>Fotoğraf ekle ›</Text> : null}</View>
       <View style={{ flex: 1, gap: 4 }}><Text numberOfLines={1} style={{ color: colors.text, fontFamily: fonts.display, fontSize: 24 }}>{pet.name}</Text><Text numberOfLines={1} style={{ color: colors.text, fontFamily: fonts.body, fontSize: 12 }}>{pet.age} · {pet.species}</Text><View style={{ gap: 3 }}>{tags.map(tag => <Text key={tag} numberOfLines={1} style={{ color: mode === 'dark' ? '#9BECC9' : colors.greenDark, fontFamily: fonts.strong, fontSize: 10 }}>{tag}</Text>)}</View></View>
@@ -28,6 +27,5 @@ export default function Home() {
     <View style={{ gap: 8 }}><View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}><View><Text accessibilityRole="header" style={{ color: colors.text, fontFamily: fonts.display, fontSize: 21 }}>Yeni yuva arayanlar</Text><Text style={{ color: colors.muted, fontFamily: fonts.body, fontSize: 11 }}>Örnek ilanlar</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Tüm sahiplendirme ilanlarını gör" onPress={() => router.push('/adoption')} style={{ minHeight: 48, justifyContent: 'center' }}><Text style={{ color: colors.accent, fontFamily: fonts.strong, fontSize: 12 }}>Tümünü gör ›</Text></Pressable></View>
       <ScrollView testID="home-adoption-carousel" horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>{adoptionListings.slice(0, 3).map(listing => <Pressable key={listing.id} accessibilityRole="button" accessibilityLabel={listing.name + ' örnek ilan detayını aç'} onPress={() => router.push({ pathname: '/adoption/[id]', params: { id: listing.id } })} style={{ width: 250, minHeight: 102, borderRadius: 18, padding: 8, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 9 }}><AdoptionPhoto listing={listing} size={84}/><View style={{ flex: 1, gap: 3 }}><Text numberOfLines={1} style={{ color: colors.text, fontFamily: fonts.strong, fontSize: 15 }}>{listing.name}</Text><Text numberOfLines={1} style={{ color: colors.muted, fontFamily: fonts.body, fontSize: 11 }}>{listing.species} · {listing.age}</Text><Text numberOfLines={1} style={{ color: colors.muted, fontFamily: fonts.body, fontSize: 10 }}>{listing.city} · örnek</Text><Text numberOfLines={1} style={{ color: colors.text, fontFamily: fonts.body, fontSize: 11 }}>{listing.teaser}</Text></View></Pressable>)}</ScrollView>
     </View>
-    <Modal visible={switchOpen} onRequestClose={() => setSwitchOpen(false)}><Screen title="Dostunu seç"><Button label="Seçimi kapat" secondary onPress={() => setSwitchOpen(false)}/><PetSelector/></Screen></Modal>
   </Screen>;
 }

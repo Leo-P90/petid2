@@ -1,5 +1,5 @@
 import { createContext, useContext, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { Image, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions, type TextInputProps } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions, type TextInputProps } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, type Href } from 'expo-router';
 import { useApp } from '../state/app-state';
@@ -33,6 +33,15 @@ function useUIColors() { const { colors } = useApp(); return useContext(UIColors
 export function PetPortrait({ size = 160 }: { size?: number }) {
   const { pet } = useApp(); const colors = useUIColors(); const [failed, setFailed] = useState(false);
   return <View style={{ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.greenSoft, overflow: 'hidden' }}>{pet.photos[0] && !failed ? <Image source={{ uri: pet.photos[0] }} accessibilityLabel={pet.name + ' profil fotoğrafı'} onError={() => setFailed(true)} style={{ width: size, height: size }} /> : <View accessibilityLabel={pet.name + ' tür avatarı'}><PetSketch species={pet.species} size={Math.min(size * .8, 72)} color={colors.accent} /></View>}</View>;
+}
+export function HeaderActions() {
+  const { pet, pets, selectPet, mode, toggleTheme, themeBusy, colors } = useApp();
+  const [open, setOpen] = useState(false);
+  return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Hayvan seç" accessibilityHint={`Seçili hayvan ${pet.name}`} onPress={() => setOpen(true)} style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.purpleSoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}><PetPortrait key={pet.id + pet.photos[0]} size={32}/><View style={{ transform: [{ rotate: '90deg' }], marginLeft: -3 }}><BrandIcon name="chevron" size={11} color={colors.text}/></View></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel={mode === 'light' ? 'Koyu temaya geç' : 'Açık temaya geç'} accessibilityState={{ disabled: themeBusy }} disabled={themeBusy} onPress={() => void toggleTheme()} style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}><BrandIcon name={mode === 'light' ? 'moon' : 'sun'} size={22} color={colors.accent}/></Pressable>
+    <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}><View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: '#11182780' }}><View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 36, gap: 12 }}><Label heading>Dostunu seç</Label>{pets.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={item.name + (item.id === pet.id ? ' · seçili' : ' profiline geç')} accessibilityState={{ selected: item.id === pet.id }} onPress={() => { selectPet(item.id); setOpen(false); }} style={{ minHeight: 56, borderRadius: 16, borderWidth: 1, borderColor: item.id === pet.id ? colors.accent : colors.border, backgroundColor: colors.background, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}><View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.purpleSoft, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>{item.photos[0] ? <Image source={{ uri: item.photos[0] }} style={{ width: 36, height: 36 }} /> : <PetSketch species={item.species} size={28} color={colors.accent}/>}</View><Text style={{ color: colors.text, fontFamily: fonts.strong, flex: 1 }}>{item.name} · {item.species}</Text></Pressable>)}<Button label="Profili yönet" secondary onPress={() => { setOpen(false); router.push('/profile'); }}/><Button label="Kapat" secondary onPress={() => setOpen(false)}/></View></View></Modal>
+  </View>;
 }
 export function Segments({ labels, selected, onSelect, testID }: { labels: string[]; selected: string; onSelect: (label: string) => void; testID?: string }) {
   const colors = useUIColors();
@@ -74,13 +83,14 @@ export function Field({ label, focusArea, onFocus, onBlur, ...props }: TextInput
     placeholderTextColor={secondaryText[mode]} style={{ color: colors.text, backgroundColor: colors.background,
       borderColor: colors.border, borderWidth: 1, borderRadius: 12, minHeight: 48, padding: 12, fontSize: 16 }} /></View>;
 }
-export function Screen({ title, children, tab = false, tone = 'home', headerRight }: { title: string; children: ReactNode; tab?: boolean; tone?: Tone; headerRight?: ReactNode }) {
-  const { pet, mode, toggleTheme, notice, themeBusy } = useApp();
+export function Screen({ title, children, tab = false, tone = 'home', headerRight, compact = false }: { title: string; children: ReactNode; tab?: boolean; tone?: Tone; headerRight?: ReactNode; compact?: boolean }) {
+  const { mode, notice } = useApp();
   const colors = useSectionColors(tone); const { fontScale } = useWindowDimensions(); const insets = useSafeAreaInsets();
   const subtitle = { home: 'Daha fazla iyi insan, daha mutlu patiler.', health: 'Sev, takip et, birlikte iyi kalın.', match: 'Küçük bir merhabayla başlar', adoption: 'Bir yuva, yeni bir hayat', services: 'Onun için en iyi hizmetler, senin yanında.' }[tone];
   return <UIColors.Provider value={colors}><SafeAreaView edges={tab ? ['top', 'left', 'right'] : ['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: colors.background }}>
     <KeyboardScreen gap={tab && tone === 'health' ? 12 : 16} bottom={tab ? 78 + insets.bottom + Math.max(0, fontScale - 1) * 32 : 32}>
-      {tab && tone !== 'match' ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingBottom: 4 }}><View style={{ flexShrink: 1 }}><PetIDWordmark size={tone === 'home' ? 36 : 31} light={mode === 'dark'}/><Text style={{ color: colors.text, fontFamily: fonts.body, fontSize: 12, lineHeight: 16 }}>{subtitle}</Text></View>{headerRight ?? (tone === 'health' ? <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><BrandIcon name="bell" size={24} color={colors.text}/><PetPortrait key={pet.id + pet.photos[0]} size={40}/></View> : <PetPortrait key={pet.id + pet.photos[0]} size={36}/>)}</View> : <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><View style={{ flex: 1, gap: 3 }}><Label heading>{title}</Label><Note>{subtitle}</Note></View><PetPortrait key={pet.id + pet.photos[0]} size={32}/><Pressable accessibilityRole="button" accessibilityLabel={mode === 'light' ? 'Koyu temaya geç' : 'Açık temaya geç'} accessibilityState={{ disabled: themeBusy }} disabled={themeBusy} onPress={() => void toggleTheme()} style={{ minHeight: 48, minWidth: 48, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.greenSoft, borderRadius: 24 }}><Text accessible={false} style={{ fontSize: 22, color: colors.accent }}>{mode === 'light' ? '☾' : '☀'}</Text></Pressable></View>}
+      {compact ? null : tab && tone !== 'match' ? <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingBottom: 4 }}><View style={{ flexShrink: 1 }}><PetIDWordmark size={tone === 'home' ? 36 : 31} light={mode === 'dark'}/><Text style={{ color: colors.text, fontFamily: fonts.body, fontSize: 12, lineHeight: 16 }}>{subtitle}</Text></View><HeaderActions/></View> : <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><View style={{ flex: 1, gap: 3 }}><Label heading>{title}</Label><Note>{subtitle}</Note></View><HeaderActions/></View>}
+      {headerRight}
       {notice ? <Note>{notice}</Note> : null}{children}
     </KeyboardScreen>
   </SafeAreaView></UIColors.Provider>;

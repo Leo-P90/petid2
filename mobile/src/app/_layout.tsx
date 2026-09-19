@@ -25,7 +25,7 @@ function Navigation() {
     <Stack screenOptions={{ headerTintColor: colors.text, headerStyle: { backgroundColor: colors.surface }, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" options={{ title: 'PetID', headerShown: false }} />
       <Stack.Screen name="profile" options={{ title: 'Hayvan profili' }} />
-      <Stack.Screen name="reports" options={{ title: 'Kayıp / yaralı' }} />
+      <Stack.Screen name="reports" options={{ title: 'Pati bildirimi oluştur' }} />
       <Stack.Screen name="emergency" options={{ title: 'Acil veteriner' }} />
       <Stack.Screen name="adoption/index" options={{ title: 'Sahiplendirme' }} />
       <Stack.Screen name="adoption/[id]" options={{ title: 'İlan detayı' }} />
