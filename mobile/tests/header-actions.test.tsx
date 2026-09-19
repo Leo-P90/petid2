@@ -1,0 +1,24 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppProvider } from '../src/state/app-state';
+import Home from '../src/app/(tabs)/index';
+import Health from '../src/app/(tabs)/health';
+import Services from '../src/app/(tabs)/services';
+import { THEME_KEY } from '../src/core/theme';
+jest.mock('@react-native-async-storage/async-storage', () => jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
+jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
+const storage = { getItem: jest.fn(async () => null as string | null), setItem: jest.fn(async () => undefined) };
+const metrics = { frame: { x: 0, y: 0, width: 320, height: 740 }, insets: { top: 24, bottom: 24, left: 0, right: 0 } };
+const mount = (node: React.ReactNode) => render(<SafeAreaProvider initialMetrics={metrics}><AppProvider storage={storage}>{node}</AppProvider></SafeAreaProvider>);
+test.each([['Ana Sayfa', <Home key="home" />], ['Sağlık', <Health key="health" />], ['Hizmetler', <Services key="services" />]])('%s has shared pet and theme actions', async (_, node) => {
+  await mount(node);
+  expect(screen.getByRole('button', { name: 'Hayvan seç' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Koyu temaya geç' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Hayvan seç' }));
+  expect(screen.getByRole('button', { name: 'Atlas profiline geç' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Atlas profiline geç' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Hayvan seç' }));
+  expect(screen.getByRole('button', { name: 'Profili yönet' })).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Koyu temaya geç' }));
+  await waitFor(() => expect(storage.setItem).toHaveBeenCalledWith(THEME_KEY, 'dark'));
+});

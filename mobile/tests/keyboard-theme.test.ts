@@ -14,9 +14,9 @@ test('small screen / large text / last field scrolls and offsets never become ne
   expect(focusScroll(20, { y: 360, height: 260 }, { y: 84, height: 300 }, 384)).toBe(272);
   expect(focusScroll(0, { y: 0, height: 48 }, { y: 84, height: 300 }, 384)).toBe(0);
 });
-test('preserved PetID brand and dark surface tokens stay centralized', () => {
-  expect(palettes.light).toMatchObject({ green: '#0EA574', greenDark: '#0B8560', greenSoft: '#E6F6F0', greenMid: '#B9E8D8', text: '#122B24', muted: '#6B7B75', border: '#E7EEEB', background: '#F6FAF8', surface: '#FFFFFF', amber: '#F5A623', blue: '#3B82F6', red: '#E5484D', purple: '#7C6BF0' });
-  expect(palettes.dark).toMatchObject({ background: '#0F1714', surface: '#1A2420', green: '#0EA574', purple: '#7C6BF0' });
+test('approved B PetID brand and dark surface tokens stay centralized', () => {
+  expect(palettes.light).toMatchObject({ green: '#16A36A', text: '#182033', background: '#FFF9F2', surface: '#FFFFFF', accent: '#8B7CF6', red: '#F43F5E', purple: '#8B7CF6' });
+  expect(palettes.dark).toMatchObject({ background: '#14151D', surface: '#20212C', green: '#16A36A', purple: '#8B7CF6' });
   expect(geometry).toMatchObject({ radius: 20, touch: 48 });
 });
 function luminance(hex: string) {

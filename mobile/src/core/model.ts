@@ -10,8 +10,8 @@ export const candidates = [
   { id: 'demo-max', name: 'Max', species: 'Köpek' as const, age: '3 yaş', note: 'Park yürüyüşlerini seviyor' },
 ];
 export const adoptionListings = [
-  { id: 'demo-pamuk', name: 'Pamuk', species: 'Kedi', note: 'Yalnızca arayüz örneği; gerçek sahiplendirme ilanı değildir.' },
-  { id: 'demo-zeytin', name: 'Zeytin', species: 'Köpek', note: 'Yalnızca arayüz örneği; gerçek sahiplendirme ilanı değildir.' },
+  { id: 'demo-pamuk', name: 'Pamuk', species: 'Kedi', age: '1 yaş', city: 'İstanbul', photoKey: 'pamuk', demo: true, teaser: 'Sessiz bir dostluk arıyor.', note: 'Yalnızca arayüz örneği; gerçek sahiplendirme ilanı değildir.' },
+  { id: 'demo-zeytin', name: 'Zeytin', species: 'Köpek', age: '2 yaş', city: 'İstanbul', photoKey: 'zeytin', demo: true, teaser: 'Yeni oyun arkadaşını bekliyor.', note: 'Yalnızca arayüz örneği; gerçek sahiplendirme ilanı değildir.' },
 ];
 export function discover(species: Pet['species'], excluded: string[]) {
   return candidates.filter((pet) => pet.species === species && !excluded.includes(pet.id));
